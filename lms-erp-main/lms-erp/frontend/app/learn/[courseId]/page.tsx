@@ -1,0 +1,382 @@
+'use client'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useParams, useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { CheckCircle, Circle, ChevronLeft, ChevronRight, FileText, HelpCircle, Download, Play } from 'lucide-react'
+import toast from 'react-hot-toast'
+import { useAuthStore } from '@/lib/store'
+import api from '@/lib/api'
+
+type Tab = 'lesson' | 'documents' | 'quiz'
+
+export default function LearnPage() {
+  const { courseId } = useParams<{ courseId: string }>()
+  const { user } = useAuthStore()
+  const router = useRouter()
+  const qc = useQueryClient()
+  const [activeLesson, setActiveLesson] = useState<any>(null)
+  const [tab, setTab] = useState<Tab>('lesson')
+  const [activeQuiz, setActiveQuiz] = useState<any>(null)
+  const [answers, setAnswers] = useState<number[]>([])
+  const [quizResult, setQuizResult] = useState<any>(null)
+  const [currentQuestion, setCurrentQuestion] = useState(0)
+
+  useEffect(() => { if (!user) router.push('/login') }, [user, router])
+
+  const { data: course } = useQuery({
+    queryKey: ['learn-course', courseId],
+    queryFn: () => api.get(`/courses/${courseId}`).then(r => r.data),
+    enabled: !!user,
+  })
+
+  const { data: progress } = useQuery({
+    queryKey: ['progress', courseId],
+    queryFn: () => api.get(`/progress/course/${courseId}`).then(r => r.data),
+    enabled: !!user,
+  })
+
+  const { data: quizzes } = useQuery({
+    queryKey: ['quizzes', courseId],
+    queryFn: () => api.get(`/quizzes/course/${courseId}`).then(r => r.data),
+    enabled: !!user,
+  })
+
+  useEffect(() => {
+    if (course?.sections?.[0]?.lessons?.[0] && !activeLesson) {
+      setActiveLesson(course.sections[0].lessons[0])
+    }
+  }, [course, activeLesson])
+
+  const markComplete = useMutation({
+    mutationFn: (lessonId: string) => api.post(`/progress/lesson/${lessonId}/complete`),
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: ['progress', courseId] })
+      toast.success('Lesson completed!')
+    },
+  })
+
+  const submitQuiz = useMutation({
+    mutationFn: ({ quizId, answers }: { quizId: string; answers: number[] }) =>
+      api.post(`/quizzes/${quizId}/submit`, { answers }),
+    onSuccess: (res) => {
+      setQuizResult(res.data)
+      qc.invalidateQueries({ queryKey: ['quizzes', courseId] })
+      if (res.data.passed) {
+        toast.success(`Quiz passed! Score: ${res.data.score.toFixed(0)}%`)
+        qc.invalidateQueries({ queryKey: ['my-certs'] })
+      } else {
+        toast.error(`Score: ${res.data.score.toFixed(0)}% — Need ${res.data.passingScore}% to pass`)
+      }
+    },
+  })
+
+  const isCompleted = (lessonId: string) =>
+    progress?.progress?.some((p: any) => p.lesson_id === lessonId && p.completed)
+
+  const allLessons = course?.sections?.flatMap((s: any) => s.lessons) ?? []
+  const currentIndex = allLessons.findIndex((l: any) => l.id === activeLesson?.id)
+  // File URL helper — Cloudinary URLs are absolute, local ones need the API base prepended
+  const apiBase = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '')
+  const fileUrl = (url: string) =>
+    url?.startsWith('http') ? url : `${apiBase}${url}`
+
+  // Convert YouTube watch URL to embed URL
+  function getYouTubeEmbedUrl(url: string): string | null {
+    const match = url?.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)
+    return match ? `https://www.youtube.com/embed/${match[1]}` : null
+  }
+
+  if (!user) return null
+
+  return (
+    <div className="flex h-screen overflow-hidden" style={{ background: '#0f0e1a' }}>
+      {/* Sidebar */}
+      <div className="w-72 flex flex-col flex-shrink-0 overflow-y-auto" style={{ background: '#1a1830' }}>
+        <div className="p-4 border-b border-gray-700">
+          <button onClick={() => router.push('/dashboard')} className="text-gray-400 hover:text-white text-sm flex items-center gap-1 mb-3">
+            <ChevronLeft className="w-4 h-4" /> Dashboard
+          </button>
+          <h2 className="text-white font-semibold text-sm line-clamp-2">{course?.title}</h2>
+          {progress && (
+            <div className="mt-2">
+              <div className="w-full bg-gray-700 rounded-full h-1.5">
+                <div className="bg-brand-500 h-1.5 rounded-full" style={{ width: `${progress.percentage}%` }} />
+              </div>
+              <p className="text-xs text-gray-400 mt-1">{progress.percentage}% complete</p>
+            </div>
+          )}
+        </div>
+
+        {/* Lessons */}
+        {course?.sections?.map((section: any) => (
+          <div key={section.id}>
+            <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide bg-gray-750">
+              {section.title}
+            </div>
+            {section.lessons.map((lesson: any) => (
+              <button key={lesson.id} onClick={() => { setActiveLesson(lesson); setTab('lesson'); setQuizResult(null) }}
+                className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors ${activeLesson?.id === lesson.id ? 'bg-brand-600 text-white' : 'text-gray-300 hover:bg-gray-700'}`}>
+                {isCompleted(lesson.id)
+                  ? <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
+                  : <Circle className="w-4 h-4 text-gray-500 flex-shrink-0" />}
+                <span className="truncate text-xs">{lesson.title}</span>
+              </button>
+            ))}
+          </div>
+        ))}
+
+        {/* Quizzes in sidebar */}
+        {quizzes?.length > 0 && (
+          <div>
+            <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">Assessments</div>
+            {quizzes.map((quiz: any) => (
+              <button key={quiz.id} onClick={() => { setActiveQuiz(quiz); setTab('quiz'); setAnswers([]); setQuizResult(null); setCurrentQuestion(0) }}
+                className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors ${activeQuiz?.id === quiz.id && tab === 'quiz' ? 'bg-brand-600 text-white' : 'text-gray-300 hover:bg-gray-700'}`}>
+                <HelpCircle className="w-4 h-4 flex-shrink-0" />
+                <span className="truncate text-xs">{quiz.title}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Main */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Tabs */}
+        <div className="bg-gray-800 border-b border-gray-700/50 flex">
+          {(['lesson', 'documents'] as Tab[]).map(t => (
+            <button key={t} onClick={() => setTab(t)}
+              className={`px-5 py-3 text-sm font-medium capitalize transition-colors ${tab === t ? 'text-white border-b-2 border-brand-500' : 'text-gray-400 hover:text-white'}`}>
+              {t === 'documents' ? 'Materials' : t}
+            </button>
+          ))}
+        </div>
+
+        <div className={`flex-1 text-white ${tab === 'quiz' && activeQuiz && !quizResult ? 'overflow-hidden flex flex-col' : 'overflow-y-auto'}`} style={{ background: '#0f0e1a' }}>
+          {/* Lesson tab */}
+          {tab === 'lesson' && activeLesson && (
+            <div className="max-w-4xl mx-auto p-6">
+              <h1 className="text-xl font-bold mb-4">{activeLesson.title}</h1>
+
+              {(activeLesson.video_file || activeLesson.video_url) ? (
+                <div className="aspect-video bg-black rounded-xl overflow-hidden mb-6">
+                  {activeLesson.video_file ? (
+                    <video
+                      src={fileUrl(activeLesson.video_file)}
+                      controls className="w-full h-full"
+                    />
+                  ) : getYouTubeEmbedUrl(activeLesson.video_url) ? (
+                    <iframe
+                      src={getYouTubeEmbedUrl(activeLesson.video_url)!}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  ) : (
+                    <video src={activeLesson.video_url} controls className="w-full h-full" />
+                  )}
+                </div>
+              ) : (
+                <div className="aspect-video bg-gray-800 rounded-xl flex items-center justify-center mb-6">
+                  <div className="text-center text-gray-500">
+                    <Play className="w-12 h-12 mx-auto mb-2" />
+                    <p className="text-sm">No video for this lesson</p>
+                  </div>
+                </div>
+              )}
+
+              {activeLesson.description && <p className="text-gray-300 mb-6">{activeLesson.description}</p>}
+
+              <div className="flex items-center justify-between">
+                <button onClick={() => currentIndex > 0 && setActiveLesson(allLessons[currentIndex - 1])}
+                  disabled={currentIndex === 0}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-700 rounded-lg text-sm disabled:opacity-40 hover:bg-gray-600">
+                  <ChevronLeft className="w-4 h-4" /> Previous
+                </button>
+
+                <button onClick={() => markComplete.mutate(activeLesson.id)}
+                  disabled={isCompleted(activeLesson.id) || markComplete.isPending}
+                  className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium ${isCompleted(activeLesson.id) ? 'bg-green-700 text-green-100' : 'bg-brand-600 hover:bg-brand-700 text-white'}`}>
+                  <CheckCircle className="w-4 h-4" />
+                  {isCompleted(activeLesson.id) ? 'Completed' : 'Mark Complete'}
+                </button>
+
+                <button onClick={() => currentIndex < allLessons.length - 1 && setActiveLesson(allLessons[currentIndex + 1])}
+                  disabled={currentIndex === allLessons.length - 1}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-700 rounded-lg text-sm disabled:opacity-40 hover:bg-gray-600">
+                  Next <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Documents tab */}
+          {tab === 'documents' && (
+            <div className="max-w-4xl mx-auto p-6">
+              <h2 className="text-lg font-semibold mb-4">Course Materials</h2>
+              {course?.documents?.length > 0 ? (
+                <div className="space-y-3">
+                  {course.documents.map((doc: any) => (
+                    <a key={doc.id} href={fileUrl(doc.file_url)} target="_blank" rel="noreferrer"
+                      className="flex items-center gap-4 p-4 bg-gray-800 rounded-xl hover:bg-gray-700 transition-colors">
+                      <div className="w-10 h-10 bg-brand-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <FileText className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">{doc.title}</p>
+                        <p className="text-xs text-gray-400">{doc.file_type}</p>
+                      </div>
+                      <Download className="w-5 h-5 text-gray-400" />
+                    </a>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-16 text-gray-500">
+                  <FileText className="w-12 h-12 mx-auto mb-3" />
+                  <p>No materials uploaded yet</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Quiz tab */}
+          {tab === 'quiz' && activeQuiz && (
+            <div className="flex flex-col h-full">
+              {/* Quiz header */}
+              <div className="flex-shrink-0 px-8 pt-6 pb-4 border-b border-gray-700/50">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-bold text-white">{activeQuiz.title}</h2>
+                    <p className="text-gray-400 text-xs mt-0.5">Passing score: {activeQuiz.passing_score}%</p>
+                  </div>
+                  {!quizResult && (
+                    <div className="flex items-center gap-2">
+                      {activeQuiz.questions?.map((_: any, i: number) => (
+                        <button key={i} onClick={() => setCurrentQuestion(i)}
+                          className={`w-7 h-7 rounded-full text-xs font-bold transition-colors ${
+                            i === currentQuestion ? 'bg-brand-500 text-white' :
+                            answers[i] !== undefined ? 'bg-green-600 text-white' :
+                            'bg-gray-700 text-gray-400 hover:bg-gray-600'
+                          }`}>
+                          {i + 1}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Quiz body */}
+              <div className="flex-1 flex flex-col overflow-hidden">
+                {quizResult ? (
+                  /* Results screen */
+                  <div className="flex-1 overflow-y-auto px-8 py-6">
+                    <div className={`rounded-2xl p-8 mb-6 text-center ${quizResult.passed ? 'bg-green-900/30 border border-green-700' : 'bg-red-900/30 border border-red-700'}`}>
+                      <p className="text-5xl font-bold mb-2">{quizResult.score.toFixed(0)}%</p>
+                      <p className={`text-xl font-semibold ${quizResult.passed ? 'text-green-400' : 'text-red-400'}`}>
+                        {quizResult.passed ? '🎉 Passed!' : '❌ Not Passed'}
+                      </p>
+                      <p className="text-sm text-gray-400 mt-2">{quizResult.correct}/{quizResult.total} correct answers</p>
+                      {quizResult.passed && <p className="text-green-300 text-sm mt-2">Certificate will be issued once all quizzes are passed!</p>}
+                    </div>
+                    <div className="space-y-3 mb-6">
+                      {quizResult.results?.map((r: any, i: number) => (
+                        <div key={i} className={`p-4 rounded-xl text-sm ${r.isCorrect ? 'bg-green-900/20 border border-green-800' : 'bg-red-900/20 border border-red-800'}`}>
+                          <p className="font-medium mb-1 text-white">Q{i + 1}: {activeQuiz.questions?.[i]?.text}</p>
+                          <p className={r.isCorrect ? 'text-green-400' : 'text-red-400'}>
+                            {r.isCorrect ? '✓ Correct' : `✗ Wrong — Correct: Option ${r.correct + 1}`}
+                          </p>
+                          {r.explanation && <p className="text-gray-400 text-xs mt-1">{r.explanation}</p>}
+                        </div>
+                      ))}
+                    </div>
+                    <button onClick={() => { setQuizResult(null); setAnswers([]); setCurrentQuestion(0) }}
+                      className="w-full py-3 bg-gray-700 rounded-xl text-sm hover:bg-gray-600 font-medium">
+                      Retake Quiz
+                    </button>
+                  </div>
+                ) : (
+                  /* One question at a time */
+                  <div className="flex-1 flex flex-col px-8 py-6">
+                    {/* Progress bar */}
+                    <div className="flex-shrink-0 mb-6">
+                      <div className="flex justify-between text-xs text-gray-400 mb-1">
+                        <span>Question {currentQuestion + 1} of {activeQuiz.questions?.length}</span>
+                        <span>{answers.filter(a => a !== undefined).length} answered</span>
+                      </div>
+                      <div className="w-full bg-gray-700 rounded-full h-1.5">
+                        <div className="bg-brand-500 h-1.5 rounded-full transition-all"
+                          style={{ width: `${((currentQuestion + 1) / (activeQuiz.questions?.length || 1)) * 100}%` }} />
+                      </div>
+                    </div>
+
+                    {/* Question card — fills remaining space */}
+                    {activeQuiz.questions?.[currentQuestion] && (() => {
+                      const q = activeQuiz.questions[currentQuestion]
+                      const opts = typeof q.options === 'string' ? JSON.parse(q.options) : q.options
+                      return (
+                        <div className="flex-1 flex flex-col">
+                          <div className="flex-1 flex flex-col justify-center max-w-2xl w-full mx-auto">
+                            <p className="text-lg font-semibold text-white mb-6">
+                              {currentQuestion + 1}. {q.text}
+                            </p>
+                            <div className="space-y-3">
+                              {opts.map((opt: string, oi: number) => (
+                                <label key={oi}
+                                  className={`flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all border-2 ${
+                                    answers[currentQuestion] === oi
+                                      ? 'border-brand-500 bg-brand-600/20 text-white'
+                                      : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-500 hover:bg-gray-700'
+                                  }`}>
+                                  <input type="radio" name={`q-${currentQuestion}`}
+                                    checked={answers[currentQuestion] === oi}
+                                    onChange={() => { const a = [...answers]; a[currentQuestion] = oi; setAnswers(a) }}
+                                    className="sr-only" />
+                                  <span className={`w-8 h-8 rounded-full border-2 flex items-center justify-center flex-shrink-0 text-sm font-bold ${
+                                    answers[currentQuestion] === oi ? 'border-brand-400 bg-brand-500 text-white' : 'border-gray-500 text-gray-400'
+                                  }`}>
+                                    {String.fromCharCode(65 + oi)}
+                                  </span>
+                                  <span className="text-sm">{opt}</span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Navigation */}
+                          <div className="flex-shrink-0 flex items-center justify-between pt-6 border-t border-gray-700/50 mt-4">
+                            <button
+                              onClick={() => setCurrentQuestion(q => Math.max(0, q - 1))}
+                              disabled={currentQuestion === 0}
+                              className="flex items-center gap-2 px-5 py-2.5 bg-gray-700 rounded-xl text-sm disabled:opacity-40 hover:bg-gray-600 font-medium">
+                              <ChevronLeft className="w-4 h-4" /> Previous
+                            </button>
+
+                            {currentQuestion < (activeQuiz.questions?.length ?? 0) - 1 ? (
+                              <button
+                                onClick={() => setCurrentQuestion(q => q + 1)}
+                                className="flex items-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 rounded-xl text-sm font-medium text-white">
+                                Next <ChevronRight className="w-4 h-4" />
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => submitQuiz.mutate({ quizId: activeQuiz.id, answers })}
+                                disabled={answers.filter(a => a !== undefined).length < (activeQuiz.questions?.length ?? 0) || submitQuiz.isPending}
+                                className="px-6 py-2.5 bg-green-600 hover:bg-green-700 rounded-xl text-sm font-medium text-white disabled:opacity-50">
+                                {submitQuiz.isPending ? 'Submitting...' : 'Submit Quiz'}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })()}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}

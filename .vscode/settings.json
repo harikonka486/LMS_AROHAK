@@ -1,0 +1,7 @@
+{
+  "typescript.tsdk": "lms-erp-main/lms-erp/backend/node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "files.exclude": {
+    "**/backend-nest": true
+  }
+}

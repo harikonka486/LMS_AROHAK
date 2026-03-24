@@ -1,0 +1,71 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.QuizzesController = void 0;
+const common_1 = require("@nestjs/common");
+const quizzes_service_1 = require("./quizzes.service");
+const guards_1 = require("../auth/guards");
+let QuizzesController = class QuizzesController {
+    quizzes;
+    constructor(quizzes) {
+        this.quizzes = quizzes;
+    }
+    findByCourse(courseId) { return this.quizzes.findByCourse(courseId); }
+    findOne(id, req) { return this.quizzes.findOne(id, req.user.role); }
+    create(courseId, body) { return this.quizzes.create(courseId, body); }
+    submit(id, answers, req) {
+        return this.quizzes.submit(id, answers, req.user.id);
+    }
+};
+exports.QuizzesController = QuizzesController;
+__decorate([
+    (0, common_1.Get)('course/:courseId'),
+    __param(0, (0, common_1.Param)('courseId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], QuizzesController.prototype, "findByCourse", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], QuizzesController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Post)('course/:courseId'),
+    (0, common_1.UseGuards)(guards_1.RolesGuard),
+    (0, guards_1.Roles)('admin'),
+    __param(0, (0, common_1.Param)('courseId')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], QuizzesController.prototype, "create", null);
+__decorate([
+    (0, common_1.Post)(':id/submit'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)('answers')),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Array, Object]),
+    __metadata("design:returntype", void 0)
+], QuizzesController.prototype, "submit", null);
+exports.QuizzesController = QuizzesController = __decorate([
+    (0, common_1.Controller)('quizzes'),
+    (0, common_1.UseGuards)(guards_1.JwtAuthGuard),
+    __metadata("design:paramtypes", [quizzes_service_1.QuizzesService])
+], QuizzesController);
+//# sourceMappingURL=quizzes.controller.js.map

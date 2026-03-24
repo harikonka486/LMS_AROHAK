@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js
+.next/
+out/
+
+# Env files — never commit real secrets
+.env
+.env.local
+.env.production
+
+# Uploads — use Cloudinary in production
+backend/uploads/thumbnails/*
+backend/uploads/avatars/*
+backend/uploads/documents/*
+backend/uploads/videos/*
+!backend/uploads/**/.gitkeep
+
+# Misc
+.DS_Store
+*.log
+npm-debug.log*
