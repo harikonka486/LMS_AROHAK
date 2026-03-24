@@ -1,13 +1,17 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import {
-  BookOpen, LayoutDashboard, GraduationCap, Award,
-  Users, LogOut, ChevronDown, Menu, X, Bell,
+  LayoutDashboard, GraduationCap, Award,
+  BookOpen, Users, LogOut, ChevronDown, Menu, X,
 } from 'lucide-react'
 import { useAuthStore } from '@/lib/store'
 import { cn } from '@/lib/utils'
+
+const A = { red: '#8B1A1A', crimson: '#C0392B', gold: '#D4A017', cream: '#FFF8F0', dark: '#3d0a0a' }
+const BTN_BG = `linear-gradient(135deg, ${A.red}, ${A.crimson})`
 
 const ROLE_LABELS: Record<string, string> = {
   admin: 'Admin',
@@ -15,8 +19,8 @@ const ROLE_LABELS: Record<string, string> = {
 }
 
 const ROLE_COLORS: Record<string, string> = {
-  admin:    'bg-purple-100 text-purple-700',
-  employee: 'bg-emerald-100 text-emerald-700',
+  admin:    'bg-amber-100 text-amber-800',
+  employee: 'bg-red-100 text-red-800',
 }
 
 const navItems = [
@@ -51,19 +55,18 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-40 h-16"
-        style={{ background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 1px 8px rgba(0,0,0,0.06)' }}>
+      <header className="fixed top-0 left-0 right-0 z-40 h-16 bg-white"
+        style={{ borderBottom: `1px solid #f0d9c8`, boxShadow: '0 1px 8px rgba(139,26,26,0.08)' }}>
         <div className="max-w-screen-xl mx-auto h-full flex items-center justify-between px-4 sm:px-6">
 
           {/* Logo */}
-          <Link href="/dashboard" className="flex items-center gap-3 flex-shrink-0 group">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm transition-transform group-hover:scale-105"
-              style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}>
-              <BookOpen className="w-4 h-4 text-white" />
-            </div>
+          <Link href="/dashboard" className="flex items-center gap-2.5 flex-shrink-0 group">
+            <Image src="/arohak-logo.png" alt="Arohak" width={36} height={36}
+              className="object-contain transition-transform group-hover:scale-105"
+              style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.15))' }} />
             <div className="hidden sm:block">
-              <p className="font-bold text-gray-900 text-sm leading-none">LMS</p>
-              <p className="text-[10px] text-gray-400 leading-none mt-0.5 font-medium tracking-wide uppercase">Training Portal</p>
+              <p className="font-bold text-sm leading-none" style={{ color: A.red }}>AROHAK</p>
+              <p className="text-[10px] text-gray-400 leading-none mt-0.5 font-medium tracking-wide uppercase">LMS Portal</p>
             </div>
           </Link>
 
@@ -76,11 +79,11 @@ export default function Navbar() {
                   className={cn(
                     'flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-150',
                     active
-                      ? 'text-brand-700 bg-brand-50'
+                      ? 'text-red-800 bg-red-50'
                       : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100'
                   )}
                 >
-                  <Icon className={cn('w-4 h-4', active ? 'text-brand-600' : 'text-gray-400')} />
+                  <Icon className={cn('w-4 h-4', active ? 'text-red-700' : 'text-gray-400')} />
                   {label}
                 </Link>
               )
@@ -96,7 +99,7 @@ export default function Navbar() {
                 className="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-xl hover:bg-gray-100 transition-colors">
                 {/* Avatar */}
                 <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-                  style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}>
+                  style={{ background: BTN_BG }}>
                   {initials}
                 </div>
                 <div className="text-left hidden sm:block">
@@ -111,10 +114,10 @@ export default function Navbar() {
                   style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.06)' }}>
 
                   {/* Profile header */}
-                  <div className="p-4 border-b border-gray-50" style={{ background: 'linear-gradient(135deg, #f8f7ff, #f0f2ff)' }}>
+                  <div className="p-4 border-b border-gray-50" style={{ background: `linear-gradient(135deg, ${A.cream}, #fdebd0)` }}>
                     <div className="flex items-center gap-3">
                       <div className="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold shadow-sm flex-shrink-0"
-                        style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}>
+                        style={{ background: BTN_BG }}>
                         {initials}
                       </div>
                       <div className="min-w-0 flex-1">
@@ -174,9 +177,9 @@ export default function Navbar() {
                 <Link key={href} href={href}
                   className={cn(
                     'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all',
-                    active ? 'bg-brand-50 text-brand-700' : 'text-gray-600 hover:bg-gray-50'
+                    active ? 'bg-red-50 text-red-800' : 'text-gray-600 hover:bg-gray-50'
                   )}>
-                  <Icon className={cn('w-4 h-4', active ? 'text-brand-600' : 'text-gray-400')} />
+                  <Icon className={cn('w-4 h-4', active ? 'text-red-700' : 'text-gray-400')} />
                   {label}
                 </Link>
               )
