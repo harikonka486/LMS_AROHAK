@@ -39,6 +39,7 @@
   th { background: rgba(255,255,255,0.1); padding: 10px 16px; text-align: left; font-weight: 600; }
   td { padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,0.07); color: rgba(255,255,255,0.8); }
   .check { color: #34d399; } .cross { color: #f87171; }
+  code { background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 6px; font-size: 13px; font-family: monospace; color: #a5b4fc; }
 </style>
 </head>
 <body>
@@ -54,10 +55,10 @@
     <p style="margin-top:24px;font-size:20px">A complete Learning Management System built for corporate workforce training — courses, quizzes, progress tracking, and auto-generated certificates.</p>
     <div style="margin-top:40px;display:flex;gap:12px;flex-wrap:wrap">
       <span class="tag">Next.js 14</span>
-      <span class="tag">Node.js + Express</span>
-      <span class="tag">MySQL</span>
+      <span class="tag">NestJS 11</span>
+      <span class="tag">MySQL 8</span>
       <span class="tag">JWT Auth</span>
-      <span class="tag">Cloudinary</span>
+      <span class="tag">TypeScript</span>
     </div>
   </div>
   <div class="slide-number">1 / 10</div>
@@ -99,9 +100,9 @@
       <h3>🖥️ Frontend</h3>
       <ul>
         <li>Next.js 14 (App Router)</li>
-        <li>TypeScript</li>
-        <li>Tailwind CSS</li>
-        <li>TanStack Query</li>
+        <li>TypeScript 5</li>
+        <li>Tailwind CSS 3</li>
+        <li>TanStack Query v5</li>
         <li>Zustand (Auth State)</li>
         <li>React Hook Form + Zod</li>
       </ul>
@@ -109,9 +110,9 @@
     <div class="card">
       <h3>⚙️ Backend</h3>
       <ul>
-        <li>Node.js + Express.js</li>
-        <li>MySQL 8 Database</li>
-        <li>JWT Authentication</li>
+        <li>NestJS 11 (Modular)</li>
+        <li>MySQL 8 + mysql2</li>
+        <li>Passport JWT Auth</li>
         <li>bcryptjs (Passwords)</li>
         <li>Multer (File Uploads)</li>
         <li>csv-parse (CSV Import)</li>
@@ -121,7 +122,7 @@
       <h3>☁️ Infrastructure</h3>
       <ul>
         <li>Cloudinary (File Storage)</li>
-        <li>Railway / Render (Deploy)</li>
+        <li>Railway / Render (API)</li>
         <li>PlanetScale / MySQL</li>
         <li>Vercel (Frontend)</li>
         <li>Environment-based config</li>
@@ -134,41 +135,31 @@
 <!-- SLIDE 4: User Roles -->
 <div class="slide" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
   <h2>User <span class="accent">Roles</span></h2>
-  <div class="grid3">
+  <div class="grid2" style="margin-top:8px">
     <div class="card" style="border-color:#7c3aed55">
       <div style="margin-bottom:12px"><span class="badge badge-purple">Admin</span></div>
       <ul>
         <li>Manage all users</li>
         <li>Change user roles</li>
-        <li>Import employees (CSV)</li>
+        <li>Import employees via CSV</li>
         <li>Create &amp; publish courses</li>
-        <li>View all progress &amp; certs</li>
+        <li>View all progress &amp; certificates</li>
         <li>Delete users &amp; content</li>
-      </ul>
-    </div>
-    <div class="card" style="border-color:#2563eb55">
-      <div style="margin-bottom:12px"><span class="badge badge-blue">Trainer</span></div>
-      <ul>
-        <li>Create new courses</li>
-        <li>Add sections &amp; lessons</li>
-        <li>Upload documents</li>
-        <li>Create quizzes</li>
-        <li>Publish / unpublish</li>
-        <li>View certificates</li>
       </ul>
     </div>
     <div class="card" style="border-color:#05966955">
       <div style="margin-bottom:12px"><span class="badge badge-green">Employee</span></div>
       <ul>
-        <li>Browse courses</li>
-        <li>Enroll &amp; learn</li>
+        <li>Browse course catalog</li>
+        <li>Enroll &amp; learn at own pace</li>
         <li>Watch video lessons</li>
-        <li>Take quizzes</li>
+        <li>Take quizzes with auto-grading</li>
         <li>Track own progress</li>
-        <li>Earn certificates</li>
+        <li>Earn &amp; share certificates</li>
       </ul>
     </div>
   </div>
+  <p style="margin-top:20px;font-size:15px;text-align:center;color:rgba(255,255,255,0.4)">Roles enforced via NestJS <code>RolesGuard</code> + <code>@Roles('admin')</code> decorator on every protected controller</p>
   <div class="slide-number">4 / 10</div>
 </div>
 
@@ -179,7 +170,7 @@
     <div>
       <div class="card" style="margin-bottom:16px">
         <h3>🎓 Course Management</h3>
-        <p>Structured courses with sections, video lessons, downloadable documents, and multiple-choice quizzes with pass/fail scoring.</p>
+        <p>Structured courses with sections, video lessons, downloadable documents, and multiple-choice quizzes with configurable pass/fail scoring.</p>
       </div>
       <div class="card">
         <h3>📊 Progress Tracking</h3>
@@ -189,7 +180,7 @@
     <div>
       <div class="card" style="margin-bottom:16px">
         <h3>🏆 Auto Certificates</h3>
-        <p>Certificates are automatically generated when an employee completes a course. Each has a unique number and is publicly verifiable.</p>
+        <p>Certificates are automatically generated when an employee completes all lessons and passes all quizzes. Each has a unique number and is publicly verifiable.</p>
       </div>
       <div class="card">
         <h3>👥 Bulk User Import</h3>
@@ -212,8 +203,8 @@
     <div style="font-size:32px;color:#818cf8">⟷</div>
     <div class="card" style="flex:1;text-align:center">
       <div style="font-size:40px;margin-bottom:12px">⚙️</div>
-      <h3>Backend API</h3>
-      <p style="font-size:14px">Express.js<br/>Port 4000<br/>Railway/Render</p>
+      <h3>NestJS API</h3>
+      <p style="font-size:14px">NestJS 11<br/>Port 4000<br/>Railway/Render</p>
     </div>
     <div style="font-size:32px;color:#818cf8">⟷</div>
     <div class="card" style="flex:1;text-align:center">
@@ -229,40 +220,42 @@
     </div>
   </div>
   <div style="margin-top:24px" class="card">
-    <p style="font-size:15px;text-align:center">JWT token stored in browser → sent with every API request → backend validates → returns data</p>
+    <p style="font-size:15px;text-align:center">JWT token stored in browser → Axios interceptor attaches Bearer header → NestJS <code>JwtAuthGuard</code> validates → <code>RolesGuard</code> checks role → returns data</p>
   </div>
   <div class="slide-number">6 / 10</div>
 </div>
 
-<!-- SLIDE 7: Database Schema -->
+<!-- SLIDE 7: NestJS Backend Structure -->
 <div class="slide" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
-  <h2>Database <span class="accent">Schema</span></h2>
+  <h2>NestJS <span class="accent">Modules</span></h2>
   <div class="grid2" style="margin-top:8px">
     <div>
       <div class="card" style="margin-bottom:12px">
-        <h3>Core Tables</h3>
+        <h3>Core Modules</h3>
         <ul>
-          <li>users — accounts &amp; roles</li>
-          <li>courses — title, level, published</li>
-          <li>sections — course chapters</li>
-          <li>lessons — video URL, duration</li>
-          <li>enrollments — user ↔ course link</li>
+          <li>AuthModule — register, login, JWT</li>
+          <li>UsersModule — CRUD, CSV import</li>
+          <li>CoursesModule — create, publish</li>
+          <li>CategoriesModule — course categories</li>
+          <li>DatabaseModule — MySQL pool (global)</li>
         </ul>
       </div>
     </div>
     <div>
       <div class="card">
-        <h3>Activity Tables</h3>
+        <h3>Feature Modules</h3>
         <ul>
-          <li>lesson_progress — completed lessons</li>
-          <li>quizzes — title, passing score</li>
-          <li>questions — options + correct answer</li>
-          <li>quiz_attempts — score, passed</li>
-          <li>certificates — unique number, issued date</li>
+          <li>SectionsModule — course chapters</li>
+          <li>LessonsModule — video lessons</li>
+          <li>EnrollmentsModule — user ↔ course</li>
+          <li>ProgressModule — lesson completion</li>
+          <li>QuizzesModule — questions + attempts</li>
+          <li>CertificatesModule — auto-issuance</li>
         </ul>
       </div>
     </div>
   </div>
+  <p style="margin-top:20px;font-size:15px;color:rgba(255,255,255,0.4);text-align:center">Each module has its own Controller, Service, and Module file. Global <code>ValidationPipe</code> with <code>whitelist: true</code> applied at bootstrap.</p>
   <div class="slide-number">7 / 10</div>
 </div>
 
@@ -270,16 +263,17 @@
 <div class="slide" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
   <h2>Pages &amp; <span class="accent">Navigation</span></h2>
   <table>
-    <thead><tr><th>Page</th><th>Route</th><th>Admin</th><th>Trainer</th><th>Employee</th></tr></thead>
+    <thead><tr><th>Page</th><th>Route</th><th>Admin</th><th>Employee</th><th>Public</th></tr></thead>
     <tbody>
-      <tr><td>Dashboard</td><td>/dashboard</td><td class="check">✅</td><td class="check">✅</td><td class="check">✅</td></tr>
+      <tr><td>Dashboard</td><td>/dashboard</td><td class="check">✅</td><td class="check">✅</td><td class="cross">❌</td></tr>
       <tr><td>Courses</td><td>/courses</td><td class="check">✅</td><td class="check">✅</td><td class="check">✅</td></tr>
       <tr><td>Course Detail</td><td>/courses/[id]</td><td class="check">✅</td><td class="check">✅</td><td class="check">✅</td></tr>
-      <tr><td>Learn (Video Player)</td><td>/learn/[courseId]</td><td class="check">✅</td><td class="check">✅</td><td class="check">✅</td></tr>
-      <tr><td>My Learning</td><td>/my-learning</td><td class="cross">❌</td><td class="cross">❌</td><td class="check">✅</td></tr>
-      <tr><td>Certificates</td><td>/certificates</td><td class="check">✅</td><td class="check">✅</td><td class="check">✅</td></tr>
+      <tr><td>Learn (Video Player)</td><td>/learn/[courseId]</td><td class="check">✅</td><td class="check">✅</td><td class="cross">❌</td></tr>
+      <tr><td>My Learning</td><td>/my-learning</td><td class="cross">❌</td><td class="check">✅</td><td class="cross">❌</td></tr>
+      <tr><td>Certificates</td><td>/certificates</td><td class="check">✅</td><td class="check">✅</td><td class="cross">❌</td></tr>
+      <tr><td>Verify Certificate</td><td>/certificates/verify/[n]</td><td class="check">✅</td><td class="check">✅</td><td class="check">✅</td></tr>
       <tr><td>Admin — Users</td><td>/admin/users</td><td class="check">✅</td><td class="cross">❌</td><td class="cross">❌</td></tr>
-      <tr><td>Admin — Edit Course</td><td>/admin/courses/[id]/edit</td><td class="check">✅</td><td class="check">✅</td><td class="cross">❌</td></tr>
+      <tr><td>Admin — Edit Course</td><td>/admin/courses/[id]/edit</td><td class="check">✅</td><td class="cross">❌</td><td class="cross">❌</td></tr>
     </tbody>
   </table>
   <div class="slide-number">8 / 10</div>
@@ -294,8 +288,8 @@
         <h3>📄 CSV Format</h3>
         <div style="background:#0f172a;border-radius:10px;padding:16px;margin-top:12px;font-family:monospace;font-size:13px;color:#a5b4fc;line-height:1.8">
           name,email,employee_id,department,role<br/>
-          John Smith,john@arohak.com,EMP001,Finance,student<br/>
-          Jane Doe,jane@arohak.com,EMP002,IT,instructor<br/>
+          John Smith,john@arohak.com,EMP001,Finance,employee<br/>
+          Jane Doe,jane@arohak.com,EMP002,IT,employee<br/>
           ...300 more rows
         </div>
       </div>
@@ -306,14 +300,14 @@
         <ul>
           <li>Admin clicks "Import CSV"</li>
           <li>Upload the prepared CSV file</li>
-          <li>System creates all accounts</li>
+          <li>NestJS parses with csv-parse</li>
           <li>Duplicate emails auto-skipped</li>
-          <li>Default password: Welcome@123</li>
+          <li>Default password: <code>Welcome@123</code></li>
         </ul>
       </div>
       <div class="card">
         <h3>📊 Import Result</h3>
-        <p style="font-size:15px">Shows total rows, created count, skipped count, and notes for any issues — all in one summary screen.</p>
+        <p style="font-size:15px">Shows total rows, created count, skipped count, and notes for any issues — all in one summary response.</p>
       </div>
     </div>
   </div>
@@ -326,22 +320,22 @@
     <h2 style="font-size:42px;margin-bottom:40px">Project <span style="color:#a5b4fc">Summary</span></h2>
     <div class="grid3" style="margin-bottom:40px">
       <div class="card" style="text-align:center">
-        <div class="big-number">3</div>
+        <div class="big-number">2</div>
         <p style="margin-top:8px">User Roles</p>
       </div>
       <div class="card" style="text-align:center">
-        <div class="big-number">10</div>
-        <p style="margin-top:8px">DB Tables</p>
+        <div class="big-number">12</div>
+        <p style="margin-top:8px">NestJS Modules</p>
       </div>
       <div class="card" style="text-align:center">
         <div class="big-number">300+</div>
         <p style="margin-top:8px">Employees</p>
       </div>
     </div>
-    <p style="font-size:20px;margin-bottom:32px">A complete, production-ready LMS system — from course creation to certificate verification, built for Arohak's 300+ employee workforce.</p>
+    <p style="font-size:20px;margin-bottom:32px">A complete, production-ready LMS — from course creation to certificate verification, built on NestJS + Next.js for Arohak's workforce.</p>
     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-      <span class="tag">✅ JWT Auth</span>
-      <span class="tag">✅ Role-Based Access</span>
+      <span class="tag">✅ NestJS Modules</span>
+      <span class="tag">✅ JWT + RolesGuard</span>
       <span class="tag">✅ Video Lessons</span>
       <span class="tag">✅ Quizzes</span>
       <span class="tag">✅ Certificates</span>

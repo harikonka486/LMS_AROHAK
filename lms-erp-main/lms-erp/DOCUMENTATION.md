@@ -57,26 +57,26 @@ Key capabilities:
 ### Backend
 | Package | Version | Purpose |
 |---|---|---|
-| Node.js / Express | 4.18.2 | REST API server |
-| MySQL2 | 3.6.5 | Database driver |
-| bcryptjs | 2.4.3 | Password hashing |
-| jsonwebtoken | 9.0.2 | JWT auth |
-| multer | 1.4.5 | File upload handling |
-| cloudinary | 2.x | Cloud media storage (production) |
-| helmet | 7.1.0 | Security headers |
-| cors | 2.8.5 | Cross-origin requests |
-| compression | 1.7.4 | Response compression |
-| express-rate-limit | 7.1.5 | Rate limiting |
-| csv-parse | 6.2.0 | CSV bulk user import |
-| uuid | 9.0.1 | UUID generation |
+| NestJS | 11.x | Backend framework (modular architecture) |
+| Node.js | 18+ | Runtime |
+| MySQL2 | 3.x | Database driver |
+| @nestjs/jwt | 11.x | JWT authentication |
+| @nestjs/passport | 11.x | Passport.js integration |
+| passport-jwt | 4.x | JWT strategy |
+| bcryptjs | 3.x | Password hashing |
+| multer | 2.x | File upload handling |
+| csv-parse | 6.x | CSV bulk user import |
+| uuid | 13.x | UUID generation |
+| class-validator | 0.15.x | DTO validation |
+| class-transformer | 0.5.x | Request transformation |
 
 ### Infrastructure
 | Service | Purpose |
 |---|---|
-| MySQL 8.0 | Database (local: localhost:3306) |
-| Node.js | Backend runtime |
-| Next.js | Frontend framework |
-| Cloudinary | Media file storage (production only) |
+| MySQL 8.0 | Primary database |
+| NestJS | Backend API (port 4000) |
+| Next.js | Frontend (port 3000) |
+| Cloudinary | Media file storage (production) |
 
 ---
 
@@ -84,43 +84,45 @@ Key capabilities:
 
 ```
 lms-erp/
-├── backend/
+├── backend/                          # NestJS API
 │   ├── src/
-│   │   ├── index.js              # Express app entry point
-│   │   ├── db/
-│   │   │   ├── connection.js     # MySQL connection pool
-│   │   │   ├── migrate.js        # Table creation script
-│   │   │   ├── seed.js           # Default data seeder
-│   │   │   └── reset-user-data.js
-│   │   ├── middleware/
-│   │   │   ├── auth.js           # JWT auth + role guard
-│   │   │   └── upload.js         # Multer / Cloudinary config
-│   │   └── routes/
-│   │       ├── auth.js
-│   │       ├── users.js
-│   │       ├── categories.js
-│   │       ├── courses.js
-│   │       ├── sections.js
-│   │       ├── lessons.js
-│   │       ├── enrollments.js
-│   │       ├── progress.js
-│   │       ├── quizzes.js
-│   │       └── certificates.js
-│   ├── uploads/                  # Local file storage (dev only)
-│   ├── .env                      # Local environment variables
+│   │   ├── main.ts                   # Bootstrap — CORS, validation pipe, global prefix
+│   │   ├── app.module.ts             # Root module — imports all feature modules
+│   │   ├── database/
+│   │   │   └── database.module.ts    # MySQL connection pool (global)
+│   │   ├── auth/
+│   │   │   ├── auth.controller.ts    # POST /auth/register, /auth/login
+│   │   │   ├── auth.service.ts       # Register / login logic
+│   │   │   ├── auth.module.ts
+│   │   │   ├── jwt.strategy.ts       # Passport JWT strategy
+│   │   │   └── guards.ts             # JwtAuthGuard, RolesGuard, @Roles decorator
+│   │   ├── users/
+│   │   ├── courses/
+│   │   ├── categories/
+│   │   ├── sections/
+│   │   ├── lessons/
+│   │   ├── enrollments/
+│   │   ├── progress/
+│   │   ├── quizzes/
+│   │   ├── certificates/
+│   │   └── health/
+│   ├── .env                          # Environment variables
+│   ├── nest-cli.json
+│   ├── tsconfig.json
 │   └── package.json
 │
-└── frontend/
+└── frontend/                         # Next.js 14 App Router
     ├── app/
-    │   ├── layout.tsx            # Root layout
-    │   ├── page.tsx              # Landing / home page
+    │   ├── layout.tsx                # Root layout (Inter font, Toaster)
+    │   ├── page.tsx                  # Landing / home page
+    │   ├── globals.css               # Tailwind base + component classes
     │   ├── login/page.tsx
     │   ├── register/page.tsx
     │   ├── dashboard/page.tsx
     │   ├── courses/
-    │   │   ├── page.tsx          # Course catalog
-    │   │   └── [id]/page.tsx     # Course detail
-    │   ├── learn/[courseId]/page.tsx  # Course player
+    │   │   ├── page.tsx              # Course catalog
+    │   │   └── [id]/page.tsx         # Course detail
+    │   ├── learn/[courseId]/page.tsx # Course player
     │   ├── my-learning/page.tsx
     │   ├── certificates/
     │   │   ├── page.tsx
@@ -133,15 +135,15 @@ lms-erp/
     │           └── [id]/edit/page.tsx
     ├── components/
     │   ├── layout/
-    │   │   ├── AppLayout.tsx     # Auth guard + layout wrapper
-    │   │   └── Navbar.tsx
-    │   ├── Providers.tsx         # QueryClient + Toast provider
+    │   │   ├── AppLayout.tsx         # Auth guard + layout wrapper
+    │   │   └── Navbar.tsx            # Top navigation bar
+    │   ├── Providers.tsx             # QueryClient + Toast provider
     │   └── ConfirmModal.tsx
     ├── lib/
-    │   ├── api.ts                # Axios instance with auth interceptor
-    │   ├── store.ts              # Zustand auth store
-    │   └── utils.ts              # Shared utility functions
-    ├── .env.local                # Local environment variables
+    │   ├── api.ts                    # Axios instance with auth interceptor
+    │   ├── store.ts                  # Zustand auth store (persisted)
+    │   └── utils.ts                  # Shared utility functions
+    ├── .env.local
     └── package.json
 ```
 
@@ -346,9 +348,9 @@ Legend: 🔓 Public  🔐 Requires JWT  👑 Admin only
 
 | Method | Endpoint | Access | Description |
 |---|---|---|---|
-| GET | `/users` | � | List all users |
-| GET | `/users/stats` | 👑 | Platform stats |
-| POST | `/users/import` | � | Bulk import users from CSV |
+| GET | `/users` | 👑 | List all users |
+| GET | `/users/stats` | 👑 | Platform-wide stats |
+| POST | `/users/import` | 👑 | Bulk import users from CSV (`multipart/form-data`, field: `file`) |
 | PATCH | `/users/:id/role` | 👑 | Change user role |
 | GET | `/users/:id/progress` | 👑 | Get all enrollments + progress for a user |
 | DELETE | `/users/:id` | 👑 | Delete user |
@@ -374,13 +376,13 @@ Default password for imported users: `Welcome@123`
 
 | Method | Endpoint | Access | Description |
 |---|---|---|---|
-| GET | `/courses` | � | List published courses. Query: `search`, `category`, `level`, `page`, `limit` |
+| GET | `/courses` | 🔐 | List published courses. Query: `search`, `category`, `level`, `page`, `limit` |
 | GET | `/courses/my` | 👑 | List courses created by current admin |
 | GET | `/courses/:id` | 🔓 | Course detail with sections, lessons, documents, quizzes |
 | POST | `/courses` | 👑 | Create course (`multipart/form-data` with optional `thumbnail`) |
 | PATCH | `/courses/:id` | 🔐 | Update course |
-| PATCH | `/courses/:id/publish` | � | T oggle publish status |
-| DELETE | `/courses/:id` | � | Delete course |
+| PATCH | `/courses/:id/publish` | 👑 | Toggle publish status |
+| DELETE | `/courses/:id` | 👑 | Delete course |
 
 ---
 
@@ -398,10 +400,10 @@ Default password for imported users: `Welcome@123`
 
 | Method | Endpoint | Access | Description |
 |---|---|---|---|
-| GET | `/lessons/:id` | � | Get lesson by ID |
+| GET | `/lessons/:id` | 🔐 | Get lesson by ID |
 | POST | `/lessons/section/:sectionId` | 👑 | Add lesson (`multipart/form-data` with optional `video`) |
 | PATCH | `/lessons/:id` | 👑 | Update lesson |
-| DELETE | `/lessons/:id` | � | Delete lesson |
+| DELETE | `/lessons/:id` | 👑 | Delete lesson |
 
 ---
 
@@ -419,8 +421,8 @@ Default password for imported users: `Welcome@123`
 
 | Method | Endpoint | Access | Description |
 |---|---|---|---|
-| POST | `/progress/lesson/:lessonId/complete` | � | Mark lesson complete. Auto-syncs enrollment status |
-| GET | `/progress/course/:courseId` | � | Get progress for a course |
+| POST | `/progress/lesson/:lessonId/complete` | 🔐 | Mark lesson complete. Auto-syncs enrollment status |
+| GET | `/progress/course/:courseId` | 🔐 | Get progress for a course |
 
 ---
 
@@ -429,9 +431,9 @@ Default password for imported users: `Welcome@123`
 | Method | Endpoint | Access | Description |
 |---|---|---|---|
 | GET | `/quizzes/course/:courseId` | 🔐 | List quizzes for a course |
-| GET | `/quizzes/:id` | � | Get quiz (admins see correct answers) |
+| GET | `/quizzes/:id` | 🔐 | Get quiz (admins see correct answers) |
 | POST | `/quizzes/course/:courseId` | 👑 | Create quiz with questions |
-| POST | `/quizzes/:id/submit` | � | Submit answers. Auto-issues certificate if all quizzes passed |
+| POST | `/quizzes/:id/submit` | 🔐 | Submit answers. Auto-issues certificate if all quizzes passed |
 
 **POST /quizzes/:id/submit — Body**
 ```json
@@ -445,7 +447,7 @@ Default password for imported users: `Welcome@123`
 | Method | Endpoint | Access | Description |
 |---|---|---|---|
 | GET | `/certificates/my` | 🔐 | Get current user's certificates |
-| GET | `/certificates/verify/:number` | � | Public certificate verification |
+| GET | `/certificates/verify/:number` | 🔓 | Public certificate verification |
 | GET | `/certificates/:id` | 🔐 | Get certificate by ID |
 
 ---
@@ -454,7 +456,7 @@ Default password for imported users: `Welcome@123`
 
 | Method | Endpoint | Access | Description |
 |---|---|---|---|
-| GET | `/health` | � | Returns `{ status: "ok" }` |
+| GET | `/health` | 🔓 | Returns `{ status: "ok" }` |
 
 ---
 
@@ -475,7 +477,7 @@ Default password for imported users: `Welcome@123`
 | `/certificates/verify/:number` | Public | Public certificate verification |
 | `/admin/users` | 👑 | User management — list, role change, delete, CSV import |
 | `/admin/courses/new` | 👑 | Create new course |
-| `/admin/courses/:id/edit` | � | Edit course, manage sections/lessons/quizzes |
+| `/admin/courses/:id/edit` | 👑 | Edit course, manage sections/lessons/quizzes |
 
 ---
 
@@ -483,13 +485,18 @@ Default password for imported users: `Welcome@123`
 
 ### Flow
 1. User logs in via `POST /api/auth/login`
-2. Server returns a JWT token (expires in 7 days)
+2. NestJS `AuthService` validates credentials and returns a signed JWT (expires in 7 days)
 3. Token stored in `localStorage` as `lms_token`
 4. Zustand store (`useAuthStore`) persists `user` and `token` via `zustand/middleware/persist`
 5. Axios interceptor in `lib/api.ts` attaches `Authorization: Bearer <token>` to every request
 6. On 401 response, interceptor clears token and redirects to `/login`
 
-### Route Protection
+### Guards (NestJS)
+- `JwtAuthGuard` — validates JWT on protected routes using `passport-jwt`
+- `RolesGuard` — checks `@Roles('admin')` decorator against the authenticated user's role
+- Both guards are applied at controller level via `@UseGuards(JwtAuthGuard, RolesGuard)`
+
+### Route Protection (Frontend)
 `AppLayout.tsx` wraps all protected pages. It waits for client-side hydration before checking auth, preventing false redirects on page refresh.
 
 ### Email Restriction
@@ -523,8 +530,10 @@ Files stored locally in `backend/uploads/`:
 - `uploads/avatars/` — user avatars
 - `uploads/documents/` — course documents
 
+Multer is configured with `memoryStorage()` for CSV imports and disk/cloud storage for media files.
+
 ### Production
-Files uploaded to Cloudinary. The `upload.js` middleware switches between local disk storage and `multer-storage-cloudinary` based on `NODE_ENV`.
+Files uploaded to Cloudinary. The upload interceptor switches between local disk storage and Cloudinary based on `NODE_ENV`.
 
 > Never set `Content-Type: multipart/form-data` manually — let the browser/axios set it so the boundary is included correctly.
 
@@ -537,22 +546,19 @@ Files uploaded to Cloudinary. The `upload.js` middleware switches between local 
 - MySQL 8.0+
 
 ### 1. Create the database
-Open MySQL and run:
 ```sql
 CREATE DATABASE lms_erp CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-### 2. Backend
+### 2. Backend (NestJS)
 ```bash
 cd lms-erp/backend
-cp .env.example .env        # fill in DB_PASSWORD and JWT_SECRET
+cp .env.example .env        # fill in DB credentials and JWT_SECRET
 npm install
-node src/db/migrate.js      # create tables
-node src/db/seed.js         # insert default data
-node src/index.js           # starts on http://localhost:4000
+npm run start:dev           # starts on http://localhost:4000 with watch mode
 ```
 
-### 3. Frontend
+### 3. Frontend (Next.js)
 ```bash
 cd lms-erp/frontend
 cp .env.local.example .env.local
@@ -564,14 +570,15 @@ npm run dev                 # starts on http://localhost:3000
 
 ## 12. Database Migrations & Seeding
 
+The NestJS `DatabaseModule` uses a raw MySQL2 connection pool. Tables are created via migration scripts.
+
 ### Migrate
-Creates all tables if they don't exist. Safe to re-run.
 ```bash
+# Run from backend directory
 node src/db/migrate.js
 ```
 
 ### Seed
-Clears all course data and inserts default users, category, course, sections, lessons, and quiz.
 ```bash
 node src/db/seed.js
 ```
@@ -585,9 +592,9 @@ Seed inserts:
 
 ## 13. Production Deployment
 
-### Backend — Render
-- Build command: `npm install`
-- Start command: `npm start`
+### Backend — Render / Railway
+- Build command: `npm run build`
+- Start command: `npm run start:prod`
 - Root directory: `lms-erp/backend`
 
 Required environment variables:
@@ -634,7 +641,7 @@ A certificate is automatically issued when:
 1. All lessons in the course are marked complete
 2. All quizzes in the course are passed (score ≥ passing_score)
 
-This is checked after every lesson completion and every quiz submission. The enrollment status updates to `completed` at the same time.
+This is checked after every lesson completion (`POST /progress/lesson/:lessonId/complete`) and every quiz submission (`POST /quizzes/:id/submit`). The enrollment status updates to `completed` at the same time.
 
 Certificate number format: `CERT-{timestamp}-{userId_first8chars}`
 
