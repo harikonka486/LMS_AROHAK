@@ -1,7 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -50,8 +49,15 @@ const LEVEL_COLORS: Record<string, string> = {
 function ArohakLogo({ size = 40, showText = true }: { size?: number; showText?: boolean }) {
   return (
     <div className="flex items-center gap-2.5">
-      <Image src="/arohak-logo.png" alt="Arohak" width={size} height={size}
-        className="object-contain" style={{ filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.2))' }} />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/arohak-logo.png"
+        alt="Arohak"
+        width={size}
+        height={size}
+        className="object-contain"
+        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+      />
       {showText && (
         <div>
           <p className="font-bold text-sm leading-none" style={{ color: A.red }}>AROHAK</p>
@@ -65,8 +71,16 @@ function ArohakLogo({ size = 40, showText = true }: { size?: number; showText?: 
 function ArohakLogoWhite({ size = 40 }: { size?: number }) {
   return (
     <div className="flex items-center gap-2.5">
-      <Image src="/arohak-logo.png" alt="Arohak" width={size} height={size}
-        className="object-contain brightness-0 invert" />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/arohak-logo.png"
+        alt="Arohak"
+        width={size}
+        height={size}
+        className="object-contain rounded-lg"
+        style={{ background: 'rgba(255,255,255,0.12)', padding: '4px' }}
+        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+      />
       <div>
         <p className="font-bold text-sm leading-none text-white">AROHAK</p>
         <p className="text-[10px] leading-none mt-0.5 uppercase tracking-wide text-white/60">LMS Portal</p>
@@ -275,8 +289,16 @@ export default function LoginPage() {
           <div className="relative z-10 max-w-3xl mx-auto">
             {/* Logo centered in hero */}
             <div className="flex justify-center mb-6">
-              <Image src="/arohak-logo.png" alt="Arohak" width={80} height={80}
-                className="object-contain brightness-0 invert opacity-90" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/arohak-logo.png"
+                alt="Arohak"
+                width={90}
+                height={90}
+                className="object-contain rounded-xl"
+                style={{ background: 'rgba(255,255,255,0.12)', padding: '8px' }}
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+              />
             </div>
             <span className="inline-block text-xs font-semibold px-4 py-1.5 rounded-full mb-5 uppercase tracking-widest"
               style={{ background: 'rgba(212,160,23,0.2)', color: A.amber, border: `1px solid ${A.gold}40` }}>
