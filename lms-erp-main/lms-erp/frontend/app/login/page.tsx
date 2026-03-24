@@ -427,7 +427,7 @@ export default function LoginPage() {
                   onClick={() => setShowAllCourses(prev => !prev)}
                   className="inline-flex items-center gap-2 px-8 py-3 rounded-xl text-white font-semibold text-sm transition-all hover:opacity-90"
                   style={{ background: BTN_BG }}>
-                  {showAllCourses ? 'Show Less' : `View All Courses (${allCourses.length})`}
+                  {showAllCourses ? 'Show Less' : 'View All Courses'}
                   <ArrowRight className={`w-4 h-4 transition-transform ${showAllCourses ? 'rotate-90' : ''}`} />
                 </button>
               </div>
