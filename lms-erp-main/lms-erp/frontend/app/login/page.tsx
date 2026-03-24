@@ -254,6 +254,11 @@ export default function LoginPage() {
 
             {/* Center nav tabs */}
             <nav className="hidden md:flex items-center gap-1">
+              <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="text-sm px-4 py-2 rounded-xl font-medium transition-all hover:bg-red-50"
+                style={{ color: A.red }}>
+                Home
+              </button>
               <button onClick={() => scrollTo('courses-section')}
                 className="text-sm px-4 py-2 rounded-xl font-medium transition-all hover:bg-red-50"
                 style={{ color: A.red }}>
