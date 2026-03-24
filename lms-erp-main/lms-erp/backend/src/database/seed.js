@@ -89,10 +89,11 @@ async function seed() {
   };
 
   // ── Course 1: MFT ────────────────────────────────────────────────────────
-  const courseMFT = uuid();
-  await db.query(`INSERT INTO courses (id,title,description,level,language,is_published,instructor_id,category_id,passing_score)
-    VALUES (?,'Managed File Transfer (MFT) Fundamentals','Master MFT protocols (SFTP, FTPS, AS2), encryption, scheduling, monitoring and compliance. Covers IBM Sterling, GoAnywhere and MOVEit.','beginner','English',1,?,?,70)
-    ON DUPLICATE KEY UPDATE instructor_id=VALUES(instructor_id),is_published=1`, [courseMFT, instructorId, catIds.mft]);
+  const courseMFT = await upsertCourse(db, {
+    title: 'Managed File Transfer (MFT) Fundamentals',
+    description: 'Master MFT protocols (SFTP, FTPS, AS2), encryption, scheduling, monitoring and compliance. Covers IBM Sterling, GoAnywhere and MOVEit.',
+    level: 'beginner', language: 'English', instructorId, categoryId: catIds.mft, passingScore: 70,
+  });
 
   await seedSectionsAndLessons(db, courseMFT, [
     { title: 'Introduction to MFT', lessons: [
@@ -121,10 +122,11 @@ async function seed() {
   console.log('✅ MFT course seeded');
 
   // ── Course 2: ServiceNow ─────────────────────────────────────────────────
-  const courseSN = uuid();
-  await db.query(`INSERT INTO courses (id,title,description,level,language,is_published,instructor_id,category_id,passing_score)
-    VALUES (?,'ServiceNow Platform Development','Comprehensive training on ServiceNow — ITSM, GlideRecord scripting, Flow Designer, REST integrations, custom apps and Service Portal.','intermediate','English',1,?,?,75)
-    ON DUPLICATE KEY UPDATE instructor_id=VALUES(instructor_id),is_published=1`, [courseSN, instructorId, catIds.sn]);
+  const courseSN = await upsertCourse(db, {
+    title: 'ServiceNow Platform Development',
+    description: 'Comprehensive training on ServiceNow — ITSM, GlideRecord scripting, Flow Designer, REST integrations, custom apps and Service Portal.',
+    level: 'intermediate', language: 'English', instructorId, categoryId: catIds.sn, passingScore: 75,
+  });
 
   await seedSectionsAndLessons(db, courseSN, [
     { title: 'ServiceNow Fundamentals', lessons: [
@@ -157,10 +159,11 @@ async function seed() {
   console.log('✅ ServiceNow course seeded');
 
   // ── Course 3: webMethods ─────────────────────────────────────────────────
-  const courseWM = uuid();
-  await db.query(`INSERT INTO courses (id,title,description,level,language,is_published,instructor_id,category_id,passing_score)
-    VALUES (?,'webMethods Integration Platform','End-to-end training on Software AG webMethods — Integration Server, Designer, API Gateway, Universal Messaging, B2B and microservices.','intermediate','English',1,?,?,75)
-    ON DUPLICATE KEY UPDATE instructor_id=VALUES(instructor_id),is_published=1`, [courseWM, instructorId, catIds.wm]);
+  const courseWM = await upsertCourse(db, {
+    title: 'webMethods Integration Platform',
+    description: 'End-to-end training on Software AG webMethods — Integration Server, Designer, API Gateway, Universal Messaging, B2B and microservices.',
+    level: 'intermediate', language: 'English', instructorId, categoryId: catIds.wm, passingScore: 75,
+  });
 
   await seedSectionsAndLessons(db, courseWM, [
     { title: 'Platform Overview', lessons: [
@@ -195,10 +198,11 @@ async function seed() {
   console.log('✅ webMethods course seeded');
 
   // ── Course 4: Python ─────────────────────────────────────────────────────
-  const coursePY = uuid();
-  await db.query(`INSERT INTO courses (id,title,description,level,language,is_published,instructor_id,category_id,passing_score)
-    VALUES (?,'Python Programming — From Beginner to Advanced','Complete Python training covering syntax, OOP, file handling, APIs, automation, data analysis with pandas/numpy, and web development with Flask.','beginner','English',1,?,?,70)
-    ON DUPLICATE KEY UPDATE instructor_id=VALUES(instructor_id),is_published=1`, [coursePY, instructorId, catIds.python]);
+  const coursePY = await upsertCourse(db, {
+    title: 'Python Programming — From Beginner to Advanced',
+    description: 'Complete Python training covering syntax, OOP, file handling, APIs, automation, data analysis with pandas/numpy, and web development with Flask.',
+    level: 'beginner', language: 'English', instructorId, categoryId: catIds.python, passingScore: 70,
+  });
 
   await seedSectionsAndLessons(db, coursePY, [
     { title: 'Python Basics', lessons: [
@@ -241,10 +245,11 @@ async function seed() {
   console.log('✅ Python course seeded');
 
   // ── Course 5: Full Stack Development ─────────────────────────────────────
-  const courseFS = uuid();
-  await db.query(`INSERT INTO courses (id,title,description,level,language,is_published,instructor_id,category_id,passing_score)
-    VALUES (?,'Full Stack Web Development','Build complete web applications using React (frontend), Node.js/Express (backend), REST APIs, MySQL, authentication with JWT, and deployment on cloud platforms.','intermediate','English',1,?,?,75)
-    ON DUPLICATE KEY UPDATE instructor_id=VALUES(instructor_id),is_published=1`, [courseFS, instructorId, catIds.fullstack]);
+  const courseFS = await upsertCourse(db, {
+    title: 'Full Stack Web Development',
+    description: 'Build complete web applications using React (frontend), Node.js/Express (backend), REST APIs, MySQL, authentication with JWT, and deployment on cloud platforms.',
+    level: 'intermediate', language: 'English', instructorId, categoryId: catIds.fullstack, passingScore: 75,
+  });
 
   await seedSectionsAndLessons(db, courseFS, [
     { title: 'HTML, CSS & JavaScript Fundamentals', lessons: [
@@ -289,10 +294,11 @@ async function seed() {
   console.log('✅ Full Stack Development course seeded');
 
   // ── Course 6: SAP UI5 & Fiori ─────────────────────────────────────────────
-  const courseSAPUI5 = uuid();
-  await db.query(`INSERT INTO courses (id,title,description,level,language,is_published,instructor_id,category_id,passing_score)
-    VALUES (?,'SAP UI5 & Fiori Development','Build enterprise-grade SAP Fiori apps using SAPUI5 framework — MVC architecture, OData binding, Fiori Elements, SAP BTP deployment and Fiori Launchpad configuration.','intermediate','English',1,?,?,75)
-    ON DUPLICATE KEY UPDATE instructor_id=VALUES(instructor_id),is_published=1`, [courseSAPUI5, instructorId, catIds.sapui5]);
+  const courseSAPUI5 = await upsertCourse(db, {
+    title: 'SAP UI5 & Fiori Development',
+    description: 'Build enterprise-grade SAP Fiori apps using SAPUI5 framework — MVC architecture, OData binding, Fiori Elements, SAP BTP deployment and Fiori Launchpad configuration.',
+    level: 'intermediate', language: 'English', instructorId, categoryId: catIds.sapui5, passingScore: 75,
+  });
 
   await seedSectionsAndLessons(db, courseSAPUI5, [
     { title: 'SAPUI5 Fundamentals', lessons: [
@@ -330,10 +336,11 @@ async function seed() {
   console.log('✅ SAP UI5 & Fiori course seeded');
 
   // ── Course 7: SAP Workflow ────────────────────────────────────────────────
-  const courseSAPWF = uuid();
-  await db.query(`INSERT INTO courses (id,title,description,level,language,is_published,instructor_id,category_id,passing_score)
-    VALUES (?,'SAP Workflow & Business Process Automation','Master SAP Business Workflow — workflow builder, tasks, agents, work items, event linkage, and SAP Business Process Automation (BPA) on SAP BTP.','intermediate','English',1,?,?,75)
-    ON DUPLICATE KEY UPDATE instructor_id=VALUES(instructor_id),is_published=1`, [courseSAPWF, instructorId, catIds.sapwf]);
+  const courseSAPWF = await upsertCourse(db, {
+    title: 'SAP Workflow & Business Process Automation',
+    description: 'Master SAP Business Workflow — workflow builder, tasks, agents, work items, event linkage, and SAP Business Process Automation (BPA) on SAP BTP.',
+    level: 'intermediate', language: 'English', instructorId, categoryId: catIds.sapwf, passingScore: 75,
+  });
 
   await seedSectionsAndLessons(db, courseSAPWF, [
     { title: 'SAP Workflow Fundamentals', lessons: [
@@ -369,10 +376,11 @@ async function seed() {
   console.log('✅ SAP Workflow course seeded');
 
   // ── Course 8: SAP CAP ─────────────────────────────────────────────────────
-  const courseSAPCAP = uuid();
-  await db.query(`INSERT INTO courses (id,title,description,level,language,is_published,instructor_id,category_id,passing_score)
-    VALUES (?,'SAP Cloud Application Programming Model (CAP)','Build cloud-native SAP applications using CAP — CDS data modeling, OData services, Node.js and Java runtimes, SAP HANA integration, and deployment on SAP BTP Cloud Foundry.','advanced','English',1,?,?,80)
-    ON DUPLICATE KEY UPDATE instructor_id=VALUES(instructor_id),is_published=1`, [courseSAPCAP, instructorId, catIds.sapcap]);
+  const courseSAPCAP = await upsertCourse(db, {
+    title: 'SAP Cloud Application Programming Model (CAP)',
+    description: 'Build cloud-native SAP applications using CAP — CDS data modeling, OData services, Node.js and Java runtimes, SAP HANA integration, and deployment on SAP BTP Cloud Foundry.',
+    level: 'advanced', language: 'English', instructorId, categoryId: catIds.sapcap, passingScore: 80,
+  });
 
   await seedSectionsAndLessons(db, courseSAPCAP, [
     { title: 'CAP Fundamentals', lessons: [
@@ -421,35 +429,74 @@ async function seed() {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
+/**
+ * Insert course only if title doesn't exist yet. Returns the course id.
+ * Safe to re-run — won't create duplicates.
+ */
+async function upsertCourse(db, { title, description, level, language, instructorId, categoryId, passingScore }) {
+  const [[existing]] = await db.query('SELECT id FROM courses WHERE title=?', [title]);
+  if (existing) {
+    // Ensure it's published and has correct instructor
+    await db.query('UPDATE courses SET is_published=1, instructor_id=? WHERE id=?', [instructorId, existing.id]);
+    console.log(`  ↩ Course already exists, updated: ${title}`);
+    return existing.id;
+  }
+  const id = uuid();
+  await db.query(
+    'INSERT INTO courses (id,title,description,level,language,is_published,instructor_id,category_id,passing_score) VALUES (?,?,?,?,?,1,?,?,?)',
+    [id, title, description, level, language, instructorId, categoryId, passingScore]
+  );
+  return id;
+}
+
 async function seedSectionsAndLessons(db, courseId, sections) {
   for (let si = 0; si < sections.length; si++) {
-    const sectionId = uuid();
-    await db.query(
-      'INSERT IGNORE INTO sections (id, title, order_num, course_id) VALUES (?,?,?,?)',
-      [sectionId, sections[si].title, si + 1, courseId]
-    );
-    for (let li = 0; li < sections[si].lessons.length; li++) {
-      const lesson = sections[si].lessons[li];
+    const sec = sections[si];
+    let [[existing]] = await db.query('SELECT id FROM sections WHERE course_id=? AND title=?', [courseId, sec.title]);
+    let sectionId;
+    if (existing) {
+      sectionId = existing.id;
+    } else {
+      sectionId = uuid();
       await db.query(
-        'INSERT IGNORE INTO lessons (id, title, video_url, duration, order_num, is_free, section_id) VALUES (?,?,?,?,?,?,?)',
-        [uuid(), lesson.title, lesson.url, lesson.duration, li + 1, li === 0 ? 1 : 0, sectionId]
+        'INSERT INTO sections (id, title, order_num, course_id) VALUES (?,?,?,?)',
+        [sectionId, sec.title, si + 1, courseId]
       );
+    }
+    for (let li = 0; li < sec.lessons.length; li++) {
+      const lesson = sec.lessons[li];
+      const [[existingLesson]] = await db.query('SELECT id FROM lessons WHERE section_id=? AND title=?', [sectionId, lesson.title]);
+      if (!existingLesson) {
+        await db.query(
+          'INSERT INTO lessons (id, title, video_url, duration, order_num, is_free, section_id) VALUES (?,?,?,?,?,?,?)',
+          [uuid(), lesson.title, lesson.url, lesson.duration, li + 1, li === 0 ? 1 : 0, sectionId]
+        );
+      }
     }
   }
 }
 
 async function seedQuiz(db, courseId, title, passingScore, questions) {
-  const quizId = uuid();
-  await db.query(
-    'INSERT IGNORE INTO quizzes (id, course_id, title, passing_score, order_num) VALUES (?,?,?,?,1)',
-    [quizId, courseId, title, passingScore]
-  );
+  let [[existing]] = await db.query('SELECT id FROM quizzes WHERE course_id=? AND title=?', [courseId, title]);
+  let quizId;
+  if (existing) {
+    quizId = existing.id;
+  } else {
+    quizId = uuid();
+    await db.query(
+      'INSERT INTO quizzes (id, course_id, title, passing_score, order_num) VALUES (?,?,?,?,1)',
+      [quizId, courseId, title, passingScore]
+    );
+  }
   for (let i = 0; i < questions.length; i++) {
     const q = questions[i];
-    await db.query(
-      'INSERT IGNORE INTO questions (id, quiz_id, text, options, correct_answer, explanation) VALUES (?,?,?,?,?,?)',
-      [uuid(), quizId, q.text, JSON.stringify(q.options), q.correct, q.explanation]
-    );
+    const [[existingQ]] = await db.query('SELECT id FROM questions WHERE quiz_id=? AND text=?', [quizId, q.text]);
+    if (!existingQ) {
+      await db.query(
+        'INSERT INTO questions (id, quiz_id, text, options, correct_answer, explanation) VALUES (?,?,?,?,?,?)',
+        [uuid(), quizId, q.text, JSON.stringify(q.options), q.correct, q.explanation]
+      );
+    }
   }
 }
 
