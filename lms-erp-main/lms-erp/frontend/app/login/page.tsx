@@ -435,74 +435,88 @@ export default function LoginPage() {
         {/* ── About Section ── */}
         <section id="about-section" className="py-16 px-6 bg-white border-t" style={{ borderColor: '#f0d9c8' }}>
           <div className="max-w-5xl mx-auto">
+
+            {/* Heading */}
             <div className="text-center mb-12">
               <h2 className="text-2xl font-bold mb-2" style={{ color: A.red }}>About Arohak</h2>
               <p className="text-gray-500 text-sm max-w-xl mx-auto">
-                Empowering professionals with world-class training and development solutions.
+                A dedicated team to grow your company — delivering innovative IT solutions since 2016.
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
-              {/* Left — text */}
-              <div className="space-y-5">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center mt-0.5" style={{ background: BTN_BG }}>
-                    <GraduationCap className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Our Mission</h3>
-                    <p className="text-sm text-gray-500 leading-relaxed">
-                      To build a culture of continuous learning by providing employees with the tools, courses, and certifications they need to grow professionally.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center mt-0.5" style={{ background: BTN_BG }}>
-                    <Award className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Certified Excellence</h3>
-                    <p className="text-sm text-gray-500 leading-relaxed">
-                      Every course completion is recognized with a verified certificate, validating your skills and dedication to professional growth.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center mt-0.5" style={{ background: BTN_BG }}>
-                    <Users className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Built for Teams</h3>
-                    <p className="text-sm text-gray-500 leading-relaxed">
-                      Designed for Arohak employees across all departments — from IT and Finance to Operations and HR — with role-based learning paths.
-                    </p>
-                  </div>
-                </div>
-              </div>
 
-              {/* Right — stats cards */}
-              <div className="grid grid-cols-2 gap-4">
+            {/* Stats row */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-14">
+              {[
+                { value: '231',     label: 'Valued Partnerships',   desc: 'Harnessing deep vertical solutions expertise to enhance workflow efficiency and surge productivity.' },
+                { value: '340',     label: 'Global Specialists',    desc: 'Our global team propels premier organizations ahead of the competition with forward-thinking strategies.' },
+                { value: '$20M',    label: 'Revenue Achievement',   desc: 'Achieved over the past three years, revolutionizing businesses with state-of-the-art data centers and security.' },
+              ].map(({ value, label, desc }) => (
+                <div key={label} className="rounded-2xl p-6 border text-center"
+                  style={{ borderColor: '#f0d9c8', background: A.cream }}>
+                  <p className="text-4xl font-extrabold mb-1" style={{ color: A.red }}>{value}</p>
+                  <p className="text-sm font-semibold text-gray-800 mb-2">{label}</p>
+                  <p className="text-xs text-gray-400 leading-relaxed">{desc}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Who We Are */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start mb-14">
+              <div>
+                <h3 className="text-lg font-bold mb-3" style={{ color: A.red }}>Who We Are</h3>
+                <p className="text-sm text-gray-600 leading-relaxed mb-3">
+                  Arohak was born from a simple yet profound belief — that we could make a meaningful impact on the lives of others. Since our inception in 2016, we have been on a relentless journey to turn aspirations into achievements. Today, we proudly stand as a trusted ally, dedicated to delivering innovative solutions that drive success.
+                </p>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  Our team members aren't just employees; they are cherished contributors and an integral part of our extended family. We cultivate an environment that nurtures positivity, fosters productivity, and encourages collaboration. Arohak is committed to diversity and gender equality, proudly championing female talent within our workforce. Our expertise spans Software Development, UX/UI, Cloud Solutions, IoT, Mobile App Development and Wearables for the enterprise.
+                </p>
+              </div>
+              <div className="space-y-5">
                 {[
-                  { value: '10+',  label: 'Expert Courses',     sub: 'Across multiple domains' },
-                  { value: '300+', label: 'Active Learners',    sub: 'Arohak employees' },
-                  { value: '100+', label: 'Certificates Issued',sub: 'And growing' },
-                  { value: '95%',  label: 'Completion Rate',    sub: 'Industry leading' },
-                ].map(({ value, label, sub }) => (
-                  <div key={label} className="rounded-2xl p-5 border text-center"
-                    style={{ borderColor: '#f0d9c8', background: A.cream }}>
-                    <p className="text-3xl font-extrabold mb-1" style={{ color: A.red }}>{value}</p>
-                    <p className="text-sm font-semibold text-gray-800">{label}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">{sub}</p>
+                  { icon: GraduationCap, title: 'Our Mission', text: 'To unlock the potential of businesses through state-of-the-art IT solutions. We prioritize a partnership approach, focusing on clients\' unique needs to deliver impactful outcomes and build lasting relationships.' },
+                  { icon: BarChart3,     title: 'Our Vision',  text: 'To emerge as a global beacon in transformative IT solutions. We imagine a world where every business can tap into the vast potential of technology to set new benchmarks in innovation.' },
+                  { icon: Award,         title: 'The Goal',    text: 'To instill a culture of ethical excellence and compliance. We empower team members to make informed decisions grounded in honesty and integrity, with robust controls ensuring strict adherence to regulations.' },
+                ].map(({ icon: Icon, title, text }) => (
+                  <div key={title} className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center mt-0.5" style={{ background: BTN_BG }}>
+                      <Icon className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-1">{title}</h4>
+                      <p className="text-sm text-gray-500 leading-relaxed">{text}</p>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Tagline banner */}
-            <div className="mt-12 rounded-2xl px-8 py-6 text-center" style={{ background: HERO_BG }}>
-              <p className="text-white font-bold text-lg mb-1">Attitude Determines Altitude</p>
-              <p className="text-white/60 text-sm">Join Arohak's learning community and take your career to the next level.</p>
+            {/* Recognitions */}
+            <div className="mb-12">
+              <h3 className="text-lg font-bold mb-6 text-center" style={{ color: A.red }}>Our Recognitions &amp; Affiliations</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {[
+                  { name: 'Inc. 5000',          desc: 'Recognized among America\'s fastest-growing private companies — an enduring symbol of entrepreneurial achievement.' },
+                  { name: 'Dun & Bradstreet',   desc: 'D&B identification reflecting our commitment to transparency, reliability, and financial trustworthiness.' },
+                  { name: 'WBENC Certified',     desc: 'Women\'s Business Enterprise National Council certification — the most respected national certification for women-owned businesses.' },
+                  { name: 'USPAACC',             desc: 'Asian American/Minority-Owned Business Certification, fostering supplier diversity and small business programs.' },
+                  { name: 'SBA WOSB Program',    desc: 'Women-Owned Small Business Federal Contract program participant, promoting equal opportunities for women business owners.' },
+                  { name: 'SBE Certified',       desc: 'Small Business Enterprise certification — a testament to our commitment to diversity and inclusion at the company level.' },
+                ].map(({ name, desc }) => (
+                  <div key={name} className="rounded-xl p-4 border"
+                    style={{ borderColor: '#f0d9c8', background: A.cream }}>
+                    <p className="text-xs font-bold mb-1.5" style={{ color: A.red }}>{name}</p>
+                    <p className="text-xs text-gray-500 leading-relaxed">{desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* CTA banner */}
+            <div className="rounded-2xl px-8 py-6 text-center" style={{ background: HERO_BG }}>
+              <p className="text-white font-bold text-lg mb-1">Ready to embark on a journey of growth and success?</p>
+              <p className="text-white/60 text-sm mb-4">Reach out to us today, and let's create a brighter future together.</p>
               <button onClick={() => setShowLogin(true)}
-                className="mt-4 inline-flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-sm transition-all hover:opacity-90"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-sm transition-all hover:opacity-90"
                 style={{ background: GOLD_BG, color: A.dark }}>
                 Get Started <ArrowRight className="w-4 h-4" />
               </button>
