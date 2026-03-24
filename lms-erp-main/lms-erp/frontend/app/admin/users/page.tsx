@@ -113,7 +113,8 @@ export default function AdminUsersPage() {
         </div>
 
         {/* Filters */}
-        <div className="card p-4 mb-6 flex flex-col sm:flex-row gap-3">
+        <div className="card p-4 mb-6 flex flex-col sm:flex-row gap-3"
+          style={{ background: '#FFF8F0', borderColor: '#f0d9c8' }}>
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input type="text" placeholder="Search by name, email or employee ID..."
@@ -136,7 +137,7 @@ export default function AdminUsersPage() {
             </div>
           ) : (
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead style={{ background: '#FDF3E7', borderBottom: '1px solid #f0d9c8' }}>
                 <tr>
                   <th className="text-left px-5 py-3 font-medium text-gray-600">User</th>
                   <th className="text-left px-5 py-3 font-medium text-gray-600">Employee ID</th>
@@ -148,17 +149,18 @@ export default function AdminUsersPage() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {filtered.map((u: any) => (
-                  <tr key={u.id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={u.id} className="transition-colors" style={{}} onMouseEnter={e => (e.currentTarget.style.background = '#FFF8F0')} onMouseLeave={e => (e.currentTarget.style.background = '')}>
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 text-white"
+                          style={{ background: 'linear-gradient(135deg, #8B1A1A, #C0392B)' }}>
                           {u.name?.[0]?.toUpperCase()}
                         </div>
                         <div>
-                          {/* Clickable name */}
                           <button
                             onClick={() => setSelectedUser(u)}
-                            className="font-medium text-brand-600 hover:text-brand-800 hover:underline text-left"
+                            className="font-medium hover:underline text-left"
+                            style={{ color: '#8B1A1A' }}
                           >
                             {u.name}
                           </button>
@@ -187,7 +189,9 @@ export default function AdminUsersPage() {
                         {u.id !== user?.id && (
                           <>
                             <button onClick={() => { setEditingId(u.id); setEditRole(u.role) }}
-                              className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded transition-colors" title="Edit role">
+                              className="p-1.5 text-gray-400 rounded transition-colors" title="Edit role"
+                              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = '#8B1A1A'; (e.currentTarget as HTMLButtonElement).style.background = '#FFF8F0' }}
+                              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = ''; (e.currentTarget as HTMLButtonElement).style.background = '' }}>
                               <Edit2 className="w-4 h-4" />
                             </button>
                             <button onClick={() => setConfirmDelete(u)}
@@ -231,7 +235,8 @@ export default function AdminUsersPage() {
                     const a = document.createElement('a'); a.href = url; a.download = 'employees_sample.csv'; a.click()
                     URL.revokeObjectURL(url)
                   }}
-                  className="text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1 text-xs"
+                  className="font-medium hover:underline flex items-center gap-1 text-xs"
+                  style={{ color: '#8B1A1A' }}
                 >
                   <Upload className="w-3.5 h-3.5 rotate-180" /> Download Sample
                 </button>
@@ -245,12 +250,12 @@ export default function AdminUsersPage() {
             {!importResult && (
               <label className={cn(
                 'flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-8 cursor-pointer transition-colors',
-                importing ? 'border-brand-300 bg-brand-50' : 'border-gray-200 hover:border-brand-400 hover:bg-brand-50'
+                importing ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-red-400 hover:bg-red-50'
               )}>
                 {importing ? (
                   <div className="flex flex-col items-center gap-3">
-                    <div className="w-8 h-8 border-3 border-brand-600 border-t-transparent rounded-full animate-spin" />
-                    <p className="text-sm text-brand-600 font-medium">Importing users...</p>
+                    <div className="w-8 h-8 border-3 border-red-700 border-t-transparent rounded-full animate-spin" />
+                    <p className="text-sm font-medium" style={{ color: '#8B1A1A' }}>Importing users...</p>
                   </div>
                 ) : (
                   <>
