@@ -20,6 +20,8 @@ export class AuthService {
 
   async register(body: any) {
     const { name, email, password, role, department, employee_id } = body;
+    if (!email?.endsWith('@arohak.com'))
+      throw new BadRequestException('Only @arohak.com email addresses are allowed');
 
     const [exists] = await this.db.query('SELECT id FROM users WHERE email=?', [email]) as any;
     if (exists.length) throw new BadRequestException('Email already in use');
@@ -43,6 +45,8 @@ export class AuthService {
 
   async login(body: any) {
     const { email, password } = body;
+    if (!email?.endsWith('@arohak.com'))
+      throw new BadRequestException('Only @arohak.com email addresses are allowed');
 
     const [[user]] = await this.db.query('SELECT * FROM users WHERE email=?', [email]) as any;
     if (!user || !(await bcrypt.compare(password, user.password)))

@@ -66,6 +66,8 @@ let AuthService = class AuthService {
     }
     async register(body) {
         const { name, email, password, role, department, employee_id } = body;
+        if (!email?.endsWith('@arohak.com'))
+            throw new common_1.BadRequestException('Only @arohak.com email addresses are allowed');
         const [exists] = await this.db.query('SELECT id FROM users WHERE email=?', [email]);
         if (exists.length)
             throw new common_1.BadRequestException('Email already in use');
@@ -79,6 +81,8 @@ let AuthService = class AuthService {
     }
     async login(body) {
         const { email, password } = body;
+        if (!email?.endsWith('@arohak.com'))
+            throw new common_1.BadRequestException('Only @arohak.com email addresses are allowed');
         const [[user]] = await this.db.query('SELECT * FROM users WHERE email=?', [email]);
         if (!user || !(await bcrypt.compare(password, user.password)))
             throw new common_1.UnauthorizedException('Invalid credentials');

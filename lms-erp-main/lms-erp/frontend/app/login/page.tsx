@@ -17,7 +17,9 @@ import { useAuthStore } from '@/lib/store'
 import { cn } from '@/lib/utils'
 
 const schema = z.object({
-  email: z.string().email(),
+  email: z.string().email().refine(e => e.endsWith('@arohak.com'), {
+    message: 'Only @arohak.com email addresses are allowed',
+  }),
   password: z.string().min(1),
 })
 type F = z.infer<typeof schema>
@@ -117,7 +119,7 @@ function LoginModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (u
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Email Address</label>
-              <input {...register('email')} type="email" className="input" placeholder="you@example.com" />
+              <input {...register('email')} type="email" className="input" placeholder="you@arohak.com" />
               {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
             </div>
             <div>
