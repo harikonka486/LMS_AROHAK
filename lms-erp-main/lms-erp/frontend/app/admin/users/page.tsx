@@ -360,7 +360,7 @@ function UserDetailPanel({ user, onClose }: { user: any; onClose: () => void }) 
       <div className="fixed right-0 top-0 h-full w-full max-w-md bg-white z-50 shadow-2xl flex flex-col overflow-hidden">
         {/* Header */}
         <div className="p-6 border-b border-gray-100 flex items-start justify-between"
-          style={{ background: 'linear-gradient(135deg, #1e1b4b, #3730a3)' }}>
+          style={{ background: 'linear-gradient(135deg, #3d0a0a, #8B1A1A)' }}>
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-white text-lg font-bold">
               {user.name?.[0]?.toUpperCase()}

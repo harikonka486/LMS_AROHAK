@@ -102,11 +102,11 @@ export default function CoursesPage() {
               <div key={course.id} className="course-card flex flex-col">
                 {/* Thumbnail */}
                 <div className="h-40 relative overflow-hidden flex-shrink-0"
-                  style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #3730a3 55%, #4f46e5 100%)' }}>
+                  style={{ background: 'linear-gradient(135deg, #3d0a0a 0%, #8B1A1A 55%, #C0392B 100%)' }}>
                   <div className="absolute inset-0 flex items-center justify-center">
                     <BookOpen className="w-16 h-16 text-white/20" />
                   </div>
-                  <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 70% 30%, rgba(139,92,246,0.3) 0%, transparent 60%)' }} />
+                  <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 70% 30%, rgba(212,160,23,0.25) 0%, transparent 60%)' }} />
                   {/* Level badge */}
                   <div className="absolute top-3 left-3">
                     <span className={cn('text-[10px] font-bold text-white px-2.5 py-1 rounded-full uppercase tracking-wide', LEVEL_COLORS[course.level] ?? 'bg-gray-500')}>

@@ -18,8 +18,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   // While hydrating, show a spinner — never redirect prematurely
   if (!mounted) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#f0f2f5' }}>
-        <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#FFF8F0' }}>
+        <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#8B1A1A', borderTopColor: 'transparent' }} />
       </div>
     )
   }
@@ -27,7 +27,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   if (!user) return null
 
   return (
-    <div className="min-h-screen" style={{ background: '#f0f2f5' }}>
+    <div className="min-h-screen" style={{ background: '#FDF3E7' }}>
       <Navbar />
       <main className="pt-20 pb-12 px-4 sm:px-6 max-w-screen-xl mx-auto w-full">
         {children}

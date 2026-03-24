@@ -51,14 +51,14 @@ export default function DashboardPage() {
 
         {/* Hero welcome banner */}
         <div className="relative overflow-hidden rounded-2xl px-8 py-7"
-          style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #3730a3 55%, #4f46e5 100%)' }}>
+          style={{ background: 'linear-gradient(135deg, #3d0a0a 0%, #8B1A1A 55%, #C0392B 100%)' }}>
           <div className="relative z-10">
-            <p className="text-indigo-300 text-sm font-medium mb-1">{greeting()},</p>
+            <p className="text-red-200 text-sm font-medium mb-1">{greeting()},</p>
             <h1 className="text-2xl font-bold text-white mb-1">{user?.name}</h1>
             <div className="flex items-center gap-2 flex-wrap">
-              {user?.department && <span className="text-indigo-300 text-sm">{user.department}</span>}
-              {user?.department && user?.employee_id && <span className="text-indigo-500 text-sm">·</span>}
-              {user?.employee_id && <span className="text-indigo-300 text-sm">{user.employee_id}</span>}
+              {user?.department && <span className="text-red-200 text-sm">{user.department}</span>}
+              {user?.department && user?.employee_id && <span className="text-red-400 text-sm">·</span>}
+              {user?.employee_id && <span className="text-red-200 text-sm">{user.employee_id}</span>}
               <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-white/15 text-white/90 ml-1">
                 {ROLE_LABELS[user?.role ?? 'employee']}
               </span>
@@ -195,7 +195,7 @@ export default function DashboardPage() {
                 <div key={c.id} className="card p-4 flex items-center justify-between gap-4 hover:shadow-md transition-shadow">
                   <div className="flex items-center gap-4 flex-1 min-w-0">
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                      style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}>
+                      style={{ background: 'linear-gradient(135deg, #8B1A1A, #C0392B)' }}>
                       <BookOpen className="w-5 h-5 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -235,10 +235,10 @@ function StatCard({ icon: Icon, label, value, color, trend }: {
   icon: any; label: string; value: number; color: string; trend?: string
 }) {
   const styles: Record<string, { bg: string; icon: string; bar: string }> = {
-    indigo:  { bg: 'bg-indigo-50',  icon: 'text-indigo-600',  bar: 'bg-indigo-500' },
+    indigo:  { bg: 'bg-red-50',     icon: 'text-red-700',     bar: 'bg-red-600' },
     emerald: { bg: 'bg-emerald-50', icon: 'text-emerald-600', bar: 'bg-emerald-500' },
     amber:   { bg: 'bg-amber-50',   icon: 'text-amber-600',   bar: 'bg-amber-500' },
-    purple:  { bg: 'bg-purple-50',  icon: 'text-purple-600',  bar: 'bg-purple-500' },
+    purple:  { bg: 'bg-orange-50',  icon: 'text-orange-600',  bar: 'bg-orange-500' },
   }
   const s = styles[color] ?? styles.indigo
   return (
