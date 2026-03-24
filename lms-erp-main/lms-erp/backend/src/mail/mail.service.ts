@@ -1,9 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 
 @Injectable()
-export class MailService {
+export class MailService implements OnModuleInit {
   private readonly logger = new Logger(MailService.name);
   private transporter: nodemailer.Transporter;
 
@@ -19,8 +19,30 @@ export class MailService {
     });
   }
 
+  async onModuleInit() {
+    const user = this.config.get('MAIL_USER');
+    const pass = this.config.get('MAIL_PASS');
+    if (!user || user === 'your-email@gmail.com' || !pass || pass === 'your-app-password') {
+      this.logger.warn('⚠️  MAIL_USER / MAIL_PASS not configured in .env — emails will NOT be sent');
+      return;
+    }
+    try {
+      await this.transporter.verify();
+      this.logger.log(`✅ Mail transporter ready — sending from ${user}`);
+    } catch (err) {
+      this.logger.error(`❌ Mail transporter failed: ${err.message}`);
+      this.logger.error('Check MAIL_USER, MAIL_PASS in .env. For Gmail use an App Password (not your login password).');
+    }
+  }
+
   async sendWelcome(to: string, name: string): Promise<void> {
-    const from = this.config.get('MAIL_FROM', `LMS Platform <${this.config.get('MAIL_USER')}>`);
+    const user = this.config.get('MAIL_USER');
+    const pass = this.config.get('MAIL_PASS');
+    if (!user || user === 'your-email@gmail.com' || !pass || pass === 'your-app-password') {
+      this.logger.warn(`Skipping welcome email to ${to} — SMTP not configured`);
+      return;
+    }
+    const from = this.config.get('MAIL_FROM', `LMS Platform <${user}>`);
     const loginUrl = `${this.config.get('FRONTEND_URL', 'http://localhost:3000')}/login`;
     try {
       await this.transporter.sendMail({
