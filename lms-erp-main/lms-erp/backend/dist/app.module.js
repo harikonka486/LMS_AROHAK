@@ -21,6 +21,7 @@ const progress_module_1 = require("./progress/progress.module");
 const quizzes_module_1 = require("./quizzes/quizzes.module");
 const certificates_module_1 = require("./certificates/certificates.module");
 const health_module_1 = require("./health/health.module");
+const mail_module_1 = require("./mail/mail.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -40,6 +41,7 @@ exports.AppModule = AppModule = __decorate([
             quizzes_module_1.QuizzesModule,
             certificates_module_1.CertificatesModule,
             health_module_1.HealthModule,
+            mail_module_1.MailModule,
         ],
     })
 ], AppModule);

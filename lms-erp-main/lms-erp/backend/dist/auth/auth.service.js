@@ -51,20 +51,21 @@ const jwt_1 = require("@nestjs/jwt");
 const bcrypt = __importStar(require("bcryptjs"));
 const uuid_1 = require("uuid");
 const database_module_1 = require("../database/database.module");
+const mail_service_1 = require("../mail/mail.service");
 let AuthService = class AuthService {
     db;
     jwt;
-    constructor(db, jwt) {
+    mail;
+    constructor(db, jwt, mail) {
         this.db = db;
         this.jwt = jwt;
+        this.mail = mail;
     }
     sign(id) {
         return this.jwt.sign({ id });
     }
     async register(body) {
         const { name, email, password, role, department, employee_id } = body;
-        if (!email?.endsWith('@arohak.com'))
-            throw new common_1.BadRequestException('Only @arohak.com email addresses are allowed');
         const [exists] = await this.db.query('SELECT id FROM users WHERE email=?', [email]);
         if (exists.length)
             throw new common_1.BadRequestException('Email already in use');
@@ -73,12 +74,11 @@ let AuthService = class AuthService {
         const userRole = role === 'admin' ? 'admin' : 'employee';
         await this.db.query('INSERT INTO users (id,name,email,password,role,department,employee_id) VALUES (?,?,?,?,?,?,?)', [id, name, email, hashed, userRole, department || null, employee_id || null]);
         const [[user]] = await this.db.query('SELECT id,name,email,role,avatar,department,employee_id,created_at FROM users WHERE id=?', [id]);
+        this.mail.sendWelcome(email, name);
         return { token: this.sign(id), user };
     }
     async login(body) {
         const { email, password } = body;
-        if (!email?.endsWith('@arohak.com'))
-            throw new common_1.BadRequestException('Only @arohak.com email addresses are allowed');
         const [[user]] = await this.db.query('SELECT * FROM users WHERE email=?', [email]);
         if (!user || !(await bcrypt.compare(password, user.password)))
             throw new common_1.UnauthorizedException('Invalid credentials');
@@ -90,6 +90,7 @@ exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, common_1.Inject)(database_module_1.DB_POOL)),
-    __metadata("design:paramtypes", [Object, jwt_1.JwtService])
+    __metadata("design:paramtypes", [Object, jwt_1.JwtService,
+        mail_service_1.MailService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

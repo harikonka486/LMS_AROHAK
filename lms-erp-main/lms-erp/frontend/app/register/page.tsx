@@ -11,9 +11,7 @@ import api from '@/lib/api'
 
 const schema = z.object({
   name: z.string().min(2),
-  email: z.string().email().refine(e => e.endsWith('@arohak.com'), {
-    message: 'Only @arohak.com email addresses are allowed',
-  }),
+  email: z.string().email(),
   password: z.string().min(6),
   department: z.string().optional(),
   employee_id: z.string().optional(),
@@ -109,7 +107,7 @@ export default function RegisterPage() {
               </div>
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                <input {...register('email')} type="email" className="input" placeholder="you@arohak.com" />
+                <input {...register('email')} type="email" className="input" placeholder="you@example.com" />
                 {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
               </div>
               <div className="col-span-2">
