@@ -10,8 +10,9 @@ export const DB_POOL = 'DB_POOL';
     {
       provide: DB_POOL,
       inject: [ConfigService],
-      useFactory: (config: ConfigService) =>
-        mysql.createPool({
+      useFactory: (config: ConfigService) => {
+        const sslEnabled = config.get('DB_SSL', 'false') === 'true';
+        return mysql.createPool({
           host: config.get('DB_HOST', 'localhost'),
           port: config.get<number>('DB_PORT', 3306),
           user: config.get('DB_USER', 'root'),
@@ -20,7 +21,9 @@ export const DB_POOL = 'DB_POOL';
           waitForConnections: true,
           connectionLimit: 10,
           timezone: '+00:00',
-        }),
+          ...(sslEnabled && { ssl: { rejectUnauthorized: false } }),
+        });
+      },
     },
   ],
   exports: [DB_POOL],

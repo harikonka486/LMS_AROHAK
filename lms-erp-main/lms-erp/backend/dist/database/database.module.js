@@ -54,16 +54,20 @@ exports.DatabaseModule = DatabaseModule = __decorate([
             {
                 provide: exports.DB_POOL,
                 inject: [config_1.ConfigService],
-                useFactory: (config) => mysql.createPool({
-                    host: config.get('DB_HOST', 'localhost'),
-                    port: config.get('DB_PORT', 3306),
-                    user: config.get('DB_USER', 'root'),
-                    password: config.get('DB_PASSWORD', ''),
-                    database: config.get('DB_NAME', 'lms_erp'),
-                    waitForConnections: true,
-                    connectionLimit: 10,
-                    timezone: '+00:00',
-                }),
+                useFactory: (config) => {
+                    const sslEnabled = config.get('DB_SSL', 'false') === 'true';
+                    return mysql.createPool({
+                        host: config.get('DB_HOST', 'localhost'),
+                        port: config.get('DB_PORT', 3306),
+                        user: config.get('DB_USER', 'root'),
+                        password: config.get('DB_PASSWORD', ''),
+                        database: config.get('DB_NAME', 'lms_erp'),
+                        waitForConnections: true,
+                        connectionLimit: 10,
+                        timezone: '+00:00',
+                        ...(sslEnabled && { ssl: { rejectUnauthorized: false } }),
+                    });
+                },
             },
         ],
         exports: [exports.DB_POOL],

@@ -17,6 +17,7 @@ async function seed() {
     password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME     || 'lms_erp',
     multipleStatements: true,
+    ...(process.env.DB_SSL === 'true' && { ssl: { rejectUnauthorized: false } }),
   });
 
   console.log('Connected to DB. Seeding...\n');
