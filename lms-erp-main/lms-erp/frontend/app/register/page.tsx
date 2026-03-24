@@ -1,7 +1,6 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -89,13 +88,14 @@ export default function RegisterPage() {
       <div className="min-h-screen flex items-center justify-center p-4" style={{ background: A.cream }}>
         <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 border" style={{ borderColor: '#f0d9c8' }}>
 
-          {/* Logo header */}
           <div className="text-center mb-8">
             <div className="flex justify-center mb-3">
-              <Image src="/arohak-logo.png" alt="Arohak" width={56} height={56} className="object-contain" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/arohak-logo.png" alt="Arohak"
+                className="object-contain"
+                style={{ height: '48px', width: 'auto' }} />
             </div>
-            <h1 className="text-2xl font-bold" style={{ color: A.red }}>Create Account</h1>
-            <p className="text-gray-500 text-sm mt-1">Join the Arohak LMS training portal</p>
+            <p className="text-gray-500 text-sm mt-2">Join the Arohak LMS training portal</p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
