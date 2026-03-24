@@ -1,4 +1,4 @@
-# LMS — Full Project Documentation
+# Arohak LMS — Full Project Documentation
 
 ## Table of Contents
 
@@ -12,27 +12,31 @@
 8. [Authentication & Authorization](#8-authentication--authorization)
 9. [State Management](#9-state-management)
 10. [File Uploads](#10-file-uploads)
-11. [Running Locally](#11-running-locally)
-12. [Database Migrations & Seeding](#12-database-migrations--seeding)
-13. [Production Deployment](#13-production-deployment)
-14. [Default Credentials](#14-default-credentials)
-15. [Certificate Auto-Issuance Logic](#15-certificate-auto-issuance-logic)
+11. [Email Notifications](#11-email-notifications)
+12. [Running Locally](#12-running-locally)
+13. [Database Migrations & Seeding](#13-database-migrations--seeding)
+14. [Production Deployment](#14-production-deployment)
+15. [Default Credentials](#15-default-credentials)
+16. [Certificate Auto-Issuance Logic](#16-certificate-auto-issuance-logic)
+17. [Brand & Design System](#17-brand--design-system)
 
 ---
 
 ## 1. Project Overview
 
-LMS is a full-stack Learning Management System built for corporate employee training. Admins create and publish courses with video lessons, quizzes, and documents. Employees enroll, track progress, take quizzes, and earn certificates upon completion.
+**Arohak LMS** is a full-stack Learning Management System built for corporate employee training at Arohak Technologies. Admins create and publish courses with video lessons, quizzes, and documents. Employees enroll, track progress, take quizzes, and earn certificates upon completion.
 
 Key capabilities:
 - Role-based access: `admin` and `employee`
-- Course management with sections, lessons, documents, and quizzes
+- Email domain restriction: only `@arohak.com` and `@cognivance.com` addresses allowed
+- Course management with sections, lessons, video URLs, and quizzes
 - Lesson progress tracking with automatic enrollment status sync
 - Quiz submission with auto-grading and pass/fail logic
 - Certificate auto-issuance when all lessons and quizzes are completed
 - Public certificate verification by certificate number
-- Bulk user import via CSV
 - Admin dashboard with platform-wide stats
+- Welcome email sent on registration (Nodemailer + Gmail SMTP)
+- Animated background UI with Arohak brand colors across all pages
 
 ---
 
@@ -65,7 +69,7 @@ Key capabilities:
 | passport-jwt | 4.x | JWT strategy |
 | bcryptjs | 3.x | Password hashing |
 | multer | 2.x | File upload handling |
-| csv-parse | 6.x | CSV bulk user import |
+| nodemailer | 8.x | Email sending (welcome mail) |
 | uuid | 13.x | UUID generation |
 | class-validator | 0.15.x | DTO validation |
 | class-transformer | 0.5.x | Request transformation |
@@ -76,7 +80,7 @@ Key capabilities:
 | MySQL 8.0 | Primary database |
 | NestJS | Backend API (port 4000) |
 | Next.js | Frontend (port 3000) |
-| Cloudinary | Media file storage (production) |
+| Gmail SMTP | Transactional email (welcome mail) |
 
 ---
 
@@ -89,60 +93,69 @@ lms-erp/
 │   │   ├── main.ts                   # Bootstrap — CORS, validation pipe, global prefix
 │   │   ├── app.module.ts             # Root module — imports all feature modules
 │   │   ├── database/
-│   │   │   └── database.module.ts    # MySQL connection pool (global)
+│   │   │   ├── database.module.ts    # MySQL connection pool (global)
+│   │   │   ├── migrate.js            # Table creation script
+│   │   │   ├── seed.js               # Sample data seeder
+│   │   │   └── cleanup-dupes.js      # Duplicate cleanup utility
 │   │   ├── auth/
 │   │   │   ├── auth.controller.ts    # POST /auth/register, /auth/login
-│   │   │   ├── auth.service.ts       # Register / login logic
+│   │   │   ├── auth.service.ts       # Register / login + email domain validation
 │   │   │   ├── auth.module.ts
 │   │   │   ├── jwt.strategy.ts       # Passport JWT strategy
 │   │   │   └── guards.ts             # JwtAuthGuard, RolesGuard, @Roles decorator
-│   │   ├── users/
-│   │   ├── courses/
-│   │   ├── categories/
-│   │   ├── sections/
-│   │   ├── lessons/
-│   │   ├── enrollments/
-│   │   ├── progress/
-│   │   ├── quizzes/
-│   │   ├── certificates/
-│   │   └── health/
+│   │   ├── users/                    # User management (admin only)
+│   │   ├── courses/                  # Course CRUD + video URL support
+│   │   ├── categories/               # Course categories
+│   │   ├── sections/                 # Course sections
+│   │   ├── lessons/                  # Lessons with video URL / file
+│   │   ├── enrollments/              # Enrollment management
+│   │   ├── progress/                 # Lesson progress tracking
+│   │   ├── quizzes/                  # Quiz + question management
+│   │   ├── certificates/             # Certificate issuance + verification
+│   │   ├── mail/                     # Nodemailer welcome email service
+│   │   └── health/                   # Health check endpoint
+│   ├── uploads/
+│   │   ├── thumbnails/               # Course thumbnail images
+│   │   └── videos/                   # Uploaded lesson videos
 │   ├── .env                          # Environment variables
+│   ├── railway.toml                  # Railway deployment config
+│   ├── Procfile                      # Heroku/Railway process file
 │   ├── nest-cli.json
 │   ├── tsconfig.json
 │   └── package.json
 │
 └── frontend/                         # Next.js 14 App Router
     ├── app/
-    │   ├── layout.tsx                # Root layout (Inter font, Toaster)
-    │   ├── page.tsx                  # Landing / home page
-    │   ├── globals.css               # Tailwind base + component classes
-    │   ├── login/page.tsx
-    │   ├── register/page.tsx
-    │   ├── dashboard/page.tsx
-    │   ├── courses/
-    │   │   ├── page.tsx              # Course catalog
-    │   │   └── [id]/page.tsx         # Course detail
-    │   ├── learn/[courseId]/page.tsx # Course player
-    │   ├── my-learning/page.tsx
+    │   ├── layout.tsx                # Root layout — animated background, Inter font
+    │   ├── globals.css               # Tailwind base + Arohak brand classes + animations
+    │   ├── login/page.tsx            # Public landing + login modal
+    │   ├── register/page.tsx         # Registration form
+    │   ├── dashboard/page.tsx        # Dashboard with welcome popup
+    │   ├── courses/page.tsx          # Course catalog with search and filters
+    │   ├── learn/[courseId]/page.tsx # Course player — lessons, progress, quiz
+    │   ├── my-learning/page.tsx      # Employee enrolled courses
     │   ├── certificates/
-    │   │   ├── page.tsx
-    │   │   ├── [id]/page.tsx
-    │   │   └── verify/[number]/page.tsx
+    │   │   ├── page.tsx              # User's earned certificates
+    │   │   ├── [id]/page.tsx         # Certificate detail / print view
+    │   │   └── verify/[number]/page.tsx  # Public certificate verification
     │   └── admin/
-    │       ├── users/page.tsx
+    │       ├── users/page.tsx        # User management — list, role change, delete
     │       └── courses/
-    │           ├── new/page.tsx
-    │           └── [id]/edit/page.tsx
+    │           ├── new/page.tsx      # Create new course (with video URL field)
+    │           └── [id]/edit/page.tsx # Edit course, manage sections/lessons/quizzes
     ├── components/
     │   ├── layout/
-    │   │   ├── AppLayout.tsx         # Auth guard + layout wrapper
-    │   │   └── Navbar.tsx            # Top navigation bar
+    │   │   ├── AppLayout.tsx         # Auth guard + frosted glass layout wrapper
+    │   │   └── Navbar.tsx            # Frosted glass top navigation bar
     │   ├── Providers.tsx             # QueryClient + Toast provider
-    │   └── ConfirmModal.tsx
+    │   └── ConfirmModal.tsx          # Reusable confirm dialog
     ├── lib/
     │   ├── api.ts                    # Axios instance with auth interceptor
     │   ├── store.ts                  # Zustand auth store (persisted)
     │   └── utils.ts                  # Shared utility functions
+    ├── public/
+    │   └── arohak-logo.png           # Arohak brand logo
+    ├── vercel.json                   # Vercel deployment config
     ├── .env.local
     └── package.json
 ```
@@ -170,10 +183,21 @@ PORT=4000
 NODE_ENV=development
 CLIENT_URL=http://localhost:3000
 
-# Cloudinary (production only)
+# Cloudinary (optional — production media storage)
 CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
+
+# Mail (SMTP) — Gmail App Password required
+# 1. Enable 2FA on your Google account
+# 2. Go to myaccount.google.com/apppasswords
+# 3. Generate an App Password for "Mail"
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USER=your-gmail@gmail.com
+MAIL_PASS=your-16-char-app-password
+MAIL_FROM=LMS Platform <your-gmail@gmail.com>
+FRONTEND_URL=http://localhost:3000
 ```
 
 ### Frontend `.env.local`
@@ -191,7 +215,7 @@ NEXT_PUBLIC_API_URL=http://localhost:4000/api
 |---|---|---|
 | id | VARCHAR(36) PK | UUID |
 | name | VARCHAR(255) | |
-| email | VARCHAR(255) UNIQUE | Must end with `@arohak.com` |
+| email | VARCHAR(255) UNIQUE | Must end with `@arohak.com` or `@cognivance.com` |
 | password | VARCHAR(255) | bcrypt hashed |
 | role | ENUM | `admin`, `employee` |
 | avatar | VARCHAR(500) | |
@@ -214,7 +238,8 @@ NEXT_PUBLIC_API_URL=http://localhost:4000/api
 | id | VARCHAR(36) PK | UUID |
 | title | VARCHAR(500) | |
 | description | TEXT | |
-| thumbnail | VARCHAR(500) | |
+| thumbnail | VARCHAR(500) | Image path or URL |
+| video_url | VARCHAR(1000) | YouTube / Vimeo / direct video URL |
 | price | DECIMAL(10,2) | Default 0 |
 | is_published | TINYINT(1) | 0 = draft, 1 = published |
 | level | ENUM | `beginner`, `intermediate`, `advanced` |
@@ -240,7 +265,7 @@ NEXT_PUBLIC_API_URL=http://localhost:4000/api
 | title | VARCHAR(500) | |
 | description | TEXT | |
 | video_url | VARCHAR(500) | YouTube or external URL |
-| video_file | VARCHAR(500) | Uploaded file path / Cloudinary URL |
+| video_file | VARCHAR(500) | Uploaded file path |
 | duration | INT | Seconds |
 | order_num | INT | Display order |
 | is_free | TINYINT(1) | Preview without enrollment |
@@ -331,7 +356,7 @@ Legend: 🔓 Public  🔐 Requires JWT  👑 Admin only
 
 | Method | Endpoint | Access | Description |
 |---|---|---|---|
-| POST | `/auth/register` | 🔓 | Register new user. Email must end with `@arohak.com` |
+| POST | `/auth/register` | 🔓 | Register new user. Email must end with `@arohak.com` or `@cognivance.com`. Sends welcome email. |
 | POST | `/auth/login` | 🔓 | Login. Returns `{ token, user }` |
 
 **POST /auth/login — Body**
@@ -349,18 +374,10 @@ Legend: 🔓 Public  🔐 Requires JWT  👑 Admin only
 | Method | Endpoint | Access | Description |
 |---|---|---|---|
 | GET | `/users` | 👑 | List all users |
-| GET | `/users/stats` | 👑 | Platform-wide stats |
-| POST | `/users/import` | 👑 | Bulk import users from CSV (`multipart/form-data`, field: `file`) |
-| PATCH | `/users/:id/role` | 👑 | Change user role |
+| GET | `/users/stats` | 👑 | Platform-wide stats (courses, users, enrollments, certificates) |
+| PATCH | `/users/:id/role` | 👑 | Change user role (`admin` or `employee`) |
 | GET | `/users/:id/progress` | 👑 | Get all enrollments + progress for a user |
-| DELETE | `/users/:id` | 👑 | Delete user |
-
-**CSV Import format:**
-```
-name,email,employee_id,department,role
-John Doe,john@arohak.com,EMP010,Finance,employee
-```
-Default password for imported users: `Welcome@123`
+| DELETE | `/users/:id` | 👑 | Delete user (cannot delete yourself) |
 
 ---
 
@@ -376,13 +393,18 @@ Default password for imported users: `Welcome@123`
 
 | Method | Endpoint | Access | Description |
 |---|---|---|---|
-| GET | `/courses` | 🔐 | List published courses. Query: `search`, `category`, `level`, `page`, `limit` |
+| GET | `/courses` | 🔓 | List published courses. Query: `search`, `category`, `level`, `page`, `limit` |
 | GET | `/courses/my` | 👑 | List courses created by current admin |
 | GET | `/courses/:id` | 🔓 | Course detail with sections, lessons, documents, quizzes |
-| POST | `/courses` | 👑 | Create course (`multipart/form-data` with optional `thumbnail`) |
+| POST | `/courses` | 👑 | Create course (`multipart/form-data` — optional `thumbnail` file + `video_url`) |
 | PATCH | `/courses/:id` | 🔐 | Update course |
 | PATCH | `/courses/:id/publish` | 👑 | Toggle publish status |
 | DELETE | `/courses/:id` | 👑 | Delete course |
+
+**Course create/update fields:**
+```
+title, description, level, passing_score, video_url, thumbnail (file)
+```
 
 ---
 
@@ -437,7 +459,7 @@ Default password for imported users: `Welcome@123`
 
 **POST /quizzes/:id/submit — Body**
 ```json
-{ "answers": [0, 1, 2, 1, 0, 2, 2] }
+{ "answers": [0, 1, 2, 1, 0] }
 ```
 
 ---
@@ -464,43 +486,39 @@ Default password for imported users: `Welcome@123`
 
 | Route | Access | Description |
 |---|---|---|
-| `/` | Public | Landing page |
-| `/login` | Public | Login form |
+| `/login` | Public | Landing page with hero, course catalog, about section, login modal |
 | `/register` | Public | Registration form |
-| `/courses` | Public | Course catalog with search and filters |
-| `/courses/:id` | Public | Course detail page |
-| `/dashboard` | 🔐 | Dashboard (admin sees stats, employee sees enrollments) |
-| `/my-learning` | 🔐 | Employee's enrolled courses |
-| `/learn/:courseId` | 🔐 | Course player — lessons, progress, quiz |
+| `/dashboard` | 🔐 | Dashboard — welcome popup on first login, stat cards, course list |
+| `/courses` | 🔐 | Course catalog with search and level filters |
+| `/learn/:courseId` | 🔐 | Course player — lessons, progress tracking, quiz, completion banner |
+| `/my-learning` | 🔐 | Employee's enrolled courses with progress |
 | `/certificates` | 🔐 | User's earned certificates |
 | `/certificates/:id` | 🔐 | Certificate detail / print view |
 | `/certificates/verify/:number` | Public | Public certificate verification |
-| `/admin/users` | 👑 | User management — list, role change, delete, CSV import |
-| `/admin/courses/new` | 👑 | Create new course |
-| `/admin/courses/:id/edit` | 👑 | Edit course, manage sections/lessons/quizzes |
+| `/admin/users` | 👑 | User management — list, role change, delete, user detail slide-over |
+| `/admin/courses/new` | 👑 | Create new course (title, description, level, passing score, video URL, thumbnail) |
+| `/admin/courses/:id/edit` | 👑 | Edit course, manage sections / lessons / quizzes |
 
 ---
 
 ## 8. Authentication & Authorization
 
 ### Flow
-1. User logs in via `POST /api/auth/login`
-2. NestJS `AuthService` validates credentials and returns a signed JWT (expires in 7 days)
-3. Token stored in `localStorage` as `lms_token`
-4. Zustand store (`useAuthStore`) persists `user` and `token` via `zustand/middleware/persist`
-5. Axios interceptor in `lib/api.ts` attaches `Authorization: Bearer <token>` to every request
-6. On 401 response, interceptor clears token and redirects to `/login`
+1. User registers or logs in via `/api/auth/register` or `/api/auth/login`
+2. Email domain validated — only `@arohak.com` and `@cognivance.com` accepted
+3. NestJS `AuthService` validates credentials and returns a signed JWT (expires in 7 days)
+4. Token stored in `localStorage` as `lms_token`
+5. Zustand store (`useAuthStore`) persists `user` and `token` via `zustand/middleware/persist`
+6. Axios interceptor in `lib/api.ts` attaches `Authorization: Bearer <token>` to every request
+7. On 401 response, interceptor clears token and redirects to `/login`
 
 ### Guards (NestJS)
 - `JwtAuthGuard` — validates JWT on protected routes using `passport-jwt`
 - `RolesGuard` — checks `@Roles('admin')` decorator against the authenticated user's role
-- Both guards are applied at controller level via `@UseGuards(JwtAuthGuard, RolesGuard)`
+- Both guards applied at controller level via `@UseGuards(JwtAuthGuard, RolesGuard)`
 
 ### Route Protection (Frontend)
 `AppLayout.tsx` wraps all protected pages. It waits for client-side hydration before checking auth, preventing false redirects on page refresh.
-
-### Email Restriction
-Only `@arohak.com` email addresses are accepted at register and login.
 
 ---
 
@@ -525,21 +543,46 @@ Persisted to `localStorage` under the key `lms-erp-auth`.
 
 ### Development
 Files stored locally in `backend/uploads/`:
-- `uploads/thumbnails/` — course thumbnails
+- `uploads/thumbnails/` — course thumbnail images
 - `uploads/videos/` — lesson videos
-- `uploads/avatars/` — user avatars
-- `uploads/documents/` — course documents
 
-Multer is configured with `memoryStorage()` for CSV imports and disk/cloud storage for media files.
+Multer `diskStorage` is used for thumbnails and videos.
 
-### Production
-Files uploaded to Cloudinary. The upload interceptor switches between local disk storage and Cloudinary based on `NODE_ENV`.
+> Never set `Content-Type: multipart/form-data` manually — let axios set it so the boundary is included correctly.
 
-> Never set `Content-Type: multipart/form-data` manually — let the browser/axios set it so the boundary is included correctly.
+### Course Video URL
+Courses support a `video_url` field for linking external videos (YouTube, Vimeo, or direct URL). This is separate from uploaded lesson video files.
 
 ---
 
-## 11. Running Locally
+## 11. Email Notifications
+
+A welcome email is sent automatically when a new user registers.
+
+### Setup (Gmail)
+1. Enable 2-Step Verification on your Google account
+2. Go to [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
+3. Generate an App Password for "Mail"
+4. Set in `backend/.env`:
+```env
+MAIL_USER=your-gmail@gmail.com
+MAIL_PASS=your-16-char-app-password
+MAIL_FROM=LMS Platform <your-gmail@gmail.com>
+```
+
+### Email Template
+The welcome email includes:
+- Arohak crimson gradient header with user's initial avatar
+- Personalized greeting
+- Feature highlights (courses, progress, certificates, quizzes)
+- "Go to Dashboard" CTA button
+- Arohak-branded footer
+
+If `MAIL_USER` / `MAIL_PASS` are not configured, the service logs a warning and skips sending — registration still works normally.
+
+---
+
+## 12. Running Locally
 
 ### Prerequisites
 - Node.js 18+
@@ -553,95 +596,113 @@ CREATE DATABASE lms_erp CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ### 2. Backend (NestJS)
 ```bash
 cd lms-erp/backend
-cp .env.example .env        # fill in DB credentials and JWT_SECRET
+# Edit .env with your DB credentials
 npm install
-npm run start:dev           # starts on http://localhost:4000 with watch mode
+node src/database/migrate.js    # create tables
+node src/database/seed.js       # insert sample data
+npm run start:dev               # starts on http://localhost:4000
 ```
 
 ### 3. Frontend (Next.js)
 ```bash
 cd lms-erp/frontend
-cp .env.local.example .env.local
+# .env.local already set to http://localhost:4000/api
 npm install
-npm run dev                 # starts on http://localhost:3000
+npm run dev                     # starts on http://localhost:3000
 ```
 
 ---
 
-## 12. Database Migrations & Seeding
+## 13. Database Migrations & Seeding
 
-The NestJS `DatabaseModule` uses a raw MySQL2 connection pool. Tables are created via migration scripts.
-
-### Migrate
+### Migrate (create all tables)
 ```bash
-# Run from backend directory
-node src/db/migrate.js
+cd lms-erp/backend
+node src/database/migrate.js
 ```
 
-### Seed
+Safe to re-run — uses `CREATE TABLE IF NOT EXISTS`. Also patches existing tables (e.g. adds `video_url` column to courses if missing).
+
+### Seed (insert sample data)
 ```bash
-node src/db/seed.js
+node src/database/seed.js
 ```
 
-Seed inserts:
+Seed inserts (idempotent — uses upsert):
 - 1 admin user + 1 employee user
-- 1 category
-- 1 course with 3 sections, 7 lessons, 1 quiz (7 questions)
+- 8 courses: MFT, ServiceNow, webMethods, Python, Full Stack, SAP UI5/Fiori, SAP Workflow, SAP CAP
+- Each course has sections, lessons, and a quiz
+
+### Cleanup duplicates
+```bash
+node src/database/cleanup-dupes.js
+```
 
 ---
 
-## 13. Production Deployment
+## 14. Production Deployment
 
-### Backend — Render / Railway
-- Build command: `npm run build`
+### Recommended: Railway (backend + DB) + Vercel (frontend)
+
+#### Step 1 — MySQL on Railway
+1. Go to [railway.app](https://railway.app) → New Project → Provision MySQL
+2. Copy the connection variables from the Variables tab
+3. Run migrate + seed locally against the Railway DB
+
+#### Step 2 — Backend on Railway
+- Root directory: `lms-erp-main/lms-erp/backend`
+- Build command: `npm install && npm run build`
 - Start command: `npm run start:prod`
-- Root directory: `lms-erp/backend`
 
 Required environment variables:
-
 | Key | Value |
 |---|---|
-| `DB_HOST` | MySQL host |
-| `DB_PORT` | `3306` |
-| `DB_USER` | MySQL user |
-| `DB_PASSWORD` | MySQL password |
-| `DB_NAME` | Database name |
+| `DB_HOST` | Railway MySQL host |
+| `DB_PORT` | Railway MySQL port |
+| `DB_USER` | Railway MySQL user |
+| `DB_PASSWORD` | Railway MySQL password |
+| `DB_NAME` | `railway` |
 | `JWT_SECRET` | Strong random string |
 | `JWT_EXPIRES_IN` | `7d` |
+| `PORT` | `4000` |
 | `NODE_ENV` | `production` |
-| `CLIENT_URL` | Frontend URL |
-| `CLOUDINARY_CLOUD_NAME` | From Cloudinary dashboard |
-| `CLOUDINARY_API_KEY` | From Cloudinary dashboard |
-| `CLOUDINARY_API_SECRET` | From Cloudinary dashboard |
+| `FRONTEND_URL` | Your Vercel frontend URL |
+| `MAIL_USER` | Gmail address |
+| `MAIL_PASS` | Gmail App Password |
+| `MAIL_FROM` | `LMS Platform <your-gmail@gmail.com>` |
 
-### Frontend — Vercel
-- Framework: Next.js
-- Root directory: `lms-erp/frontend`
+#### Step 3 — Frontend on Vercel
+- Root directory: `lms-erp-main/lms-erp/frontend`
+- Framework: Next.js (auto-detected)
 
 | Key | Value |
 |---|---|
-| `NEXT_PUBLIC_API_URL` | Your deployed backend URL + `/api` |
+| `NEXT_PUBLIC_API_URL` | `https://your-backend.railway.app/api` |
 
 ---
 
-## 14. Default Credentials
+## 15. Default Credentials
 
 | Role | Email | Password |
 |---|---|---|
 | Admin | `admin@arohak.com` | `Ar0hak#Admin2024` |
 | Employee | `employee@arohak.com` | `Ar0hak#Emp2024` |
 
-> Bulk-imported users via CSV get the default password `Welcome@123`
+> Only `@arohak.com` and `@cognivance.com` email addresses can register or log in.
 
 ---
 
-## 15. Certificate Auto-Issuance Logic
+## 16. Certificate Auto-Issuance Logic
 
 A certificate is automatically issued when:
 1. All lessons in the course are marked complete
 2. All quizzes in the course are passed (score ≥ passing_score)
 
-This is checked after every lesson completion (`POST /progress/lesson/:lessonId/complete`) and every quiz submission (`POST /quizzes/:id/submit`). The enrollment status updates to `completed` at the same time.
+This is checked after every:
+- Lesson completion (`POST /progress/lesson/:lessonId/complete`)
+- Quiz submission (`POST /quizzes/:id/submit`)
+
+The enrollment status updates to `completed` at the same time. A "Course Completed" banner appears in the course player with a "View Certificate" button.
 
 Certificate number format: `CERT-{timestamp}-{userId_first8chars}`
 
@@ -649,3 +710,40 @@ Public verification URL (no login required):
 ```
 http://localhost:3000/certificates/verify/CERT-XXXXXXXXXX
 ```
+
+---
+
+## 17. Brand & Design System
+
+### Arohak Brand Colors
+| Name | Hex | Usage |
+|---|---|---|
+| Red | `#8B1A1A` | Primary brand, links, headings |
+| Crimson | `#C0392B` | Buttons, gradients |
+| Gold | `#D4A017` | Accents, CTA highlights |
+| Amber | `#F0A500` | Stats, badges |
+| Cream | `#FFF8F0` | Card backgrounds, inputs |
+| Warm | `#FDF3E7` | Page background |
+| Dark | `#3d0a0a` | Hero gradients, footer |
+
+### Animated Background
+All pages share a fixed animated background layer (defined in `globals.css` and injected in `layout.tsx`):
+- 5 floating soft orbs in Arohak red/gold tones
+- Rising particle dots
+- Subtle animated grid overlay
+- Frosted glass effect on navbar and cards (`backdrop-filter: blur`)
+
+### CSS Utility Classes
+| Class | Description |
+|---|---|
+| `.btn-primary` | Crimson gradient button |
+| `.btn-secondary` | White outlined button |
+| `.card` | Frosted glass card (white/82% + blur) |
+| `.stat-card` | Frosted glass stat card |
+| `.course-card` | Course card with hover lift |
+| `.input` | Styled form input with red focus ring |
+| `.badge-*` | Colored badge variants |
+| `.progress-fill` | Red gradient progress bar fill |
+| `.animate-pop` | Pop-in animation |
+| `.animate-fade-up` | Fade up animation |
+| `.skeleton` | Shimmer loading skeleton |
