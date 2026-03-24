@@ -1,6 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, Request, UseInterceptors, UploadedFile } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { memoryStorage } from 'multer';
+import { Controller, Get, Patch, Delete, Param, Body, UseGuards, Request } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard, RolesGuard, Roles } from '../auth/guards';
 
@@ -15,12 +13,6 @@ export class UsersController {
 
   @Get('stats')
   stats() { return this.users.getStats(); }
-
-  @Post('import')
-  @UseInterceptors(FileInterceptor('file', { storage: memoryStorage() }))
-  import(@UploadedFile() file: Express.Multer.File) {
-    return this.users.importCsv(file.buffer);
-  }
 
   @Patch(':id/role')
   changeRole(@Param('id') id: string, @Body('role') role: string) {

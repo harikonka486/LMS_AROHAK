@@ -14,8 +14,6 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersController = void 0;
 const common_1 = require("@nestjs/common");
-const platform_express_1 = require("@nestjs/platform-express");
-const multer_1 = require("multer");
 const users_service_1 = require("./users.service");
 const guards_1 = require("../auth/guards");
 let UsersController = class UsersController {
@@ -25,9 +23,6 @@ let UsersController = class UsersController {
     }
     findAll() { return this.users.findAll(); }
     stats() { return this.users.getStats(); }
-    import(file) {
-        return this.users.importCsv(file.buffer);
-    }
     changeRole(id, role) {
         return this.users.changeRole(id, role);
     }
@@ -49,14 +44,6 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "stats", null);
-__decorate([
-    (0, common_1.Post)('import'),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', { storage: (0, multer_1.memoryStorage)() })),
-    __param(0, (0, common_1.UploadedFile)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
-], UsersController.prototype, "import", null);
 __decorate([
     (0, common_1.Patch)(':id/role'),
     __param(0, (0, common_1.Param)('id')),

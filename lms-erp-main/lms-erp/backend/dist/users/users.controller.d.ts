@@ -10,12 +10,6 @@ export declare class UsersController {
         totalCertificates: any;
         totalUsers: any;
     }>;
-    import(file: Express.Multer.File): Promise<{
-        created: number;
-        skipped: number;
-        total: number;
-        errors: string[];
-    }>;
     changeRole(id: string, role: string): Promise<{
         success: boolean;
     }>;

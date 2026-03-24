@@ -1,9 +1,9 @@
 'use client'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import {
   Users, Search, Shield, GraduationCap, BookOpen, Trash2, Edit2,
-  X, Check, Award, Clock, CheckCircle, Upload, FileText, AlertCircle
+  X, Check, Award, Clock, CheckCircle
 } from 'lucide-react'
 import AppLayout from '@/components/layout/AppLayout'
 import ConfirmModal from '@/components/ConfirmModal'
@@ -28,10 +28,6 @@ export default function AdminUsersPage() {
   const [confirmDelete, setConfirmDelete] = useState<any>(null)
   const [successMsg, setSuccessMsg] = useState('')
   const [successType, setSuccessType] = useState<'deleted' | 'updated'>('deleted')
-  const [showImport, setShowImport] = useState(false)
-  const [importResult, setImportResult] = useState<any>(null)
-  const [importing, setImporting] = useState(false)
-  const fileRef = useRef<HTMLInputElement>(null)
 
   const { data: users, isLoading } = useQuery({
     queryKey: ['admin-users'],
@@ -58,25 +54,6 @@ export default function AdminUsersPage() {
     },
     onError: () => { setConfirmDelete(null) },
   })
-
-  const handleImportCSV = async (file: File) => {
-    setImporting(true)
-    setImportResult(null)
-    try {
-      const fd = new FormData()
-      fd.append('file', file)
-      // Do NOT set Content-Type manually — browser sets it with the correct boundary
-      const res = await api.post('/users/import', fd)
-      setImportResult(res.data)
-      qc.invalidateQueries({ queryKey: ['admin-users'] })
-    } catch (err: any) {
-      const msg = err.response?.data?.error || err.message || 'Import failed'
-      setImportResult({ error: msg })
-    } finally {
-      setImporting(false)
-      if (fileRef.current) fileRef.current.value = ''
-    }
-  }
 
   const filtered = (users ?? []).filter((u: any) => {
     const matchSearch = !search ||
@@ -105,10 +82,6 @@ export default function AdminUsersPage() {
               <h1 className="text-2xl font-bold text-gray-900">Users</h1>
               <p className="text-gray-500 mt-1">{users?.length ?? 0} total users · Click a name to view details</p>
             </div>
-            <button onClick={() => { setShowImport(true); setImportResult(null) }}
-              className="btn-primary flex items-center gap-2">
-              <Upload className="w-4 h-4" /> Import CSV
-            </button>
           </div>
         </div>
 
@@ -210,106 +183,6 @@ export default function AdminUsersPage() {
           )}
         </div>
       </div>
-
-      {/* CSV Import Modal */}
-      {showImport && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8 animate-pop">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Import Users from CSV</h2>
-              <button onClick={() => setShowImport(false)} className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Format guide */}
-            <div className="bg-gray-50 rounded-xl p-4 mb-6 text-xs text-gray-600 space-y-1">
-              <div className="flex items-center justify-between mb-2">
-                <p className="font-semibold text-gray-700 flex items-center gap-1.5"><FileText className="w-4 h-4" /> CSV Format</p>
-                <button
-                  onClick={() => {
-                    const csv = `name,email,employee_id,department,role\nJohn Smith,john.smith@arohak.com,EMP001,Finance,employee\nJane Doe,jane.doe@arohak.com,EMP002,IT,trainer`
-                    const blob = new Blob([csv], { type: 'text/csv' })
-                    const url = URL.createObjectURL(blob)
-                    const a = document.createElement('a'); a.href = url; a.download = 'employees_sample.csv'; a.click()
-                    URL.revokeObjectURL(url)
-                  }}
-                  className="font-medium hover:underline flex items-center gap-1 text-xs"
-                  style={{ color: '#8B1A1A' }}
-                >
-                  <Upload className="w-3.5 h-3.5 rotate-180" /> Download Sample
-                </button>
-              </div>
-              <p>Required: <span className="font-mono bg-white px-1 rounded border border-gray-200">name</span>, <span className="font-mono bg-white px-1 rounded border border-gray-200">email</span></p>
-              <p>Optional: <span className="font-mono bg-white px-1 rounded border border-gray-200">employee_id</span>, <span className="font-mono bg-white px-1 rounded border border-gray-200">department</span>, <span className="font-mono bg-white px-1 rounded border border-gray-200">role</span></p>
-              <p className="text-gray-400 mt-2">Default password: <span className="font-mono font-semibold text-gray-600">Welcome@123</span> · Role values: <span className="font-mono">employee</span>, <span className="font-mono">admin</span></p>
-            </div>
-
-            {/* Upload area */}
-            {!importResult && (
-              <label className={cn(
-                'flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-8 cursor-pointer transition-colors',
-                importing ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-red-400 hover:bg-red-50'
-              )}>
-                {importing ? (
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="w-8 h-8 border-3 border-red-700 border-t-transparent rounded-full animate-spin" />
-                    <p className="text-sm font-medium" style={{ color: '#8B1A1A' }}>Importing users...</p>
-                  </div>
-                ) : (
-                  <>
-                    <Upload className="w-10 h-10 text-gray-300 mb-3" />
-                    <p className="text-sm font-medium text-gray-700">Click to upload CSV file</p>
-                    <p className="text-xs text-gray-400 mt-1">Max 5MB</p>
-                  </>
-                )}
-                <input ref={fileRef} type="file" accept=".csv" className="sr-only"
-                  onChange={e => e.target.files?.[0] && handleImportCSV(e.target.files[0])} />
-              </label>
-            )}
-
-            {/* Result */}
-            {importResult && (
-              <div className="space-y-4">
-                {importResult.error ? (
-                  <div className="flex items-center gap-3 p-4 bg-red-50 rounded-xl text-red-700">
-                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                    <p className="text-sm">{importResult.error}</p>
-                  </div>
-                ) : (
-                  <>
-                    <div className="grid grid-cols-3 gap-3">
-                      {[
-                        { label: 'Total Rows', value: importResult.total, color: 'bg-gray-50 text-gray-700' },
-                        { label: 'Created', value: importResult.created, color: 'bg-emerald-50 text-emerald-700' },
-                        { label: 'Skipped', value: importResult.skipped, color: 'bg-amber-50 text-amber-700' },
-                      ].map(s => (
-                        <div key={s.label} className={cn('rounded-xl p-3 text-center', s.color)}>
-                          <p className="text-2xl font-bold">{s.value}</p>
-                          <p className="text-xs mt-0.5">{s.label}</p>
-                        </div>
-                      ))}
-                    </div>
-                    {importResult.errors?.length > 0 && (
-                      <div className="bg-amber-50 rounded-xl p-3 max-h-32 overflow-y-auto">
-                        <p className="text-xs font-semibold text-amber-700 mb-1">Notes:</p>
-                        {importResult.errors.map((e: string, i: number) => (
-                          <p key={i} className="text-xs text-amber-600">{e}</p>
-                        ))}
-                      </div>
-                    )}
-                  </>
-                )}
-                <div className="flex gap-3">
-                  <button onClick={() => setImportResult(null)} className="flex-1 btn-secondary">Import Another</button>
-                  <button onClick={() => setShowImport(false)} className="flex-1 btn-primary">Done</button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Slide-over panel */}
       {selectedUser && (

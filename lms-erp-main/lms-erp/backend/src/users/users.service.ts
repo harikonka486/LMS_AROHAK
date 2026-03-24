@@ -1,8 +1,5 @@
 import { Injectable, Inject, BadRequestException } from '@nestjs/common';
 import type { Pool } from 'mysql2/promise';
-import * as bcrypt from 'bcryptjs';
-import { v4 as uuid } from 'uuid';
-import { parse } from 'csv-parse/sync';
 import { DB_POOL } from '../database/database.module';
 
 @Injectable()
@@ -23,34 +20,6 @@ export class UsersService {
     const [[{ totalCertificates }]] = await this.db.query('SELECT COUNT(*) AS totalCertificates FROM certificates') as any;
     const [[{ totalUsers }]] = await this.db.query('SELECT COUNT(*) AS totalUsers FROM users') as any;
     return { totalCourses, totalEnrollments, completedEnrollments, totalCertificates, totalUsers };
-  }
-
-  async importCsv(buffer: Buffer) {
-    const records = parse(buffer.toString('utf-8'), { columns: true, skip_empty_lines: true, trim: true });
-    const hashed = await bcrypt.hash('Welcome@123', 10);
-    let created = 0, skipped = 0;
-    const errors: string[] = [];
-
-    for (const row of records as any[]) {
-      const name = row.name || row.Name;
-      const email = (row.email || row.Email || '').toLowerCase().trim();
-      const employee_id = row.employee_id || row['Employee ID'] || '';
-      const department = row.department || row.Department || '';
-      const role = (row.role || 'employee').toLowerCase().trim();
-      const validRole = ['employee', 'admin'].includes(role) ? role : 'employee';
-
-      if (!name || !email) { skipped++; errors.push('Row skipped — missing name or email'); continue; }
-      try {
-        const [existing] = await this.db.query('SELECT id FROM users WHERE email=?', [email]) as any;
-        if (existing.length) { skipped++; errors.push(`${email} — already exists`); continue; }
-        await this.db.query(
-          'INSERT INTO users (id,name,email,password,role,employee_id,department) VALUES (?,?,?,?,?,?,?)',
-          [uuid(), name, email, hashed, validRole, employee_id, department],
-        );
-        created++;
-      } catch (e: any) { skipped++; errors.push(`${email} — ${e.message}`); }
-    }
-    return { created, skipped, total: records.length, errors };
   }
 
   async changeRole(id: string, role: string) {

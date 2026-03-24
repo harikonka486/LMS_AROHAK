@@ -10,12 +10,6 @@ export declare class UsersService {
         totalCertificates: any;
         totalUsers: any;
     }>;
-    importCsv(buffer: Buffer): Promise<{
-        created: number;
-        skipped: number;
-        total: number;
-        errors: string[];
-    }>;
     changeRole(id: string, role: string): Promise<{
         success: boolean;
     }>;
