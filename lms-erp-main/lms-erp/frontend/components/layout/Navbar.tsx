@@ -1,6 +1,7 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, GraduationCap, Award,
@@ -59,11 +60,14 @@ export default function Navbar() {
         <div className="max-w-screen-xl mx-auto h-full flex items-center justify-between px-4 sm:px-6">
 
           {/* Logo */}
-          <Link href="/dashboard" className="flex items-center flex-shrink-0 group">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/arohak-logo.png" alt="Arohak"
+          <Link href="/dashboard" className="flex items-center gap-2.5 flex-shrink-0 group">
+            <Image src="/arohak-logo.png" alt="Arohak" width={36} height={36}
               className="object-contain transition-transform group-hover:scale-105"
-              style={{ height: '36px', width: 'auto' }} />
+              style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.15))' }} />
+            <div className="hidden sm:block">
+              <p className="font-bold text-sm leading-none" style={{ color: A.red }}>AROHAK</p>
+              <p className="text-[10px] text-gray-400 leading-none mt-0.5 font-medium tracking-wide uppercase">LMS Portal</p>
+            </div>
           </Link>
 
           {/* Desktop nav */}
