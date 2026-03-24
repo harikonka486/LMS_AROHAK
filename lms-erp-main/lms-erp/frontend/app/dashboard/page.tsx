@@ -75,16 +75,16 @@ export default function DashboardPage() {
         {/* Stat cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {isEmployee && <>
-            <StatCard icon={BookOpen}    label="Enrolled"    value={enrollments?.length ?? 0}      color="indigo" trend="+2 this month" />
-            <StatCard icon={Clock}       label="In Progress" value={activeEnrollments.length}       color="amber" />
-            <StatCard icon={CheckCircle} label="Completed"   value={completedEnrollments.length}    color="emerald" />
-            <StatCard icon={Award}       label="Certificates" value={certificates?.length ?? 0}     color="purple" />
+            <StatCard icon={BookOpen}    label="Enrolled"     value={enrollments?.length ?? 0}   color="red" />
+            <StatCard icon={Clock}       label="In Progress"  value={activeEnrollments.length}    color="amber" />
+            <StatCard icon={CheckCircle} label="Completed"    value={completedEnrollments.length} color="emerald" />
+            <StatCard icon={Award}       label="Certificates" value={certificates?.length ?? 0}   color="gold" />
           </>}
-          {user?.role === 'admin' && <>
-            <StatCard icon={BookOpen}      label="Total Courses"  value={stats?.totalCourses ?? 0}         color="indigo" />
-            <StatCard icon={GraduationCap} label="Enrollments"    value={stats?.totalEnrollments ?? 0}     color="emerald" />
-            <StatCard icon={Award}         label="Certificates"   value={stats?.totalCertificates ?? 0}    color="purple" />
-            <StatCard icon={TrendingUp}    label="Completions"    value={stats?.completedEnrollments ?? 0} color="amber" />
+          {isAdmin && <>
+            <StatCard icon={BookOpen}      label="Total Courses"  value={stats?.totalCourses ?? 0}         color="red" />
+            <StatCard icon={GraduationCap} label="Total Users"    value={stats?.totalUsers ?? 0}           color="amber" />
+            <StatCard icon={TrendingUp}    label="Enrollments"    value={stats?.totalEnrollments ?? 0}     color="emerald" />
+            <StatCard icon={Award}         label="Certificates"   value={stats?.totalCertificates ?? 0}    color="gold" />
           </>}
         </div>
 
@@ -95,7 +95,7 @@ export default function DashboardPage() {
             <div className="lg:col-span-3">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="section-title">My Courses</h2>
-                <Link href="/courses" className="text-xs text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1">
+                <Link href="/courses" className="text-xs font-medium flex items-center gap-1 hover:underline" style={{ color: '#8B1A1A' }}>
                   Browse more <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
@@ -134,8 +134,9 @@ export default function DashboardPage() {
                 })}
                 {!enrollments?.length && (
                   <div className="card p-10 text-center">
-                    <div className="w-14 h-14 bg-brand-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                      <BookOpen className="w-7 h-7 text-brand-500" />
+                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                      style={{ background: '#FFF8F0' }}>
+                      <BookOpen className="w-7 h-7" style={{ color: '#8B1A1A' }} />
                     </div>
                     <p className="font-semibold text-gray-700 mb-1">No courses yet</p>
                     <p className="text-sm text-gray-400 mb-4">Start your learning journey today</p>
@@ -149,7 +150,7 @@ export default function DashboardPage() {
             <div className="lg:col-span-2">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="section-title">Certificates</h2>
-                <Link href="/certificates" className="text-xs text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1">
+                <Link href="/certificates" className="text-xs font-medium flex items-center gap-1 hover:underline" style={{ color: '#8B1A1A' }}>
                   View all <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
@@ -213,8 +214,9 @@ export default function DashboardPage() {
               ))}
               {!myCourses?.length && (
                 <div className="card p-12 text-center">
-                  <div className="w-14 h-14 bg-brand-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <BookOpen className="w-7 h-7 text-brand-500" />
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                    style={{ background: '#FFF8F0' }}>
+                    <BookOpen className="w-7 h-7" style={{ color: '#8B1A1A' }} />
                   </div>
                   <p className="font-semibold text-gray-700 mb-1">No courses yet</p>
                   <p className="text-sm text-gray-400 mb-4">Create your first course to get started</p>
@@ -234,18 +236,18 @@ export default function DashboardPage() {
 function StatCard({ icon: Icon, label, value, color, trend }: {
   icon: any; label: string; value: number; color: string; trend?: string
 }) {
-  const styles: Record<string, { bg: string; icon: string; bar: string }> = {
-    indigo:  { bg: 'bg-red-50',     icon: 'text-red-700',     bar: 'bg-red-600' },
-    emerald: { bg: 'bg-emerald-50', icon: 'text-emerald-600', bar: 'bg-emerald-500' },
-    amber:   { bg: 'bg-amber-50',   icon: 'text-amber-600',   bar: 'bg-amber-500' },
-    purple:  { bg: 'bg-orange-50',  icon: 'text-orange-600',  bar: 'bg-orange-500' },
+  const styles: Record<string, { bg: string; icon: string }> = {
+    red:     { bg: '#FFF8F0', icon: '#8B1A1A' },
+    emerald: { bg: '#ecfdf5', icon: '#059669' },
+    amber:   { bg: '#fffbeb', icon: '#d97706' },
+    gold:    { bg: '#fefce8', icon: '#b45309' },
   }
-  const s = styles[color] ?? styles.indigo
+  const s = styles[color] ?? styles.red
   return (
     <div className="stat-card group hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
       <div className="flex items-start justify-between mb-4">
-        <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center', s.bg)}>
-          <Icon className={cn('w-5 h-5', s.icon)} />
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: s.bg }}>
+          <Icon className="w-5 h-5" style={{ color: s.icon }} />
         </div>
       </div>
       <p className="text-3xl font-bold text-gray-900 mb-0.5">{value}</p>
