@@ -7,6 +7,7 @@ export declare class AuthService {
     private mail;
     constructor(db: Pool, jwt: JwtService, mail: MailService);
     private sign;
+    private isAllowedEmail;
     register(body: any): Promise<{
         token: string;
         user: any;

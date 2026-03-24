@@ -31,9 +31,12 @@ const HERO_BG   = `linear-gradient(135deg, ${A.dark} 0%, ${A.red} 55%, ${A.crims
 const BTN_BG    = `linear-gradient(135deg, ${A.red}, ${A.crimson})`
 const GOLD_BG   = `linear-gradient(135deg, ${A.gold}, ${A.amber})`
 
+const ALLOWED_DOMAINS = ['@arohak.com', '@cognivance.com']
+const isAllowedEmail = (e: string) => ALLOWED_DOMAINS.some(d => e.endsWith(d))
+
 const schema = z.object({
-  email: z.string().email().refine(e => e.endsWith('@arohak.com'), {
-    message: 'Only @arohak.com email addresses are allowed',
+  email: z.string().email().refine(isAllowedEmail, {
+    message: 'Only @arohak.com or @cognivance.com email addresses are allowed',
   }),
   password: z.string().min(1),
 })
@@ -178,7 +181,7 @@ function LoginModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (u
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div>
               <label className="block text-sm font-medium mb-1.5" style={{ color: A.red }}>Email Address</label>
-              <input {...register('email')} type="email" className="input" placeholder="you@arohak.com" />
+              <input {...register('email')} type="email" className="input" placeholder="you@arohak.com or you@cognivance.com" />
               {errors.email && <p className="text-red-600 text-xs mt-1">{errors.email.message}</p>}
             </div>
             <div>
