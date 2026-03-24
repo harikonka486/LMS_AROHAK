@@ -246,11 +246,11 @@ export default function LoginPage() {
       {welcomeUser && <WelcomeModal user={welcomeUser} onClose={handleWelcomeClose} />}
       {showLogin   && <LoginModal onClose={() => setShowLogin(false)} onSuccess={handleSuccess} />}
 
-      <div className="min-h-screen flex flex-col" style={{ background: A.cream }}>
+      <div className="min-h-screen flex flex-col">
 
         {/* ── Navbar ── */}
-        <header className="sticky top-0 z-40 bg-white border-b"
-          style={{ borderColor: '#f0d9c8', boxShadow: '0 1px 8px rgba(139,26,26,0.08)' }}>
+        <header className="sticky top-0 z-40 border-b"
+          style={{ background: 'rgba(255,248,240,0.82)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderColor: '#f0d9c8', boxShadow: '0 1px 8px rgba(139,26,26,0.08)' }}>
           <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
             {/* Logo */}
             <ArohakLogo size={38} />
@@ -349,7 +349,7 @@ export default function LoginPage() {
         </section>
 
         {/* ── Courses Grid ── */}
-        <section id="courses-section" className="py-16 px-6" style={{ background: A.warm }}>
+        <section id="courses-section" className="py-16 px-6" style={{ background: 'rgba(253,243,231,0.7)' }}>
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-10">
               <h2 className="text-2xl font-bold mb-2" style={{ color: A.red }}>Available Courses</h2>
@@ -436,7 +436,7 @@ export default function LoginPage() {
         </section>
 
         {/* ── About Section ── */}
-        <section id="about-section" className="py-16 px-6 bg-white border-t" style={{ borderColor: '#f0d9c8' }}>
+        <section id="about-section" className="py-16 px-6 border-t" style={{ background: 'rgba(255,255,255,0.7)', borderColor: '#f0d9c8' }}>
           <div className="max-w-5xl mx-auto">
 
             {/* Heading */}
@@ -509,7 +509,7 @@ export default function LoginPage() {
         </section>
 
         {/* ── Features strip ── */}
-        <section className="py-12 px-6 bg-white border-t" style={{ borderColor: '#f0d9c8' }}>
+        <section className="py-12 px-6 border-t" style={{ background: 'rgba(255,255,255,0.7)', borderColor: '#f0d9c8' }}>
           <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             {[
               { icon: GraduationCap, title: 'Structured Learning', desc: 'Curated courses with sections, video lessons, and downloadable resources.' },

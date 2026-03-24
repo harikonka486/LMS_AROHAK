@@ -92,8 +92,8 @@ export default function RegisterPage() {
     <>
       {createdName && <SuccessModal name={createdName} onClose={() => router.push('/login')} />}
 
-      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: A.cream }}>
-        <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 border" style={{ borderColor: '#f0d9c8' }}>
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="rounded-2xl shadow-xl w-full max-w-md p-8 border" style={{ background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderColor: '#f0d9c8' }}>
 
           {/* Logo header */}
           <div className="text-center mb-8">

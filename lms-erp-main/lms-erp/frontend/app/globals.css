@@ -5,7 +5,7 @@
 @layer base {
   body {
     @apply antialiased text-gray-900;
-    background: #FDF3E7;
+    background: transparent;
     min-height: 100vh;
     overflow-x: hidden;
   }
