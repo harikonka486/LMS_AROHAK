@@ -100,7 +100,7 @@ export default function LearnPage() {
           {progress && (
             <div className="mt-2">
               <div className="w-full bg-gray-700 rounded-full h-1.5">
-                <div className="bg-brand-500 h-1.5 rounded-full" style={{ width: `${progress.percentage}%` }} />
+                <div className="bg-brand-500 h-1.5 rounded-full" style={{ width: `${progress.percentage}%`, background: '#C0392B' }} />
               </div>
               <p className="text-xs text-gray-400 mt-1">{progress.percentage}% complete</p>
             </div>
@@ -115,7 +115,8 @@ export default function LearnPage() {
             </div>
             {section.lessons.map((lesson: any) => (
               <button key={lesson.id} onClick={() => { setActiveLesson(lesson); setTab('lesson'); setQuizResult(null) }}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors ${activeLesson?.id === lesson.id ? 'bg-brand-600 text-white' : 'text-gray-300 hover:bg-gray-700'}`}>
+                className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors ${activeLesson?.id === lesson.id ? 'text-white' : 'text-gray-300 hover:bg-gray-700'}`}
+                style={activeLesson?.id === lesson.id ? { background: '#8B1A1A' } : {}}>
                 {isCompleted(lesson.id)
                   ? <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
                   : <Circle className="w-4 h-4 text-gray-500 flex-shrink-0" />}
@@ -131,7 +132,8 @@ export default function LearnPage() {
             <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">Assessments</div>
             {quizzes.map((quiz: any) => (
               <button key={quiz.id} onClick={() => { setActiveQuiz(quiz); setTab('quiz'); setAnswers([]); setQuizResult(null); setCurrentQuestion(0) }}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors ${activeQuiz?.id === quiz.id && tab === 'quiz' ? 'bg-brand-600 text-white' : 'text-gray-300 hover:bg-gray-700'}`}>
+                className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors ${activeQuiz?.id === quiz.id && tab === 'quiz' ? 'text-white' : 'text-gray-300 hover:bg-gray-700'}`}
+                style={activeQuiz?.id === quiz.id && tab === 'quiz' ? { background: '#8B1A1A' } : {}}>
                 <HelpCircle className="w-4 h-4 flex-shrink-0" />
                 <span className="truncate text-xs">{quiz.title}</span>
               </button>
@@ -146,7 +148,8 @@ export default function LearnPage() {
         <div className="bg-gray-800 border-b border-gray-700/50 flex">
           {(['lesson', 'documents'] as Tab[]).map(t => (
             <button key={t} onClick={() => setTab(t)}
-              className={`px-5 py-3 text-sm font-medium capitalize transition-colors ${tab === t ? 'text-white border-b-2 border-brand-500' : 'text-gray-400 hover:text-white'}`}>
+              className={`px-5 py-3 text-sm font-medium capitalize transition-colors ${tab === t ? 'text-white border-b-2' : 'text-gray-400 hover:text-white'}`}
+              style={tab === t ? { borderBottomColor: '#C0392B' } : {}}>
               {t === 'documents' ? 'Materials' : t}
             </button>
           ))}
@@ -196,7 +199,8 @@ export default function LearnPage() {
 
                 <button onClick={() => markComplete.mutate(activeLesson.id)}
                   disabled={isCompleted(activeLesson.id) || markComplete.isPending}
-                  className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium ${isCompleted(activeLesson.id) ? 'bg-green-700 text-green-100' : 'bg-brand-600 hover:bg-brand-700 text-white'}`}>
+                  className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium ${isCompleted(activeLesson.id) ? 'bg-green-700 text-green-100' : 'text-white'}`}
+                  style={!isCompleted(activeLesson.id) ? { background: '#8B1A1A' } : {}}>
                   <CheckCircle className="w-4 h-4" />
                   {isCompleted(activeLesson.id) ? 'Completed' : 'Mark Complete'}
                 </button>
@@ -219,7 +223,7 @@ export default function LearnPage() {
                   {course.documents.map((doc: any) => (
                     <a key={doc.id} href={fileUrl(doc.file_url)} target="_blank" rel="noreferrer"
                       className="flex items-center gap-4 p-4 bg-gray-800 rounded-xl hover:bg-gray-700 transition-colors">
-                      <div className="w-10 h-10 bg-brand-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: '#8B1A1A' }}>
                         <FileText className="w-5 h-5" />
                       </div>
                       <div className="flex-1">
@@ -254,10 +258,11 @@ export default function LearnPage() {
                       {activeQuiz.questions?.map((_: any, i: number) => (
                         <button key={i} onClick={() => setCurrentQuestion(i)}
                           className={`w-7 h-7 rounded-full text-xs font-bold transition-colors ${
-                            i === currentQuestion ? 'bg-brand-500 text-white' :
+                            i === currentQuestion ? 'text-white' :
                             answers[i] !== undefined ? 'bg-green-600 text-white' :
                             'bg-gray-700 text-gray-400 hover:bg-gray-600'
-                          }`}>
+                          }`}
+                          style={i === currentQuestion ? { background: '#C0392B' } : {}}>
                           {i + 1}
                         </button>
                       ))}
@@ -305,8 +310,8 @@ export default function LearnPage() {
                         <span>{answers.filter(a => a !== undefined).length} answered</span>
                       </div>
                       <div className="w-full bg-gray-700 rounded-full h-1.5">
-                        <div className="bg-brand-500 h-1.5 rounded-full transition-all"
-                          style={{ width: `${((currentQuestion + 1) / (activeQuiz.questions?.length || 1)) * 100}%` }} />
+                        <div className="h-1.5 rounded-full transition-all"
+                          style={{ background: '#C0392B', width: `${((currentQuestion + 1) / (activeQuiz.questions?.length || 1)) * 100}%` }} />
                       </div>
                     </div>
 
@@ -325,9 +330,10 @@ export default function LearnPage() {
                                 <label key={oi}
                                   className={`flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all border-2 ${
                                     answers[currentQuestion] === oi
-                                      ? 'border-brand-500 bg-brand-600/20 text-white'
+                                      ? 'text-white border-red-600'
                                       : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-500 hover:bg-gray-700'
-                                  }`}>
+                                  }`}
+                                  style={answers[currentQuestion] === oi ? { borderColor: '#C0392B', background: 'rgba(192,57,43,0.15)' } : {}}>
                                   <input type="radio" name={`q-${currentQuestion}`}
                                     checked={answers[currentQuestion] === oi}
                                     onChange={() => { const a = [...answers]; a[currentQuestion] = oi; setAnswers(a) }}

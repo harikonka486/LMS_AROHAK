@@ -23,10 +23,10 @@ export default function CertificatesPage() {
         ) : certs?.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {certs.map((cert: any) => (
-              <div key={cert.id} className="card p-6 border-l-4 border-yellow-400">
+              <div key={cert.id} className="card p-6 border-l-4 border-amber-500">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Award className="w-6 h-6 text-yellow-600" />
+                  <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Award className="w-6 h-6 text-amber-600" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-sm">{cert.course_title}</h3>

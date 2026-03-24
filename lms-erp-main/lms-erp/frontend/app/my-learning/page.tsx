@@ -32,7 +32,7 @@ export default function MyLearningPage() {
         {/* Summary stats */}
         <div className="grid grid-cols-3 gap-4">
           {[
-            { icon: BookOpen,    label: 'Total Enrolled', value: enrollments?.length ?? 0, bg: 'bg-indigo-50',  color: 'text-indigo-600' },
+            { icon: BookOpen,    label: 'Total Enrolled', value: enrollments?.length ?? 0, bg: 'bg-red-50',     color: 'text-red-700' },
             { icon: Clock,       label: 'In Progress',    value: active.length,            bg: 'bg-amber-50',   color: 'text-amber-600' },
             { icon: CheckCircle, label: 'Completed',      value: completed.length,         bg: 'bg-emerald-50', color: 'text-emerald-600' },
           ].map(({ icon: Icon, label, value, bg, color }) => (

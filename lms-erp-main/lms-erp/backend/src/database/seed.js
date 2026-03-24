@@ -93,6 +93,7 @@ async function seed() {
     title: 'Managed File Transfer (MFT) Fundamentals',
     description: 'Master MFT protocols (SFTP, FTPS, AS2), encryption, scheduling, monitoring and compliance. Covers IBM Sterling, GoAnywhere and MOVEit.',
     level: 'beginner', language: 'English', instructorId, categoryId: catIds.mft, passingScore: 70,
+    thumbnail: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&q=80',
   });
 
   await seedSectionsAndLessons(db, courseMFT, [
@@ -126,6 +127,7 @@ async function seed() {
     title: 'ServiceNow Platform Development',
     description: 'Comprehensive training on ServiceNow — ITSM, GlideRecord scripting, Flow Designer, REST integrations, custom apps and Service Portal.',
     level: 'intermediate', language: 'English', instructorId, categoryId: catIds.sn, passingScore: 75,
+    thumbnail: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80',
   });
 
   await seedSectionsAndLessons(db, courseSN, [
@@ -163,6 +165,7 @@ async function seed() {
     title: 'webMethods Integration Platform',
     description: 'End-to-end training on Software AG webMethods — Integration Server, Designer, API Gateway, Universal Messaging, B2B and microservices.',
     level: 'intermediate', language: 'English', instructorId, categoryId: catIds.wm, passingScore: 75,
+    thumbnail: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&q=80',
   });
 
   await seedSectionsAndLessons(db, courseWM, [
@@ -202,6 +205,7 @@ async function seed() {
     title: 'Python Programming — From Beginner to Advanced',
     description: 'Complete Python training covering syntax, OOP, file handling, APIs, automation, data analysis with pandas/numpy, and web development with Flask.',
     level: 'beginner', language: 'English', instructorId, categoryId: catIds.python, passingScore: 70,
+    thumbnail: 'https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=600&q=80',
   });
 
   await seedSectionsAndLessons(db, coursePY, [
@@ -249,6 +253,7 @@ async function seed() {
     title: 'Full Stack Web Development',
     description: 'Build complete web applications using React (frontend), Node.js/Express (backend), REST APIs, MySQL, authentication with JWT, and deployment on cloud platforms.',
     level: 'intermediate', language: 'English', instructorId, categoryId: catIds.fullstack, passingScore: 75,
+    thumbnail: 'https://images.unsplash.com/photo-1593720213428-28a5b9e94613?w=600&q=80',
   });
 
   await seedSectionsAndLessons(db, courseFS, [
@@ -298,6 +303,7 @@ async function seed() {
     title: 'SAP UI5 & Fiori Development',
     description: 'Build enterprise-grade SAP Fiori apps using SAPUI5 framework — MVC architecture, OData binding, Fiori Elements, SAP BTP deployment and Fiori Launchpad configuration.',
     level: 'intermediate', language: 'English', instructorId, categoryId: catIds.sapui5, passingScore: 75,
+    thumbnail: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80',
   });
 
   await seedSectionsAndLessons(db, courseSAPUI5, [
@@ -340,6 +346,7 @@ async function seed() {
     title: 'SAP Workflow & Business Process Automation',
     description: 'Master SAP Business Workflow — workflow builder, tasks, agents, work items, event linkage, and SAP Business Process Automation (BPA) on SAP BTP.',
     level: 'intermediate', language: 'English', instructorId, categoryId: catIds.sapwf, passingScore: 75,
+    thumbnail: 'https://images.unsplash.com/photo-1507925921958-8a62f3d1a50d?w=600&q=80',
   });
 
   await seedSectionsAndLessons(db, courseSAPWF, [
@@ -380,6 +387,7 @@ async function seed() {
     title: 'SAP Cloud Application Programming Model (CAP)',
     description: 'Build cloud-native SAP applications using CAP — CDS data modeling, OData services, Node.js and Java runtimes, SAP HANA integration, and deployment on SAP BTP Cloud Foundry.',
     level: 'advanced', language: 'English', instructorId, categoryId: catIds.sapcap, passingScore: 80,
+    thumbnail: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&q=80',
   });
 
   await seedSectionsAndLessons(db, courseSAPCAP, [
@@ -433,18 +441,17 @@ async function seed() {
  * Insert course only if title doesn't exist yet. Returns the course id.
  * Safe to re-run — won't create duplicates.
  */
-async function upsertCourse(db, { title, description, level, language, instructorId, categoryId, passingScore }) {
+async function upsertCourse(db, { title, description, level, language, instructorId, categoryId, passingScore, thumbnail }) {
   const [[existing]] = await db.query('SELECT id FROM courses WHERE title=?', [title]);
   if (existing) {
-    // Ensure it's published and has correct instructor
-    await db.query('UPDATE courses SET is_published=1, instructor_id=? WHERE id=?', [instructorId, existing.id]);
+    await db.query('UPDATE courses SET is_published=1, instructor_id=?, thumbnail=? WHERE id=?', [instructorId, thumbnail || null, existing.id]);
     console.log(`  ↩ Course already exists, updated: ${title}`);
     return existing.id;
   }
   const id = uuid();
   await db.query(
-    'INSERT INTO courses (id,title,description,level,language,is_published,instructor_id,category_id,passing_score) VALUES (?,?,?,?,?,1,?,?,?)',
-    [id, title, description, level, language, instructorId, categoryId, passingScore]
+    'INSERT INTO courses (id,title,description,level,language,is_published,instructor_id,category_id,passing_score,thumbnail) VALUES (?,?,?,?,?,1,?,?,?,?)',
+    [id, title, description, level, language, instructorId, categoryId, passingScore, thumbnail || null]
   );
   return id;
 }

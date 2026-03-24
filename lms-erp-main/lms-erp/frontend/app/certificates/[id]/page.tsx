@@ -28,16 +28,16 @@ export default function CertificatePage() {
         {/* Certificate */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden print:shadow-none" id="certificate">
           {/* Header band */}
-          <div className="bg-gradient-to-r from-brand-900 via-brand-700 to-brand-800 p-8 text-white text-center">
-            <Award className="w-14 h-14 mx-auto mb-3 text-yellow-300" />
-            <p className="text-brand-200 uppercase tracking-widest text-xs font-semibold">LMS Training Portal</p>
+          <div className="p-8 text-white text-center" style={{ background: 'linear-gradient(135deg, #3d0a0a 0%, #8B1A1A 50%, #C0392B 100%)' }}>
+            <Award className="w-14 h-14 mx-auto mb-3 text-amber-300" />
+            <p className="text-red-200 uppercase tracking-widest text-xs font-semibold">LMS Training Portal</p>
             <h1 className="text-3xl font-bold mt-2">Certificate of Completion</h1>
           </div>
 
           {/* Body */}
-          <div className="p-10 text-center border-x-4 border-b-4 border-brand-700 rounded-b-2xl">
+          <div className="p-10 text-center border-x-4 border-b-4 border-red-800 rounded-b-2xl">
             <p className="text-gray-500 text-sm uppercase tracking-widest mb-3">This certifies that</p>
-            <h2 className="text-4xl font-bold text-brand-700 mb-1">{cert.user_name}</h2>
+            <h2 className="text-4xl font-bold mb-1" style={{ color: '#8B1A1A' }}>{cert.user_name}</h2>
             {cert.employee_id && <p className="text-gray-400 text-sm mb-1">Employee ID: {cert.employee_id}</p>}
             {cert.department && <p className="text-gray-400 text-sm mb-6">{cert.department}</p>}
 

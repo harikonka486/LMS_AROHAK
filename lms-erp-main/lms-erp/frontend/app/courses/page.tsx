@@ -103,9 +103,15 @@ export default function CoursesPage() {
                 {/* Thumbnail */}
                 <div className="h-40 relative overflow-hidden flex-shrink-0"
                   style={{ background: 'linear-gradient(135deg, #3d0a0a 0%, #8B1A1A 55%, #C0392B 100%)' }}>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <BookOpen className="w-16 h-16 text-white/20" />
-                  </div>
+                  {course.thumbnail ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={course.thumbnail} alt={course.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <BookOpen className="w-16 h-16 text-white/20" />
+                    </div>
+                  )}
                   <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 70% 30%, rgba(212,160,23,0.25) 0%, transparent 60%)' }} />
                   {/* Level badge */}
                   <div className="absolute top-3 left-3">
