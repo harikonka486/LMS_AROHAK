@@ -20,11 +20,11 @@ export class MailService {
   }
 
   async sendWelcome(to: string, name: string): Promise<void> {
-    const from = this.config.get('MAIL_FROM', this.config.get('MAIL_USER'));
+    const from = this.config.get('MAIL_FROM', `LMS Platform <${this.config.get('MAIL_USER')}>`);
     const loginUrl = `${this.config.get('FRONTEND_URL', 'http://localhost:3000')}/login`;
     try {
       await this.transporter.sendMail({
-        from: `"Arohak LMS Portal" <${from}>`,
+        from,
         to,
         subject: '🎉 Welcome to Arohak LMS Portal!',
         html: `
