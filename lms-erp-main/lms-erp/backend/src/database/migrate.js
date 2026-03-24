@@ -45,6 +45,7 @@ async function migrate() {
       title VARCHAR(500) NOT NULL,
       description TEXT,
       thumbnail VARCHAR(500),
+      video_url VARCHAR(1000),
       price DECIMAL(10,2) DEFAULT 0,
       is_published TINYINT(1) DEFAULT 0,
       level ENUM('beginner','intermediate','advanced') DEFAULT 'beginner',
@@ -158,6 +159,15 @@ async function migrate() {
   `);
 
   console.log('✅ All tables created successfully.');
+
+  // Patch existing tables — safe to re-run
+  try {
+    await db.query(`ALTER TABLE courses ADD COLUMN video_url VARCHAR(1000) NULL`);
+    console.log('✅ Added video_url column to courses');
+  } catch (e) {
+    if (!e.message.includes('Duplicate column')) console.warn('video_url column:', e.message);
+  }
+
   await db.end();
 }
 

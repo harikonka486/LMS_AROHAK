@@ -78,10 +78,10 @@ let CoursesService = class CoursesService {
         return { ...course, sections, documents, quizzes };
     }
     async create(body, file, userId) {
-        const { title, description, price = 0, level = 'beginner', language = 'English', categoryId, passing_score = 70 } = body;
+        const { title, description, price = 0, level = 'beginner', language = 'English', categoryId, passing_score = 70, video_url } = body;
         const thumbnail = file ? `/uploads/thumbnails/${file.filename}` : null;
         const id = (0, uuid_1.v4)();
-        await this.db.query('INSERT INTO courses (id,title,description,price,level,language,thumbnail,instructor_id,category_id,passing_score) VALUES (?,?,?,?,?,?,?,?,?,?)', [id, title, description, price, level, language, thumbnail, userId, categoryId || null, passing_score]);
+        await this.db.query('INSERT INTO courses (id,title,description,price,level,language,thumbnail,instructor_id,category_id,passing_score,video_url) VALUES (?,?,?,?,?,?,?,?,?,?,?)', [id, title, description, price, level, language, thumbnail, userId, categoryId || null, passing_score, video_url || null]);
         const [[course]] = await this.db.query('SELECT * FROM courses WHERE id=?', [id]);
         return course;
     }
@@ -92,9 +92,10 @@ let CoursesService = class CoursesService {
         if (course.instructor_id !== user.id && user.role !== 'admin')
             throw new common_1.ForbiddenException();
         const thumbnail = file ? `/uploads/thumbnails/${file.filename}` : course.thumbnail;
-        const { title, description, price, level, language, categoryId, passing_score } = body;
-        await this.db.query('UPDATE courses SET title=?,description=?,price=?,level=?,language=?,thumbnail=?,category_id=?,passing_score=?,updated_at=NOW() WHERE id=?', [title || course.title, description || course.description, price ?? course.price, level || course.level,
-            language || course.language, thumbnail, categoryId || course.category_id, passing_score || course.passing_score, id]);
+        const { title, description, price, level, language, categoryId, passing_score, video_url } = body;
+        await this.db.query('UPDATE courses SET title=?,description=?,price=?,level=?,language=?,thumbnail=?,category_id=?,passing_score=?,video_url=?,updated_at=NOW() WHERE id=?', [title || course.title, description || course.description, price ?? course.price, level || course.level,
+            language || course.language, thumbnail, categoryId || course.category_id, passing_score || course.passing_score,
+            video_url !== undefined ? video_url : course.video_url, id]);
         const [[updated]] = await this.db.query('SELECT * FROM courses WHERE id=?', [id]);
         return updated;
     }
