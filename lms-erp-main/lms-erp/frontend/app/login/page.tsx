@@ -320,7 +320,7 @@ export default function LoginPage() {
               style={{ background: 'rgba(212,160,23,0.2)', color: A.amber, border: `1px solid ${A.gold}40` }}>
               Arohak Learning Platform
             </span>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-5 leading-tight">
+            <h1 className="text-2xl md:text-3xl font-extrabold text-white mb-5 leading-tight">
               Upskill Your Workforce.<br />
               <span style={{ color: A.amber }}>Learn. Grow. Certify.</span>
             </h1>
