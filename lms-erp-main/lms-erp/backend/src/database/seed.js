@@ -38,6 +38,18 @@ async function seed() {
   // Fetch admin id (may already exist)
   const [[admin]] = await db.query(`SELECT id FROM users WHERE email='admin@arohak.com'`);
   const instructorId = admin.id;
+  console.log(`Using instructor ID: ${instructorId}`);
+
+  // Fix any previously seeded courses that may have wrong instructor_id
+  await db.query(
+    `UPDATE courses SET instructor_id=? WHERE title IN (
+      'Managed File Transfer (MFT) Fundamentals',
+      'ServiceNow Platform Development',
+      'webMethods Integration Platform'
+    )`,
+    [instructorId]
+  );
+  console.log('✅ Repaired existing course instructor IDs');
 
   // ── Categories ───────────────────────────────────────────────────────────
   const catMFT        = uuid();
@@ -60,10 +72,11 @@ async function seed() {
   // ── Course 1: MFT ────────────────────────────────────────────────────────
   const courseMFT = uuid();
   await db.query(`
-    INSERT IGNORE INTO courses (id, title, description, level, language, is_published, instructor_id, category_id, passing_score)
+    INSERT INTO courses (id, title, description, level, language, is_published, instructor_id, category_id, passing_score)
     VALUES (?, 'Managed File Transfer (MFT) Fundamentals',
       'Master the core concepts of Managed File Transfer — protocols (SFTP, FTPS, AS2, HTTPS), encryption, scheduling, monitoring, and compliance. Covers IBM Sterling, GoAnywhere, and MOVEit.',
       'beginner', 'English', 1, ?, ?, 70)
+    ON DUPLICATE KEY UPDATE instructor_id=VALUES(instructor_id), is_published=1
   `, [courseMFT, instructorId, rowMFT.id]);
 
   // MFT Sections & Lessons
@@ -120,10 +133,11 @@ async function seed() {
   // ── Course 2: ServiceNow ─────────────────────────────────────────────────
   const courseSN = uuid();
   await db.query(`
-    INSERT IGNORE INTO courses (id, title, description, level, language, is_published, instructor_id, category_id, passing_score)
+    INSERT INTO courses (id, title, description, level, language, is_published, instructor_id, category_id, passing_score)
     VALUES (?, 'ServiceNow Platform Development',
       'Comprehensive training on the ServiceNow platform — ITSM, scripting with GlideRecord, Flow Designer, REST integrations, custom applications, and Service Portal development.',
       'intermediate', 'English', 1, ?, ?, 75)
+    ON DUPLICATE KEY UPDATE instructor_id=VALUES(instructor_id), is_published=1
   `, [courseSN, instructorId, rowSN.id]);
 
   const snSections = [
@@ -189,10 +203,11 @@ async function seed() {
   // ── Course 3: webMethods ─────────────────────────────────────────────────
   const courseWM = uuid();
   await db.query(`
-    INSERT IGNORE INTO courses (id, title, description, level, language, is_published, instructor_id, category_id, passing_score)
+    INSERT INTO courses (id, title, description, level, language, is_published, instructor_id, category_id, passing_score)
     VALUES (?, 'webMethods Integration Platform',
       'End-to-end training on Software AG webMethods — Integration Server, Designer, API Gateway, Broker/Universal Messaging, B2B trading partner management, and microservices deployment.',
       'intermediate', 'English', 1, ?, ?, 75)
+    ON DUPLICATE KEY UPDATE instructor_id=VALUES(instructor_id), is_published=1
   `, [courseWM, instructorId, rowWM.id]);
 
   const wmSections = [
