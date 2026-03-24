@@ -145,7 +145,12 @@ function LoginModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (u
       setAuth(res.data.user, res.data.token)
       onSuccess(res.data.user)
     } catch (err: any) {
-      toast.error(err.response?.data?.error || 'Login failed')
+      if (!err.response) {
+        toast.error('Cannot connect to server. Please ensure the backend is running.')
+      } else {
+        const msg = err.response?.data?.message || err.response?.data?.error || 'Login failed'
+        toast.error(Array.isArray(msg) ? msg[0] : msg)
+      }
     } finally { setLoading(false) }
   }
 
