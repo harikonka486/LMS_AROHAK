@@ -212,6 +212,10 @@ export default function LoginPage() {
   const handleSuccess = (u: any) => { setShowLogin(false); setWelcomeUser(u) }
   const handleWelcomeClose = () => { setWelcomeUser(null); router.push('/dashboard') }
 
+  const scrollTo = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   return (
     <>
       {welcomeUser && <WelcomeModal user={welcomeUser} onClose={handleWelcomeClose} />}
@@ -223,7 +227,24 @@ export default function LoginPage() {
         <header className="sticky top-0 z-40 bg-white border-b"
           style={{ borderColor: '#f0d9c8', boxShadow: '0 1px 8px rgba(139,26,26,0.08)' }}>
           <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            {/* Logo */}
             <ArohakLogo size={38} />
+
+            {/* Center nav tabs */}
+            <nav className="hidden md:flex items-center gap-1">
+              <button onClick={() => scrollTo('courses-section')}
+                className="text-sm px-4 py-2 rounded-xl font-medium transition-all hover:bg-red-50"
+                style={{ color: A.red }}>
+                Courses
+              </button>
+              <button onClick={() => scrollTo('about-section')}
+                className="text-sm px-4 py-2 rounded-xl font-medium transition-all hover:bg-red-50"
+                style={{ color: A.red }}>
+                About
+              </button>
+            </nav>
+
+            {/* Right actions */}
             <div className="flex items-center gap-3">
               <button onClick={() => setShowLogin(true)}
                 className="text-sm px-5 py-2 rounded-xl font-medium border transition-all hover:bg-red-50"
@@ -301,7 +322,7 @@ export default function LoginPage() {
         </section>
 
         {/* ── Courses Grid ── */}
-        <section className="py-16 px-6" style={{ background: A.warm }}>
+        <section id="courses-section" className="py-16 px-6" style={{ background: A.warm }}>
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-10">
               <h2 className="text-2xl font-bold mb-2" style={{ color: A.red }}>Available Courses</h2>
@@ -379,6 +400,84 @@ export default function LoginPage() {
           </div>
         </section>
 
+        {/* ── About Section ── */}
+        <section id="about-section" className="py-16 px-6 bg-white border-t" style={{ borderColor: '#f0d9c8' }}>
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl font-bold mb-2" style={{ color: A.red }}>About Arohak</h2>
+              <p className="text-gray-500 text-sm max-w-xl mx-auto">
+                Empowering professionals with world-class training and development solutions.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+              {/* Left — text */}
+              <div className="space-y-5">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center mt-0.5" style={{ background: BTN_BG }}>
+                    <GraduationCap className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-1">Our Mission</h3>
+                    <p className="text-sm text-gray-500 leading-relaxed">
+                      To build a culture of continuous learning by providing employees with the tools, courses, and certifications they need to grow professionally.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center mt-0.5" style={{ background: BTN_BG }}>
+                    <Award className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-1">Certified Excellence</h3>
+                    <p className="text-sm text-gray-500 leading-relaxed">
+                      Every course completion is recognized with a verified certificate, validating your skills and dedication to professional growth.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center mt-0.5" style={{ background: BTN_BG }}>
+                    <Users className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-1">Built for Teams</h3>
+                    <p className="text-sm text-gray-500 leading-relaxed">
+                      Designed for Arohak employees across all departments — from IT and Finance to Operations and HR — with role-based learning paths.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right — stats cards */}
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { value: '10+',  label: 'Expert Courses',     sub: 'Across multiple domains' },
+                  { value: '300+', label: 'Active Learners',    sub: 'Arohak employees' },
+                  { value: '100+', label: 'Certificates Issued',sub: 'And growing' },
+                  { value: '95%',  label: 'Completion Rate',    sub: 'Industry leading' },
+                ].map(({ value, label, sub }) => (
+                  <div key={label} className="rounded-2xl p-5 border text-center"
+                    style={{ borderColor: '#f0d9c8', background: A.cream }}>
+                    <p className="text-3xl font-extrabold mb-1" style={{ color: A.red }}>{value}</p>
+                    <p className="text-sm font-semibold text-gray-800">{label}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">{sub}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Tagline banner */}
+            <div className="mt-12 rounded-2xl px-8 py-6 text-center" style={{ background: HERO_BG }}>
+              <p className="text-white font-bold text-lg mb-1">Attitude Determines Altitude</p>
+              <p className="text-white/60 text-sm">Join Arohak's learning community and take your career to the next level.</p>
+              <button onClick={() => setShowLogin(true)}
+                className="mt-4 inline-flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-sm transition-all hover:opacity-90"
+                style={{ background: GOLD_BG, color: A.dark }}>
+                Get Started <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </section>
+
         {/* ── Features strip ── */}
         <section className="py-12 px-6 bg-white border-t" style={{ borderColor: '#f0d9c8' }}>
           <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
@@ -420,7 +519,8 @@ export default function LoginPage() {
                 <ul className="space-y-2 text-sm text-white/50">
                   <li><button onClick={() => setShowLogin(true)} className="hover:text-white transition-colors">Sign In</button></li>
                   <li><Link href="/register" className="hover:text-white transition-colors">Register</Link></li>
-                  <li><button onClick={() => setShowLogin(true)} className="hover:text-white transition-colors">Browse Courses</button></li>
+                  <li><button onClick={() => scrollTo('courses-section')} className="hover:text-white transition-colors">Browse Courses</button></li>
+                  <li><button onClick={() => scrollTo('about-section')} className="hover:text-white transition-colors">About Us</button></li>
                   <li><button onClick={() => setShowLogin(true)} className="hover:text-white transition-colors">My Certificates</button></li>
                 </ul>
               </div>
