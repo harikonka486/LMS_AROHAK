@@ -491,17 +491,12 @@ export default function LoginPage() {
               <div className="absolute bottom-0 left-0 right-0 h-1" style={{ background: GOLD_BG }} />
               <p className="text-white font-bold text-lg mb-1">Ready to grow with Arohak?</p>
               <p className="text-white/60 text-sm mb-5">Join our learning community and take your career to the next level.</p>
-              <div className="flex items-center justify-center gap-3 flex-wrap">
+              <div className="flex items-center justify-center">
                 <button onClick={() => setShowLogin(true)}
                   className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90"
                   style={{ background: GOLD_BG, color: A.dark }}>
                   Get Started <ArrowRight className="w-4 h-4" />
                 </button>
-                <a href="https://www.arohak.com/about-us" target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-sm text-white hover:opacity-90"
-                  style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)' }}>
-                  Learn More
-                </a>
               </div>
             </div>
 
