@@ -7,7 +7,121 @@
     @apply antialiased text-gray-900;
     background: #FDF3E7;
     min-height: 100vh;
+    overflow-x: hidden;
   }
+}
+
+/* ─── Animated background canvas ─── */
+.bg-animated {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background: linear-gradient(135deg, #FFF8F0 0%, #FDF3E7 40%, #fce8d5 100%);
+}
+
+/* Soft floating orbs */
+.bg-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.35;
+  animation: orbFloat linear infinite;
+}
+.bg-orb-1 {
+  width: 520px; height: 520px;
+  background: radial-gradient(circle, #C0392B55, #8B1A1A22);
+  top: -120px; left: -100px;
+  animation-duration: 22s;
+  animation-delay: 0s;
+}
+.bg-orb-2 {
+  width: 380px; height: 380px;
+  background: radial-gradient(circle, #D4A01744, #F0A50022);
+  top: 30%; right: -80px;
+  animation-duration: 28s;
+  animation-delay: -8s;
+}
+.bg-orb-3 {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, #8B1A1A33, #C0392B11);
+  bottom: 10%; left: 20%;
+  animation-duration: 18s;
+  animation-delay: -4s;
+}
+.bg-orb-4 {
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, #F0A50033, #D4A01722);
+  top: 60%; left: 60%;
+  animation-duration: 24s;
+  animation-delay: -12s;
+}
+.bg-orb-5 {
+  width: 160px; height: 160px;
+  background: radial-gradient(circle, #C0392B22, #8B1A1A11);
+  top: 15%; left: 45%;
+  animation-duration: 32s;
+  animation-delay: -6s;
+}
+
+@keyframes orbFloat {
+  0%   { transform: translate(0, 0) scale(1); }
+  25%  { transform: translate(30px, -40px) scale(1.05); }
+  50%  { transform: translate(-20px, 30px) scale(0.95); }
+  75%  { transform: translate(40px, 20px) scale(1.03); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+/* Floating particles */
+.bg-particles {
+  position: absolute;
+  inset: 0;
+}
+.bg-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: #8B1A1A;
+  opacity: 0;
+  animation: particleDrift linear infinite;
+}
+.bg-particle:nth-child(1)  { width:4px;  height:4px;  left:10%;  animation-duration:14s; animation-delay:0s;    opacity:0.12; }
+.bg-particle:nth-child(2)  { width:3px;  height:3px;  left:25%;  animation-duration:18s; animation-delay:-3s;   opacity:0.10; }
+.bg-particle:nth-child(3)  { width:5px;  height:5px;  left:40%;  animation-duration:12s; animation-delay:-6s;   opacity:0.08; }
+.bg-particle:nth-child(4)  { width:3px;  height:3px;  left:55%;  animation-duration:20s; animation-delay:-9s;   opacity:0.12; }
+.bg-particle:nth-child(5)  { width:4px;  height:4px;  left:70%;  animation-duration:16s; animation-delay:-2s;   opacity:0.09; }
+.bg-particle:nth-child(6)  { width:3px;  height:3px;  left:85%;  animation-duration:22s; animation-delay:-5s;   opacity:0.11; }
+.bg-particle:nth-child(7)  { width:5px;  height:5px;  left:15%;  animation-duration:15s; animation-delay:-11s;  opacity:0.07; }
+.bg-particle:nth-child(8)  { width:3px;  height:3px;  left:60%;  animation-duration:19s; animation-delay:-7s;   opacity:0.10; }
+.bg-particle:nth-child(9)  { width:4px;  height:4px;  left:78%;  animation-duration:13s; animation-delay:-14s;  opacity:0.08; }
+.bg-particle:nth-child(10) { width:3px;  height:3px;  left:33%;  animation-duration:25s; animation-delay:-1s;   opacity:0.09; }
+
+@keyframes particleDrift {
+  0%   { transform: translateY(110vh) translateX(0);   opacity: 0; }
+  5%   { opacity: 0.12; }
+  90%  { opacity: 0.08; }
+  100% { transform: translateY(-10vh) translateX(30px); opacity: 0; }
+}
+
+/* Subtle grid overlay */
+.bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(139,26,26,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139,26,26,0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  animation: gridShift 40s linear infinite;
+}
+@keyframes gridShift {
+  0%   { background-position: 0 0; }
+  100% { background-position: 48px 48px; }
+}
+
+/* Page content sits above the background */
+.page-content {
+  position: relative;
+  z-index: 1;
 }
 
 @layer components {
@@ -25,7 +139,10 @@
 
   /* Cards */
   .card {
-    @apply bg-white rounded-2xl border border-gray-100 shadow-sm;
+    @apply rounded-2xl border border-gray-100 shadow-sm;
+    background: rgba(255,255,255,0.82);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
   .card-hover {
     @apply card transition-all duration-200 hover:shadow-md hover:-translate-y-0.5;
@@ -33,7 +150,10 @@
 
   /* Stat card */
   .stat-card {
-    @apply bg-white rounded-2xl border border-gray-100 p-5 shadow-sm;
+    @apply rounded-2xl border border-gray-100 p-5 shadow-sm;
+    background: rgba(255,255,255,0.82);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 
   /* Course card */

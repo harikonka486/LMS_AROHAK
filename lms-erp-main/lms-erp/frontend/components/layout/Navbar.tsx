@@ -55,8 +55,8 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-40 h-16 bg-white"
-        style={{ borderBottom: `1px solid #f0d9c8`, boxShadow: '0 1px 8px rgba(139,26,26,0.08)' }}>
+      <header className="fixed top-0 left-0 right-0 z-40 h-16"
+        style={{ background: 'rgba(255,248,240,0.82)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: `1px solid #f0d9c8`, boxShadow: '0 1px 8px rgba(139,26,26,0.08)' }}>
         <div className="max-w-screen-xl mx-auto h-full flex items-center justify-between px-4 sm:px-6">
 
           {/* Logo */}
@@ -169,7 +169,8 @@ export default function Navbar() {
 
       {/* Mobile drawer */}
       {mobileOpen && (
-        <div className="fixed top-16 left-0 right-0 z-30 bg-white border-b border-gray-100 shadow-lg md:hidden animate-fade-up">
+        <div className="fixed top-16 left-0 right-0 z-30 border-b border-gray-100 shadow-lg md:hidden animate-fade-up"
+          style={{ background: 'rgba(255,248,240,0.92)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
           <nav className="px-4 py-3 space-y-0.5">
             {visibleItems.map(({ href, label, icon: Icon }) => {
               const active = pathname.startsWith(href)
