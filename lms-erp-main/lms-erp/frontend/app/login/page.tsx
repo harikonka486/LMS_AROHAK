@@ -222,11 +222,14 @@ export default function LoginPage() {
   useEffect(() => { setMounted(true) }, [])
   useEffect(() => { if (mounted && user) router.replace('/dashboard') }, [mounted, user, router])
 
+  const [showAllCourses, setShowAllCourses] = useState(false)
+
   const { data } = useQuery({
     queryKey: ['public-courses'],
-    queryFn: () => api.get('/courses', { params: { limit: 9 } }).then(r => r.data),
+    queryFn: () => api.get('/courses', { params: { limit: 100 } }).then(r => r.data),
   })
-  const courses = data?.courses ?? []
+  const allCourses = data?.courses ?? []
+  const courses = showAllCourses ? allCourses : allCourses.slice(0, 3)
 
   const handleSuccess = (u: any) => { setShowLogin(false); setWelcomeUser(u) }
   const handleWelcomeClose = () => { setWelcomeUser(null); router.push('/dashboard') }
@@ -356,9 +359,9 @@ export default function LoginPage() {
               <p className="text-gray-500 text-sm">Browse our training catalog — sign in to enroll</p>
             </div>
 
-            {courses.length === 0 ? (
+            {allCourses.length === 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {Array.from({ length: 6 }).map((_, i) => (
+                {Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-sm">
                     <div className="skeleton h-40 rounded-none" />
                     <div className="p-4 space-y-2">
@@ -415,12 +418,14 @@ export default function LoginPage() {
               </div>
             )}
 
-            {courses.length > 0 && (
+            {allCourses.length > 3 && (
               <div className="text-center mt-10">
-                <button onClick={() => setShowLogin(true)}
+                <button
+                  onClick={() => setShowAllCourses(prev => !prev)}
                   className="inline-flex items-center gap-2 px-8 py-3 rounded-xl text-white font-semibold text-sm transition-all hover:opacity-90"
                   style={{ background: BTN_BG }}>
-                  View All Courses <ArrowRight className="w-4 h-4" />
+                  {showAllCourses ? 'Show Less' : `View All Courses (${allCourses.length})`}
+                  <ArrowRight className={`w-4 h-4 transition-transform ${showAllCourses ? 'rotate-90' : ''}`} />
                 </button>
               </div>
             )}
