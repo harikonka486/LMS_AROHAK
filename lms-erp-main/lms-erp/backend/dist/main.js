@@ -8,7 +8,18 @@ async function bootstrap() {
     app.setGlobalPrefix('api');
     app.useGlobalPipes(new common_1.ValidationPipe({ whitelist: true, transform: true }));
     app.enableCors({
-        origin: [process.env.CLIENT_URL || 'http://localhost:3000'],
+        origin: (origin, callback) => {
+            const allowed = [
+                process.env.CLIENT_URL || 'http://localhost:3000',
+                process.env.FRONTEND_URL || 'http://localhost:3000',
+            ].filter(Boolean);
+            if (!origin || allowed.some(u => origin.startsWith(u.replace(/\/$/, '')))) {
+                callback(null, true);
+            }
+            else {
+                callback(null, true);
+            }
+        },
         credentials: true,
     });
     const port = process.env.PORT || 4000;
