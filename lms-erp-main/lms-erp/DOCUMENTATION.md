@@ -42,7 +42,12 @@ Key capabilities:
 
 ## 2. Tech Stack
 
-### Frontend
+### 🚀 **Core Technologies**
+- **Frontend**: Next.js 14.2.0 (React App Router)
+- **Backend**: NestJS 11.0.1 (Node.js Framework)  
+- **Database**: MySQL 8.0 (Relational Database)
+
+### Frontend (Next.js)
 | Package | Version | Purpose |
 |---|---|---|
 | Next.js | 14.2.0 | React framework (App Router) |
@@ -58,29 +63,32 @@ Key capabilities:
 | Lucide React | 0.294.0 | Icons |
 | date-fns | 3.x | Date formatting |
 
-### Backend
+### Backend (NestJS)
 | Package | Version | Purpose |
 |---|---|---|
-| NestJS | 11.x | Backend framework (modular architecture) |
-| Node.js | 18+ | Runtime |
-| MySQL2 | 3.x | Database driver |
-| @nestjs/jwt | 11.x | JWT authentication |
-| @nestjs/passport | 11.x | Passport.js integration |
-| passport-jwt | 4.x | JWT strategy |
-| bcryptjs | 3.x | Password hashing |
-| multer | 2.x | File upload handling |
-| nodemailer | 8.x | Email sending (welcome mail) |
-| uuid | 13.x | UUID generation |
+| NestJS | 11.0.1 | Node.js framework |
+| TypeScript | 5.7.3 | Type safety |
+| MySQL2 | 3.20.0 | MySQL driver |
+| Passport | 0.7.0 | Authentication |
+| JWT | 11.0.2 | JSON Web Tokens |
+| bcryptjs | 3.0.3 | Password hashing |
 | class-validator | 0.15.x | DTO validation |
 | class-transformer | 0.5.x | Request transformation |
 
+### Database (MySQL)
+| Component | Version | Purpose |
+|---|---|---|
+| MySQL Server | 8.0 | Primary database |
+| MySQL2 Driver | 3.20.0 | Node.js MySQL connector |
+| Database Schema | Custom | LMS tables structure |
+
 ### Infrastructure
-| Service | Purpose |
-|---|---|
-| MySQL 8.0 | Primary database |
-| NestJS | Backend API (port 4000) |
-| Next.js | Frontend (port 3000) |
-| Gmail SMTP | Transactional email (welcome mail) |
+| Service | Technology | Port | Purpose |
+|---|---|---|---|
+| Frontend | Next.js | 3000 | React application |
+| Backend API | NestJS | 4000 | RESTful API server |
+| Database | MySQL 8.0 | 3306 | Data persistence |
+| Email Service | Gmail SMTP | - | Transactional emails |
 
 ---
 
@@ -88,9 +96,46 @@ Key capabilities:
 
 ```
 lms-erp/
-├── backend/                          # NestJS API
+├── backend/                          # NestJS Backend API
 │   ├── src/
-│   │   ├── main.ts                   # Bootstrap — CORS, validation pipe, global prefix
+│   │   ├── main.ts                   # NestJS bootstrap — CORS, validation pipe, global prefix
+│   │   ├── app.module.ts             # Root module
+│   │   ├── auth/                     # JWT authentication
+│   │   ├── users/                    # User management
+│   │   ├── courses/                  # Course CRUD
+│   │   ├── enrollments/              # Student enrollments
+│   │   ├── lessons/                  # Lesson content
+│   │   ├── quizzes/                  # Quiz system
+│   │   ├── certificates/             # Certificate generation
+│   │   ├── progress/                 # Progress tracking
+│   │   ├── categories/               # Course categories
+│   │   ├── database/                 # MySQL connection
+│   │   └── mail/                     # Email service
+│   ├── package.json
+│   └── nest-cli.json
+├── frontend/                         # Next.js Frontend
+│   ├── app/                          # Next.js App Router
+│   │   ├── (auth)/                   # Auth group layout
+│   │   │   ├── login/
+│   │   │   └── register/
+│   │   ├── admin/                    # Admin routes
+│   │   │   ├── courses/
+│   │   │   ├── users/
+│   │   │   └── dashboard/
+│   │   ├── certificates/             # Certificate pages
+│   │   ├── courses/                  # Course listing/details
+│   │   ├── dashboard/                # Employee dashboard
+│   │   ├── learn/                    # Learning interface
+│   │   └── my-learning/              # Progress tracking
+│   ├── components/                   # Reusable React components
+│   ├── lib/                         # Utilities, API client, store
+│   ├── public/                      # Static assets
+│   ├── next.config.js              # Next.js configuration
+│   ├── tailwind.config.ts          # Tailwind CSS config
+│   └── package.json
+├── DOCUMENTATION.md                 # This file
+└── README.md                       # Project overview
+```
 │   │   ├── app.module.ts             # Root module — imports all feature modules
 │   │   ├── database/
 │   │   │   ├── database.module.ts    # MySQL connection pool (global)
