@@ -1,6 +1,7 @@
 {
-  "name": "lms-erp-frontend",
+  "name": "lms-frontend-nextjs",
   "version": "1.0.0",
+  "description": "LMS Frontend built with Next.js 14 and TypeScript",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000",

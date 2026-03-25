@@ -2,7 +2,7 @@
 
 A full-stack Learning Management System built for enterprise/ERP use.
 
-**Stack:** Next.js 14 · Node.js + Express · MySQL
+**Stack:** Next.js 14 · NestJS · MySQL
 
 ---
 
@@ -10,7 +10,7 @@ A full-stack Learning Management System built for enterprise/ERP use.
 
 ```
 lms-erp/
-├── backend/          # Express API (port 4000)
+├── backend/          # NestJS API (port 4000)
 └── frontend/         # Next.js 14 App (port 3000)
 ```
 
@@ -54,17 +54,17 @@ CREATE DATABASE lms_erp CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 ### 4. Run migrations
 ```bash
-node src/db/migrate.js
+npm run migrate
 ```
 
 ### 5. Seed demo data
 ```bash
-node src/db/seed.js
+npm run seed
 ```
 
 ### 6. Start the server
 ```bash
-node src/index.js
+npm run start:dev
 ```
 
 API available at: `http://localhost:4000/api`

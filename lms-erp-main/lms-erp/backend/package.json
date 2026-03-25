@@ -1,7 +1,7 @@
 {
-  "name": "backend-nest",
+  "name": "lms-backend-nestjs",
   "version": "0.0.1",
-  "description": "",
+  "description": "LMS Backend API built with NestJS and MySQL",
   "author": "",
   "private": true,
   "license": "UNLICENSED",
@@ -12,6 +12,8 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
+    "migrate": "node src/database/migrate.js",
+    "seed": "node src/database/seed.js",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",

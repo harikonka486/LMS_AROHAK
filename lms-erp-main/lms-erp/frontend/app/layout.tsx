@@ -1,3 +1,12 @@
+/**
+ * LMS Frontend - Next.js Root Layout
+ * 
+ * This is the root layout component for the LMS Next.js frontend application.
+ * It provides the HTML structure, fonts, and global providers.
+ * 
+ * Stack: Next.js 14 + React 18 + TypeScript + Tailwind CSS
+ */
+
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { Toaster } from 'react-hot-toast'
@@ -8,7 +17,7 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'LMS — Employee Training Portal',
-  description: 'Employee Learning Management System',
+  description: 'Employee Learning Management System built with Next.js',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
