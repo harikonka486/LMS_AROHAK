@@ -9,7 +9,7 @@ import { useQuery } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import {
   Eye, EyeOff, Award, BarChart3, GraduationCap,
-  Users, HelpCircle, ArrowRight, CheckCircle, X,
+  Users, HelpCircle, ArrowRight, X,
   Mail, Phone, MapPin, Globe, BookOpen,
 } from 'lucide-react'
 import api from '@/lib/api'
@@ -32,12 +32,10 @@ const BTN_BG    = `linear-gradient(135deg, ${A.red}, ${A.crimson})`
 const GOLD_BG   = `linear-gradient(135deg, ${A.gold}, ${A.amber})`
 
 const ALLOWED_DOMAINS = ['@arohak.com', '@cognivance.com']
-const isAllowedEmail = (e: string) => ALLOWED_DOMAINS.some(d => e.endsWith(d))
+const isAllowedEmail = (e: string) => !!e
 
 const schema = z.object({
-  email: z.string().email().refine(isAllowedEmail, {
-    message: 'Only @arohak.com or @cognivance.com email addresses are allowed',
-  }),
+  email: z.string().email(),
   password: z.string().min(1),
 })
 type F = z.infer<typeof schema>
@@ -92,56 +90,20 @@ function ArohakLogoWhite({ size = 40 }: { size?: number }) {
   )
 }
 
-// ── Welcome Modal ─────────────────────────────────────────────────────────────
-function WelcomeModal({ user, onClose }: { user: any; onClose: () => void }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(61,10,10,0.75)', backdropFilter: 'blur(6px)' }}>
-      <div className="relative w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl"
-        style={{ animation: 'popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards' }}>
-        <div className="px-10 pt-12 pb-8 text-center" style={{ background: HERO_BG }}>
-          <div className="w-20 h-20 rounded-full bg-white/20 border-4 border-white/30 flex items-center justify-center mx-auto mb-5 shadow-xl">
-            <span className="text-4xl font-bold text-white">{user.name?.[0]?.toUpperCase()}</span>
-          </div>
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <CheckCircle className="w-5 h-5 text-amber-300" />
-            <p className="text-amber-300 text-sm font-medium">Login successful</p>
-          </div>
-          <h2 className="text-3xl font-bold text-white mb-1">Welcome back!</h2>
-          <p className="text-white/70 text-lg">{user.name}</p>
-          <div className="flex items-center justify-center gap-3 mt-4 flex-wrap">
-            <span className={cn('text-xs font-semibold px-3 py-1 rounded-full',
-              user.role === 'admin' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800')}>
-              {user.role === 'admin' ? 'Admin' : 'Employee'}
-            </span>
-            {user.employee_id && <span className="text-xs text-white/60 bg-white/10 px-3 py-1 rounded-full">{user.employee_id}</span>}
-            {user.department  && <span className="text-xs text-white/60 bg-white/10 px-3 py-1 rounded-full">{user.department}</span>}
-          </div>
-        </div>
-        <div className="bg-white px-10 py-8 text-center">
-          <p className="text-gray-500 text-sm mb-6">
-            You're signed in to the <span className="font-semibold text-gray-800">Arohak LMS Portal</span>. Ready to continue?
-          </p>
-          <button onClick={onClose}
-            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-white font-semibold text-base transition-all hover:opacity-90 active:scale-95"
-            style={{ background: BTN_BG }}>
-            Go to Dashboard <ArrowRight className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-      <style>{`@keyframes popIn{0%{opacity:0;transform:scale(0.85) translateY(20px)}100%{opacity:1;transform:scale(1) translateY(0)}}`}</style>
-    </div>
-  )
-}
-
 // ── Login Modal ───────────────────────────────────────────────────────────────
 function LoginModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (user: any) => void }) {
   const { setAuth } = useAuthStore()
-  const [loading, setLoading] = useState(false)
-  const [show, setShow] = useState(false)
+  const [loading, setLoading]             = useState(false)
+  const [show, setShow]                   = useState(false)
+  const [forgotMode, setForgotMode]       = useState(false)
+  const [forgotEmail, setForgotEmail]     = useState('')
+  const [forgotSent, setForgotSent]       = useState(false)
+  const [forgotLoading, setForgotLoading] = useState(false)
+  const [errorMsg, setErrorMsg]           = useState('')
   const { register, handleSubmit, formState: { errors } } = useForm<F>({ resolver: zodResolver(schema) })
 
   const onSubmit = async (data: F) => {
+    setErrorMsg('')
     setLoading(true)
     try {
       const res = await api.post('/auth/login', data)
@@ -149,12 +111,24 @@ function LoginModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (u
       onSuccess(res.data.user)
     } catch (err: any) {
       if (!err.response) {
-        toast.error('Cannot connect to server. Please ensure the backend is running.')
+        setErrorMsg('Cannot connect to server. Please ensure the backend is running.')
       } else {
-        const msg = err.response?.data?.message || err.response?.data?.error || 'Login failed'
-        toast.error(Array.isArray(msg) ? msg[0] : msg)
+        const msg = err.response?.data?.message || err.response?.data?.error || 'Invalid email or password'
+        setErrorMsg(Array.isArray(msg) ? msg[0] : msg)
       }
     } finally { setLoading(false) }
+  }
+
+  const onForgot = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!forgotEmail) return
+    setForgotLoading(true)
+    try {
+      await api.post('/auth/forgot-password', { email: forgotEmail })
+      setForgotSent(true)
+    } catch {
+      setForgotSent(true)
+    } finally { setForgotLoading(false) }
   }
 
   return (
@@ -169,44 +143,100 @@ function LoginModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (u
 
         {/* Header */}
         <div className="px-8 pt-8 pb-6" style={{ background: HERO_BG }}>
-          <div className="mb-5">
-            <ArohakLogoWhite size={36} />
-          </div>
-          <h2 className="text-2xl font-bold text-white mb-1">Welcome back</h2>
-          <p className="text-white/60 text-sm">Sign in to continue your learning journey</p>
+          <div className="mb-5"><ArohakLogoWhite size={36} /></div>
+          <h2 className="text-2xl font-bold text-white mb-1">
+            {forgotMode ? 'Reset Password' : 'Welcome back'}
+          </h2>
+          <p className="text-white/60 text-sm">
+            {forgotMode ? 'Enter your email to receive a reset link' : 'Sign in to continue your learning journey'}
+          </p>
         </div>
 
+        {/* Error banner — top center of form */}
+        {errorMsg && (
+          <div className="mx-8 mt-5 flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium"
+            style={{ background: '#fff0f0', border: '1px solid #fca5a5', color: '#991b1b' }}>
+            <X className="w-4 h-4 flex-shrink-0 cursor-pointer" onClick={() => setErrorMsg('')} />
+            {errorMsg}
+          </div>
+        )}
+
         {/* Form */}
-        <div className="px-8 py-7" style={{ background: A.cream }}>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: A.red }}>Email Address</label>
-              <input {...register('email')} type="email" className="input" placeholder="you@arohak.com or you@cognivance.com" />
-              {errors.email && <p className="text-red-600 text-xs mt-1">{errors.email.message}</p>}
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: A.red }}>Password</label>
-              <div className="relative">
-                <input {...register('password')} type={show ? 'text' : 'password'} className="input pr-10" placeholder="••••••••" />
-                <button type="button" onClick={() => setShow(!show)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                  {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+        <div className="px-8 py-6" style={{ background: A.cream }}>
+          {forgotMode ? (
+            forgotSent ? (
+              <div className="text-center py-4">
+                <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-3">
+                  <Mail className="w-6 h-6 text-green-600" />
+                </div>
+                <p className="font-semibold text-gray-800 mb-1">Check your inbox</p>
+                <p className="text-sm text-gray-500 mb-5">If that email is registered, a reset link has been sent.</p>
+                <button onClick={() => { setForgotMode(false); setForgotSent(false); setForgotEmail('') }}
+                  className="text-sm font-medium hover:underline" style={{ color: A.red }}>
+                  Back to Sign In
                 </button>
               </div>
-              {errors.password && <p className="text-red-600 text-xs mt-1">{errors.password.message}</p>}
-            </div>
-            <button type="submit" disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-white font-semibold text-sm transition-all hover:opacity-90 active:scale-95 disabled:opacity-60"
-              style={{ background: BTN_BG }}>
-              {loading
-                ? <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Signing in...</>
-                : 'Sign In'}
-            </button>
-          </form>
-          <p className="text-center text-sm text-gray-500 mt-5">
-            New employee?{' '}
-            <Link href="/register" className="font-medium hover:underline" style={{ color: A.red }}>Create account</Link>
-          </p>
+            ) : (
+              <form onSubmit={onForgot} className="space-y-5">
+                <div>
+                  <label className="block text-sm font-medium mb-1.5" style={{ color: A.red }}>Email Address</label>
+                  <input type="email" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)}
+                    className="input" placeholder="you@example.com" required />
+                </div>
+                <button type="submit" disabled={forgotLoading}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-white font-semibold text-sm transition-all hover:opacity-90 disabled:opacity-60"
+                  style={{ background: BTN_BG }}>
+                  {forgotLoading
+                    ? <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Sending...</>
+                    : 'Send Reset Link'}
+                </button>
+                <p className="text-center text-sm text-gray-500">
+                  <button type="button" onClick={() => setForgotMode(false)}
+                    className="font-medium hover:underline" style={{ color: A.red }}>
+                    Back to Sign In
+                  </button>
+                </p>
+              </form>
+            )
+          ) : (
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: A.red }}>Email Address</label>
+                <input {...register('email')} type="email" className="input" placeholder="you@example.com" />
+                {errors.email && <p className="text-red-600 text-xs mt-1">{errors.email.message}</p>}
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-sm font-medium" style={{ color: A.red }}>Password</label>
+                  <button type="button" onClick={() => { setForgotMode(true); setErrorMsg('') }}
+                    className="text-xs hover:underline" style={{ color: A.red }}>
+                    Forgot password?
+                  </button>
+                </div>
+                <div className="relative">
+                  <input {...register('password')} type={show ? 'text' : 'password'} className="input pr-10" placeholder="••••••••" />
+                  <button type="button" onClick={() => setShow(!show)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                    {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                {errors.password && <p className="text-red-600 text-xs mt-1">{errors.password.message}</p>}
+              </div>
+              <button type="submit" disabled={loading}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-white font-semibold text-sm transition-all hover:opacity-90 active:scale-95 disabled:opacity-60"
+                style={{ background: BTN_BG }}>
+                {loading
+                  ? <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Signing in...</>
+                  : 'Sign In'}
+              </button>
+            </form>
+          )}
+          {!forgotMode && (
+            <p className="text-center text-sm text-gray-500 mt-5">
+              New employee?{' '}
+              <Link href="/register" className="font-medium hover:underline" style={{ color: A.red }}>Create account</Link>
+            </p>
+          )}
         </div>
       </div>
       <style>{`@keyframes popIn{0%{opacity:0;transform:scale(0.85) translateY(20px)}100%{opacity:1;transform:scale(1) translateY(0)}}`}</style>
@@ -214,13 +244,13 @@ function LoginModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (u
   )
 }
 
+
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function LoginPage() {
   const router = useRouter()
   const { user } = useAuthStore()
   const [mounted, setMounted]         = useState(false)
   const [showLogin, setShowLogin]     = useState(false)
-  const [welcomeUser, setWelcomeUser] = useState<any>(null)
 
   useEffect(() => { setMounted(true) }, [])
   useEffect(() => { if (mounted && user) router.replace('/dashboard') }, [mounted, user, router])
@@ -234,8 +264,7 @@ export default function LoginPage() {
   const allCourses = data?.courses ?? []
   const courses = showAllCourses ? allCourses : allCourses.slice(0, 3)
 
-  const handleSuccess = (u: any) => { setShowLogin(false); setWelcomeUser(u) }
-  const handleWelcomeClose = () => { setWelcomeUser(null); router.push('/dashboard') }
+  const handleSuccess = (u: any) => { setShowLogin(false); router.push('/dashboard') }
 
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -243,7 +272,6 @@ export default function LoginPage() {
 
   return (
     <>
-      {welcomeUser && <WelcomeModal user={welcomeUser} onClose={handleWelcomeClose} />}
       {showLogin   && <LoginModal onClose={() => setShowLogin(false)} onSuccess={handleSuccess} />}
 
       <div className="min-h-screen flex flex-col">

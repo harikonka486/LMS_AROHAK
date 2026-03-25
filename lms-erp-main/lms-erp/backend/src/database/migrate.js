@@ -168,6 +168,27 @@ async function migrate() {
     if (!e.message.includes('Duplicate column')) console.warn('video_url column:', e.message);
   }
 
+  try {
+    await db.query(`ALTER TABLE certificates ADD COLUMN score DECIMAL(5,2) NULL`);
+    console.log('✅ Added score column to certificates');
+  } catch (e) {
+    if (!e.message.includes('Duplicate column')) console.warn('score column:', e.message);
+  }
+
+  // Password reset tokens table
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS password_reset_tokens (
+      id VARCHAR(36) PRIMARY KEY,
+      user_id VARCHAR(36) NOT NULL,
+      token VARCHAR(255) UNIQUE NOT NULL,
+      expires_at TIMESTAMP NOT NULL,
+      used TINYINT(1) DEFAULT 0,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+  `);
+  console.log('✅ password_reset_tokens table ready');
+
   await db.end();
 }
 

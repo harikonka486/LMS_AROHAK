@@ -1,8 +1,7 @@
 'use client'
 import { useQuery } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { BookOpen, GraduationCap, Award, TrendingUp, Clock, CheckCircle, ArrowRight, Play, Plus, X } from 'lucide-react'
+import { BookOpen, GraduationCap, Award, TrendingUp, Clock, CheckCircle, ArrowRight, Play, Plus } from 'lucide-react'
 import AppLayout from '@/components/layout/AppLayout'
 import { useAuthStore } from '@/lib/store'
 import api from '@/lib/api'
@@ -14,79 +13,9 @@ const A = { red: '#8B1A1A', crimson: '#C0392B', gold: '#D4A017', amber: '#F0A500
 const HERO_BG = `linear-gradient(135deg, ${A.dark} 0%, ${A.red} 55%, ${A.crimson} 100%)`
 const GOLD_BG = `linear-gradient(135deg, ${A.gold}, ${A.amber})`
 
-function WelcomePopup({ user, onClose }: { user: any; onClose: () => void }) {
-  const [progress, setProgress] = useState(100)
-
-  useEffect(() => {
-    // Auto-close after 3s with a progress bar countdown
-    const start = Date.now()
-    const duration = 3000
-    const interval = setInterval(() => {
-      const elapsed = Date.now() - start
-      const remaining = Math.max(0, 100 - (elapsed / duration) * 100)
-      setProgress(remaining)
-      if (elapsed >= duration) { clearInterval(interval); onClose() }
-    }, 30)
-    return () => clearInterval(interval)
-  }, [onClose])
-
-  const initials = user?.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(61,10,10,0.55)', backdropFilter: 'blur(6px)' }}>
-      <div className="relative w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl animate-pop">
-        {/* Close button */}
-        <button onClick={onClose}
-          className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-white/20 hover:bg-white/30 text-white transition-colors">
-          <X className="w-4 h-4" />
-        </button>
-
-        {/* Header */}
-        <div className="px-8 pt-10 pb-7 text-center" style={{ background: HERO_BG }}>
-          {/* Avatar */}
-          <div className="w-16 h-16 rounded-full bg-white/20 border-4 border-white/30 flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <span className="text-2xl font-bold text-white">{initials}</span>
-          </div>
-          <p className="text-amber-300 text-xs font-semibold uppercase tracking-widest mb-1">Welcome back</p>
-          <h2 className="text-xl font-bold text-white mb-0.5">{user?.name}</h2>
-          <span className={cn('inline-block text-xs font-semibold px-3 py-0.5 rounded-full mt-1',
-            user?.role === 'admin' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800')}>
-            {ROLE_LABELS[user?.role ?? 'employee']}
-          </span>
-        </div>
-
-        {/* Body */}
-        <div className="bg-white px-8 py-5 text-center">
-          <p className="text-gray-500 text-sm">You're signed in to the <span className="font-semibold text-gray-800">Arohak LMS Portal</span></p>
-          <button onClick={onClose}
-            className="mt-4 w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
-            style={{ background: HERO_BG }}>
-            Go to Dashboard
-          </button>
-        </div>
-
-        {/* Countdown progress bar */}
-        <div className="h-1 w-full" style={{ background: '#f0d9c8' }}>
-          <div className="h-1 transition-none" style={{ width: `${progress}%`, background: GOLD_BG }} />
-        </div>
-      </div>
-    </div>
-  )
-}
 
 export default function DashboardPage() {
   const { user } = useAuthStore()
-  const [showWelcome, setShowWelcome] = useState(false)
-
-  useEffect(() => {
-    if (!user) return
-    const key = `welcome_shown_${user.id}`
-    if (!sessionStorage.getItem(key)) {
-      sessionStorage.setItem(key, '1')
-      setShowWelcome(true)
-    }
-  }, [user])
 
   const { data: enrollments } = useQuery({
     queryKey: ['my-enrollments'],
@@ -123,7 +52,6 @@ export default function DashboardPage() {
 
   return (
     <AppLayout>
-      {showWelcome && <WelcomePopup user={user} onClose={() => setShowWelcome(false)} />}
       <div className="max-w-6xl mx-auto space-y-6">
 
         {/* Hero welcome banner */}

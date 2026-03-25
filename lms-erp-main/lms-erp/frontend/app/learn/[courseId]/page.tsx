@@ -89,6 +89,43 @@ export default function LearnPage() {
     return match ? `https://www.youtube.com/embed/${match[1]}` : null
   }
 
+  // Convert SharePoint video URL to embed URL
+  function getSharePointEmbedUrl(url: string): string | null {
+    if (!url) return null
+    if (!url.includes('sharepoint.com') && !url.includes('sharepointonline.com')) return null
+
+    // Already an embed/stream URL — use as-is
+    if (url.includes('/_layouts/15/embed.aspx') ||
+        url.includes('/_layouts/15/stream.aspx') ||
+        url.includes('/embed') ||
+        url.includes('microsoftstream.com/embed')) {
+      return url
+    }
+
+    // SharePoint "share" link — convert to stream embed
+    // e.g. https://tenant.sharepoint.com/:v:/s/site/XXXXX
+    if (url.includes('/:v:/')) {
+      // Replace /:v:/ share link with stream embed
+      return url.replace('/:v:/', '/_layouts/15/stream.aspx?id=')
+        .replace('/s/', '/sites/')
+    }
+
+    // Fallback — try to use as embed directly
+    return url
+  }
+
+  function getVideoEmbed(url: string): { type: 'youtube' | 'sharepoint' | 'iframe' | 'video'; src: string } | null {
+    if (!url) return null
+    const yt = getYouTubeEmbedUrl(url)
+    if (yt) return { type: 'youtube', src: yt }
+    const sp = getSharePointEmbedUrl(url)
+    if (sp) return { type: 'sharepoint', src: sp }
+    // Vimeo
+    const vimeo = url.match(/vimeo\.com\/(\d+)/)
+    if (vimeo) return { type: 'iframe', src: `https://player.vimeo.com/video/${vimeo[1]}` }
+    return null
+  }
+
   if (!user) return null
 
   return (
@@ -201,20 +238,32 @@ export default function LearnPage() {
               {(activeLesson.video_file || activeLesson.video_url) ? (
                 <div className="aspect-video bg-black rounded-xl overflow-hidden mb-6">
                   {activeLesson.video_file ? (
-                    <video
-                      src={fileUrl(activeLesson.video_file)}
-                      controls className="w-full h-full"
-                    />
-                  ) : getYouTubeEmbedUrl(activeLesson.video_url) ? (
-                    <iframe
-                      src={getYouTubeEmbedUrl(activeLesson.video_url)!}
-                      className="w-full h-full"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  ) : (
-                    <video src={activeLesson.video_url} controls className="w-full h-full" />
-                  )}
+                    <video src={fileUrl(activeLesson.video_file)} controls className="w-full h-full" />
+                  ) : (() => {
+                    const embed = getVideoEmbed(activeLesson.video_url)
+                    if (embed?.type === 'youtube' || embed?.type === 'iframe') {
+                      return (
+                        <iframe
+                          src={embed.src}
+                          className="w-full h-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      )
+                    }
+                    if (embed?.type === 'sharepoint') {
+                      return (
+                        <iframe
+                          src={embed.src}
+                          className="w-full h-full"
+                          allowFullScreen
+                          allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                        />
+                      )
+                    }
+                    // Direct video file URL
+                    return <video src={activeLesson.video_url} controls className="w-full h-full" />
+                  })()}
                 </div>
               ) : (
                 <div className="aspect-video bg-gray-800 rounded-xl flex items-center justify-center mb-6">

@@ -49,6 +49,15 @@ export default function CertificatePage() {
               <span className="text-sm font-medium">All assessments passed</span>
             </div>
 
+            {cert.score != null && (
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6"
+                style={{ background: '#FFF8F0', border: '1px solid #f0d9c8' }}>
+                <span className="text-sm font-bold" style={{ color: '#8B1A1A' }}>
+                  Final Score: {Math.round(cert.score)}%
+                </span>
+              </div>
+            )}
+
             <div className="border-t border-gray-200 pt-6 flex items-center justify-between text-sm text-gray-500">
               <div>
                 <p className="font-medium text-gray-700">{cert.instructor_name}</p>

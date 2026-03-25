@@ -3,12 +3,14 @@ import type { Pool } from 'mysql2/promise';
 import { v4 as uuid } from 'uuid';
 import { DB_POOL } from '../database/database.module';
 import { ProgressService } from '../progress/progress.service';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class QuizzesService {
   constructor(
     @Inject(DB_POOL) private db: Pool,
     private progress: ProgressService,
+    private mail: MailService,
   ) {}
 
   async findByCourse(courseId: string) {
@@ -81,9 +83,28 @@ export class QuizzesService {
       if (Number(passedCount) >= Number(total)) {
         const certNum = `CERT-${Date.now()}-${userId.slice(0, 8).toUpperCase()}`;
         await this.db.query(
-          'INSERT IGNORE INTO certificates (id,user_id,course_id,certificate_number) VALUES (?,?,?,?)',
-          [uuid(), userId, courseId, certNum],
+          'INSERT IGNORE INTO certificates (id,user_id,course_id,certificate_number,score) VALUES (?,?,?,?,?)',
+          [uuid(), userId, courseId, certNum, Math.round(score * 100) / 100],
         );
+        // Send certificate email to the user
+        const [[user]] = await this.db.query('SELECT name, email, employee_id, department FROM users WHERE id=?', [userId]) as any;
+        const [[course]] = await this.db.query(
+          'SELECT c.title, u.name AS instructor_name FROM courses c JOIN users u ON u.id=c.instructor_id WHERE c.id=?',
+          [courseId]
+        ) as any;
+        const [[cert]] = await this.db.query(
+          'SELECT issued_at FROM certificates WHERE certificate_number=?', [certNum]
+        ) as any;
+        if (user && course) {
+          const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+          const verifyUrl = `${frontendUrl}/certificates/verify/${certNum}`;
+          this.mail.sendCertificate(
+            user.email, user.name, course.title, certNum, verifyUrl,
+            user.employee_id, user.department, course.instructor_name,
+            cert?.issued_at ? new Date(cert.issued_at) : new Date(),
+            score,
+          );
+        }
       }
       const [[enrollment]] = await this.db.query(
         'SELECT id FROM enrollments WHERE user_id=? AND course_id=?', [userId, courseId],

@@ -8,4 +8,7 @@ export declare class EnrollmentsController {
         enrolled: boolean;
         enrollment: any;
     }>;
+    unenroll(id: string): Promise<{
+        message: string;
+    }>;
 }

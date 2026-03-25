@@ -17,12 +17,15 @@ const common_1 = require("@nestjs/common");
 const uuid_1 = require("uuid");
 const database_module_1 = require("../database/database.module");
 const progress_service_1 = require("../progress/progress.service");
+const mail_service_1 = require("../mail/mail.service");
 let QuizzesService = class QuizzesService {
     db;
     progress;
-    constructor(db, progress) {
+    mail;
+    constructor(db, progress, mail) {
         this.db = db;
         this.progress = progress;
+        this.mail = mail;
     }
     async findByCourse(courseId) {
         const [quizzes] = await this.db.query('SELECT * FROM quizzes WHERE course_id=? ORDER BY order_num', [courseId]);
@@ -90,7 +93,15 @@ let QuizzesService = class QuizzesService {
       `, [userId, courseId]);
             if (Number(passedCount) >= Number(total)) {
                 const certNum = `CERT-${Date.now()}-${userId.slice(0, 8).toUpperCase()}`;
-                await this.db.query('INSERT IGNORE INTO certificates (id,user_id,course_id,certificate_number) VALUES (?,?,?,?)', [(0, uuid_1.v4)(), userId, courseId, certNum]);
+                await this.db.query('INSERT IGNORE INTO certificates (id,user_id,course_id,certificate_number,score) VALUES (?,?,?,?,?)', [(0, uuid_1.v4)(), userId, courseId, certNum, Math.round(score * 100) / 100]);
+                const [[user]] = await this.db.query('SELECT name, email, employee_id, department FROM users WHERE id=?', [userId]);
+                const [[course]] = await this.db.query('SELECT c.title, u.name AS instructor_name FROM courses c JOIN users u ON u.id=c.instructor_id WHERE c.id=?', [courseId]);
+                const [[cert]] = await this.db.query('SELECT issued_at FROM certificates WHERE certificate_number=?', [certNum]);
+                if (user && course) {
+                    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+                    const verifyUrl = `${frontendUrl}/certificates/verify/${certNum}`;
+                    this.mail.sendCertificate(user.email, user.name, course.title, certNum, verifyUrl, user.employee_id, user.department, course.instructor_name, cert?.issued_at ? new Date(cert.issued_at) : new Date(), score);
+                }
             }
             const [[enrollment]] = await this.db.query('SELECT id FROM enrollments WHERE user_id=? AND course_id=?', [userId, courseId]);
             if (enrollment)
@@ -103,6 +114,7 @@ exports.QuizzesService = QuizzesService;
 exports.QuizzesService = QuizzesService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, common_1.Inject)(database_module_1.DB_POOL)),
-    __metadata("design:paramtypes", [Object, progress_service_1.ProgressService])
+    __metadata("design:paramtypes", [Object, progress_service_1.ProgressService,
+        mail_service_1.MailService])
 ], QuizzesService);
 //# sourceMappingURL=quizzes.service.js.map

@@ -23,10 +23,7 @@ const HERO_BG = `linear-gradient(135deg, ${A.dark} 0%, ${A.red} 55%, ${A.crimson
 
 const schema = z.object({
   name: z.string().min(2),
-  email: z.string().email().refine(
-    e => e.endsWith('@arohak.com') || e.endsWith('@cognivance.com'),
-    { message: 'Only @arohak.com or @cognivance.com email addresses are allowed' }
-  ),
+  email: z.string().email(),
   password: z.string().min(6),
   department: z.string().optional(),
   employee_id: z.string().optional(),
@@ -113,7 +110,7 @@ export default function RegisterPage() {
               </div>
               <div className="col-span-2">
                 <label className="block text-sm font-medium mb-1" style={{ color: A.red }}>Email *</label>
-                <input {...register('email')} type="email" className="input" placeholder="you@arohak.com or you@cognivance.com" />
+                <input {...register('email')} type="email" className="input" placeholder="you@example.com" />
                 {errors.email && <p className="text-red-600 text-xs mt-1">{errors.email.message}</p>}
               </div>
               <div className="col-span-2">

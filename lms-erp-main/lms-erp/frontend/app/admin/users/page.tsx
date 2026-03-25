@@ -219,9 +219,20 @@ export default function AdminUsersPage() {
 }
 
 function UserDetailPanel({ user, onClose }: { user: any; onClose: () => void }) {
+  const qc = useQueryClient()
+  const [confirmUnenroll, setConfirmUnenroll] = useState<any>(null)
+
   const { data: progress, isLoading } = useQuery({
     queryKey: ['user-progress', user.id],
     queryFn: () => api.get(`/users/${user.id}/progress`).then(r => r.data),
+  })
+
+  const unenroll = useMutation({
+    mutationFn: (enrollmentId: string) => api.delete(`/enrollments/${enrollmentId}`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['user-progress', user.id] })
+      setConfirmUnenroll(null)
+    },
   })
 
   const enrolled   = progress?.length ?? 0
@@ -349,12 +360,29 @@ function UserDetailPanel({ user, onClose }: { user: any; onClose: () => void }) 
                     <span>Enrolled: {new Date(e.enrolled_at).toLocaleDateString()}</span>
                     {e.completed_at && <span>Completed: {new Date(e.completed_at).toLocaleDateString()}</span>}
                   </div>
+
+                  {/* Remove enrollment */}
+                  <button
+                    onClick={() => setConfirmUnenroll(e)}
+                    className="mt-3 w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors border border-red-100">
+                    <Trash2 className="w-3.5 h-3.5" /> Remove Enrollment
+                  </button>
                 </div>
               )
             })}
           </div>
         </div>
       </div>
+
+      {confirmUnenroll && (
+        <ConfirmModal
+          title="Remove Enrollment"
+          message={`Remove "${user.name}" from "${confirmUnenroll.course_title}"? Their progress and quiz attempts will also be deleted.`}
+          onConfirm={() => unenroll.mutate(confirmUnenroll.enrollment_id)}
+          onCancel={() => setConfirmUnenroll(null)}
+          loading={unenroll.isPending}
+        />
+      )}
     </>
   )
 }

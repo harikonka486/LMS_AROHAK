@@ -33,6 +33,13 @@ export class EnrollmentsService {
     return rows;
   }
 
+  async unenroll(enrollmentId: string) {
+    const [[enrollment]] = await this.db.query('SELECT id FROM enrollments WHERE id=?', [enrollmentId]) as any;
+    if (!enrollment) throw new NotFoundException('Enrollment not found');
+    await this.db.query('DELETE FROM enrollments WHERE id=?', [enrollmentId]);
+    return { message: 'Unenrolled successfully' };
+  }
+
   async check(userId: string, courseId: string) {
     const [[enrollment]] = await this.db.query(
       'SELECT * FROM enrollments WHERE user_id=? AND course_id=?', [userId, courseId],

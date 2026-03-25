@@ -19,7 +19,7 @@ export class AuthService {
   }
 
   private isAllowedEmail(email: string): boolean {
-    return email?.endsWith('@arohak.com') || email?.endsWith('@cognivance.com');
+    return !!email; // accept any valid email
   }
 
   async register(body: any) {
@@ -58,5 +58,39 @@ export class AuthService {
 
     const { password: _, ...userData } = user;
     return { token: this.sign(user.id), user: userData };
+  }
+
+  async forgotPassword(email: string) {
+    const [[user]] = await this.db.query('SELECT id, name FROM users WHERE email=?', [email]) as any;
+    if (!user) return { message: 'If that email exists, a reset link has been sent.' };
+
+    // Invalidate existing tokens
+    await this.db.query('UPDATE password_reset_tokens SET used=1 WHERE user_id=?', [user.id]);
+
+    const token = uuid();
+    await this.db.query(
+      'INSERT INTO password_reset_tokens (id, user_id, token, expires_at) VALUES (?,?,?, DATE_ADD(NOW(), INTERVAL 1 HOUR))',
+      [uuid(), user.id, token],
+    );
+
+    this.mail.sendPasswordReset(email, user.name, token);
+    return { message: 'If that email exists, a reset link has been sent.' };
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    const [[record]] = await this.db.query(
+      'SELECT * FROM password_reset_tokens WHERE token=? AND used=0 AND expires_at > NOW()',
+      [token],
+    ) as any;
+    if (!record) {
+      console.log(`[ResetPassword] Token lookup failed for token: ${token}`);
+      throw new BadRequestException('Invalid or expired reset token');
+    }
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await this.db.query('UPDATE users SET password=? WHERE id=?', [hashed, record.user_id]);
+    await this.db.query('UPDATE password_reset_tokens SET used=1 WHERE id=?', [record.id]);
+
+    return { message: 'Password reset successfully. You can now log in.' };
   }
 }

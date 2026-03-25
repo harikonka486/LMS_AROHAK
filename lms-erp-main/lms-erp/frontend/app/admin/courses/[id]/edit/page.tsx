@@ -16,7 +16,7 @@ export default function EditCoursePage() {
   const { user } = useAuthStore()
   const canDelete = user?.role === 'admin'
   const [newSection, setNewSection] = useState('')
-  const [newLesson, setNewLesson] = useState<{ sectionId: string; title: string } | null>(null)
+  const [newLesson, setNewLesson] = useState<{ sectionId: string; title: string; video_url: string } | null>(null)
   const [showQuizForm, setShowQuizForm] = useState(false)
   const [quizData, setQuizData] = useState({ title: '', passing_score: 70, questions: [{ text: '', options: ['', '', '', ''], correctAnswer: 0 }] })
   const [confirmDelete, setConfirmDelete] = useState<{ type: string; id: string; label: string } | null>(null)
@@ -51,8 +51,8 @@ export default function EditCoursePage() {
   })
 
   const addLesson = useMutation({
-    mutationFn: ({ sectionId, title }: { sectionId: string; title: string }) =>
-      api.post(`/lessons/section/${sectionId}`, { title }),
+    mutationFn: ({ sectionId, title, video_url }: { sectionId: string; title: string; video_url: string }) =>
+      api.post(`/lessons/section/${sectionId}`, { title, video_url: video_url || undefined }),
     onSuccess: () => { invalidate(); setNewLesson(null) },
   })
 
@@ -108,7 +108,7 @@ export default function EditCoursePage() {
           <button onClick={() => togglePublish.mutate()} className="btn-secondary flex items-center gap-2">
             {course?.is_published ? <><EyeOff className="w-4 h-4" />Unpublish</> : <><Eye className="w-4 h-4" />Publish</>}
           </button>
-          {!course?.is_published && canDelete && (
+          {canDelete && (
             <button onClick={() => setConfirmDeleteCourse(true)} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors">
               <Trash2 className="w-4 h-4" /> Delete Course
             </button>
@@ -137,14 +137,18 @@ export default function EditCoursePage() {
                     </div>
                   ))}
                   {newLesson?.sectionId === section.id ? (
-                    <div className="flex gap-2">
+                    <div className="space-y-2">
                       <input value={newLesson.title} onChange={e => setNewLesson({ ...newLesson, title: e.target.value })}
                         placeholder="Lesson title" className="input text-sm py-1.5" />
-                      <button onClick={() => addLesson.mutate(newLesson)} className="btn-primary text-sm py-1.5">Add</button>
-                      <button onClick={() => setNewLesson(null)} className="btn-secondary text-sm py-1.5">Cancel</button>
+                      <input value={newLesson.video_url} onChange={e => setNewLesson({ ...newLesson, video_url: e.target.value })}
+                        placeholder="Video URL (YouTube, SharePoint, or direct link)" className="input text-sm py-1.5" />
+                      <div className="flex gap-2">
+                        <button onClick={() => addLesson.mutate(newLesson)} className="btn-primary text-sm py-1.5">Add</button>
+                        <button onClick={() => setNewLesson(null)} className="btn-secondary text-sm py-1.5">Cancel</button>
+                      </div>
                     </div>
                   ) : (
-                    <button onClick={() => setNewLesson({ sectionId: section.id, title: '' })}
+                    <button onClick={() => setNewLesson({ sectionId: section.id, title: '', video_url: '' })}
                       className="text-sm text-brand-600 hover:text-brand-700 flex items-center gap-1">
                       <Plus className="w-3.5 h-3.5" /> Add Lesson
                     </button>

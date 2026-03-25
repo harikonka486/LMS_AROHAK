@@ -47,6 +47,13 @@ let EnrollmentsService = class EnrollmentsService {
     `, [userId]);
         return rows;
     }
+    async unenroll(enrollmentId) {
+        const [[enrollment]] = await this.db.query('SELECT id FROM enrollments WHERE id=?', [enrollmentId]);
+        if (!enrollment)
+            throw new common_1.NotFoundException('Enrollment not found');
+        await this.db.query('DELETE FROM enrollments WHERE id=?', [enrollmentId]);
+        return { message: 'Unenrolled successfully' };
+    }
     async check(userId, courseId) {
         const [[enrollment]] = await this.db.query('SELECT * FROM enrollments WHERE user_id=? AND course_id=?', [userId, courseId]);
         return { enrolled: !!enrollment, enrollment: enrollment || null };

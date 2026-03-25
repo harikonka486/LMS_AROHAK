@@ -11,10 +11,11 @@ const common_1 = require("@nestjs/common");
 const quizzes_controller_1 = require("./quizzes.controller");
 const quizzes_service_1 = require("./quizzes.service");
 const progress_module_1 = require("../progress/progress.module");
+const mail_module_1 = require("../mail/mail.module");
 let QuizzesModule = class QuizzesModule {
 };
 exports.QuizzesModule = QuizzesModule;
 exports.QuizzesModule = QuizzesModule = __decorate([
-    (0, common_1.Module)({ imports: [progress_module_1.ProgressModule], controllers: [quizzes_controller_1.QuizzesController], providers: [quizzes_service_1.QuizzesService] })
+    (0, common_1.Module)({ imports: [progress_module_1.ProgressModule, mail_module_1.MailModule], controllers: [quizzes_controller_1.QuizzesController], providers: [quizzes_service_1.QuizzesService] })
 ], QuizzesModule);
 //# sourceMappingURL=quizzes.module.js.map

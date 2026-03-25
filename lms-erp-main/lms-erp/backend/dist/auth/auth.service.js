@@ -65,7 +65,7 @@ let AuthService = class AuthService {
         return this.jwt.sign({ id });
     }
     isAllowedEmail(email) {
-        return email?.endsWith('@arohak.com') || email?.endsWith('@cognivance.com');
+        return !!email;
     }
     async register(body) {
         const { name, email, password, role, department, employee_id } = body;
@@ -91,6 +91,27 @@ let AuthService = class AuthService {
             throw new common_1.UnauthorizedException('Invalid credentials');
         const { password: _, ...userData } = user;
         return { token: this.sign(user.id), user: userData };
+    }
+    async forgotPassword(email) {
+        const [[user]] = await this.db.query('SELECT id, name FROM users WHERE email=?', [email]);
+        if (!user)
+            return { message: 'If that email exists, a reset link has been sent.' };
+        await this.db.query('UPDATE password_reset_tokens SET used=1 WHERE user_id=?', [user.id]);
+        const token = (0, uuid_1.v4)();
+        await this.db.query('INSERT INTO password_reset_tokens (id, user_id, token, expires_at) VALUES (?,?,?, DATE_ADD(NOW(), INTERVAL 1 HOUR))', [(0, uuid_1.v4)(), user.id, token]);
+        this.mail.sendPasswordReset(email, user.name, token);
+        return { message: 'If that email exists, a reset link has been sent.' };
+    }
+    async resetPassword(token, newPassword) {
+        const [[record]] = await this.db.query('SELECT * FROM password_reset_tokens WHERE token=? AND used=0 AND expires_at > NOW()', [token]);
+        if (!record) {
+            console.log(`[ResetPassword] Token lookup failed for token: ${token}`);
+            throw new common_1.BadRequestException('Invalid or expired reset token');
+        }
+        const hashed = await bcrypt.hash(newPassword, 10);
+        await this.db.query('UPDATE users SET password=? WHERE id=?', [hashed, record.user_id]);
+        await this.db.query('UPDATE password_reset_tokens SET used=1 WHERE id=?', [record.id]);
+        return { message: 'Password reset successfully. You can now log in.' };
     }
 };
 exports.AuthService = AuthService;

@@ -16,6 +16,7 @@ exports.EnrollmentsController = void 0;
 const common_1 = require("@nestjs/common");
 const enrollments_service_1 = require("./enrollments.service");
 const guards_1 = require("../auth/guards");
+const guards_2 = require("../auth/guards");
 let EnrollmentsController = class EnrollmentsController {
     enrollments;
     constructor(enrollments) {
@@ -27,6 +28,9 @@ let EnrollmentsController = class EnrollmentsController {
     findMy(req) { return this.enrollments.findMy(req.user.id); }
     check(req, courseId) {
         return this.enrollments.check(req.user.id, courseId);
+    }
+    unenroll(id) {
+        return this.enrollments.unenroll(id);
     }
 };
 exports.EnrollmentsController = EnrollmentsController;
@@ -53,6 +57,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], EnrollmentsController.prototype, "check", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    (0, common_1.UseGuards)(guards_2.RolesGuard),
+    (0, guards_2.Roles)('admin'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], EnrollmentsController.prototype, "unenroll", null);
 exports.EnrollmentsController = EnrollmentsController = __decorate([
     (0, common_1.Controller)('enrollments'),
     (0, common_1.UseGuards)(guards_1.JwtAuthGuard),
