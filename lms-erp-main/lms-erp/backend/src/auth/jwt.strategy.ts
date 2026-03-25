@@ -18,10 +18,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: { id: string }) {
-    const [[user]] = await this.db.query(
+    const [[user]] = (await this.db.query(
       'SELECT id,name,email,role,avatar,department,employee_id FROM users WHERE id=?',
       [payload.id],
-    ) as any;
+    )) as any;
     if (!user) throw new UnauthorizedException();
     return user;
   }

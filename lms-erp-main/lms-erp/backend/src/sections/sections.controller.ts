@@ -1,9 +1,18 @@
-import { Controller, Post, Patch, Delete, Param, Body, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Patch,
+  Delete,
+  Param,
+  Body,
+  UseGuards,
+} from '@nestjs/common';
 import { SectionsService } from './sections.service';
 import { JwtAuthGuard, RolesGuard, Roles } from '../auth/guards';
 
 @Controller('sections')
-@UseGuards(JwtAuthGuard, RolesGuard) @Roles('admin')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
 export class SectionsController {
   constructor(private sections: SectionsService) {}
 
@@ -18,5 +27,7 @@ export class SectionsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) { return this.sections.remove(id); }
+  remove(@Param('id') id: string) {
+    return this.sections.remove(id);
+  }
 }

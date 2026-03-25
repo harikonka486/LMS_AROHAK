@@ -78,6 +78,15 @@ export default function LearnPage() {
 
   const allLessons = course?.sections?.flatMap((s: any) => s.lessons) ?? []
   const currentIndex = allLessons.findIndex((l: any) => l.id === activeLesson?.id)
+
+  // Check if all lessons are completed
+  const allLessonsCompleted = allLessons.length > 0 && allLessons.every(lesson => isCompleted(lesson.id))
+
+  // Check if all quizzes are passed
+  const allQuizzesPassed = quizzes?.length > 0 && quizzes.every((quiz: any) => quiz.passed)
+
+  // Course is truly completed only when both lessons and quizzes are done
+  const isCourseFullyCompleted = allLessonsCompleted && allQuizzesPassed
   // File URL helper — Cloudinary URLs are absolute, local ones need the API base prepended
   const apiBase = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '')
   const fileUrl = (url: string) =>
@@ -146,7 +155,7 @@ export default function LearnPage() {
             </div>
           )}
           {/* Course completed badge in sidebar */}
-          {progress?.status === 'completed' && (
+          {isCourseFullyCompleted && (
             <div className="mt-3 flex items-center gap-2 px-3 py-2 rounded-lg"
               style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)' }}>
               <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" />
@@ -206,7 +215,7 @@ export default function LearnPage() {
         <div className={`flex-1 text-white ${tab === 'quiz' && activeQuiz && !quizResult ? 'overflow-hidden flex flex-col' : 'overflow-y-auto'}`} style={{ background: '#0f0e1a' }}>
 
           {/* ── Course Completed Banner ── */}
-          {progress?.status === 'completed' && (
+          {isCourseFullyCompleted && (
             <div className="mx-auto max-w-4xl mt-6 mx-6 rounded-2xl overflow-hidden"
               style={{ background: 'linear-gradient(135deg, #064e3b 0%, #065f46 100%)', border: '1px solid rgba(16,185,129,0.3)' }}>
               <div className="px-6 py-5 flex items-center gap-4">

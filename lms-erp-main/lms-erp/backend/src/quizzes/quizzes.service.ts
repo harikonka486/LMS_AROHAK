@@ -14,20 +14,42 @@ export class QuizzesService {
   ) {}
 
   async findByCourse(courseId: string) {
-    const [quizzes] = await this.db.query('SELECT * FROM quizzes WHERE course_id=? ORDER BY order_num', [courseId]) as any;
+    const [quizzes] = (await this.db.query(
+      'SELECT * FROM quizzes WHERE course_id=? ORDER BY order_num',
+      [courseId],
+    )) as any;
     for (const q of quizzes) {
-      const [questions] = await this.db.query('SELECT id,text,options FROM questions WHERE quiz_id=?', [q.id]) as any;
-      q.questions = questions.map((q: any) => ({ ...q, options: typeof q.options === 'string' ? JSON.parse(q.options) : q.options }));
+      const [questions] = (await this.db.query(
+        'SELECT id,text,options FROM questions WHERE quiz_id=?',
+        [q.id],
+      )) as any;
+      q.questions = questions.map((q: any) => ({
+        ...q,
+        options:
+          typeof q.options === 'string' ? JSON.parse(q.options) : q.options,
+      }));
     }
     return quizzes;
   }
 
   async findOne(id: string, userRole: string) {
-    const [[quiz]] = await this.db.query('SELECT * FROM quizzes WHERE id=?', [id]) as any;
+    const [[quiz]] = (await this.db.query('SELECT * FROM quizzes WHERE id=?', [
+      id,
+    ])) as any;
     if (!quiz) throw new NotFoundException('Not found');
-    const fields = userRole === 'admin' ? 'id,text,options,correct_answer,explanation' : 'id,text,options';
-    const [questions] = await this.db.query(`SELECT ${fields} FROM questions WHERE quiz_id=?`, [id]) as any;
-    quiz.questions = questions.map((q: any) => ({ ...q, options: typeof q.options === 'string' ? JSON.parse(q.options) : q.options }));
+    const fields =
+      userRole === 'admin'
+        ? 'id,text,options,correct_answer,explanation'
+        : 'id,text,options';
+    const [questions] = (await this.db.query(
+      `SELECT ${fields} FROM questions WHERE quiz_id=?`,
+      [id],
+    )) as any;
+    quiz.questions = questions.map((q: any) => ({
+      ...q,
+      options:
+        typeof q.options === 'string' ? JSON.parse(q.options) : q.options,
+    }));
     return quiz;
   }
 
@@ -36,36 +58,72 @@ export class QuizzesService {
     const conn = await (this.db as any).getConnection();
     try {
       await conn.beginTransaction();
-      const [[{ count }]] = await conn.query('SELECT COUNT(*) AS count FROM quizzes WHERE course_id=?', [courseId]) as any;
+      const [[{ count }]] = await conn.query(
+        'SELECT COUNT(*) AS count FROM quizzes WHERE course_id=?',
+        [courseId],
+      );
       const qid = uuid();
       await conn.query(
         'INSERT INTO quizzes (id,course_id,title,description,passing_score,order_num) VALUES (?,?,?,?,?,?)',
-        [qid, courseId, title, description || null, passing_score, Number(count) + 1],
+        [
+          qid,
+          courseId,
+          title,
+          description || null,
+          passing_score,
+          Number(count) + 1,
+        ],
       );
-      for (const q of (questions || [])) {
+      for (const q of questions || []) {
         await conn.query(
           'INSERT INTO questions (id,quiz_id,text,options,correct_answer,explanation) VALUES (?,?,?,?,?,?)',
-          [uuid(), qid, q.text, JSON.stringify(q.options), q.correctAnswer, q.explanation || null],
+          [
+            uuid(),
+            qid,
+            q.text,
+            JSON.stringify(q.options),
+            q.correctAnswer,
+            q.explanation || null,
+          ],
         );
       }
       await conn.commit();
-      const [[quiz]] = await conn.query('SELECT * FROM quizzes WHERE id=?', [qid]) as any;
-      const [qs] = await conn.query('SELECT * FROM questions WHERE quiz_id=?', [qid]) as any;
+      const [[quiz]] = await conn.query('SELECT * FROM quizzes WHERE id=?', [
+        qid,
+      ]);
+      const [qs] = await conn.query('SELECT * FROM questions WHERE quiz_id=?', [
+        qid,
+      ]);
       quiz.questions = qs;
       return quiz;
-    } catch (e) { await conn.rollback(); throw e; }
-    finally { conn.release(); }
+    } catch (e) {
+      await conn.rollback();
+      throw e;
+    } finally {
+      conn.release();
+    }
   }
 
   async submit(quizId: string, answers: number[], userId: string) {
-    const [[quiz]] = await this.db.query('SELECT * FROM quizzes WHERE id=?', [quizId]) as any;
+    const [[quiz]] = (await this.db.query('SELECT * FROM quizzes WHERE id=?', [
+      quizId,
+    ])) as any;
     if (!quiz) throw new NotFoundException('Quiz not found');
-    const [questions] = await this.db.query('SELECT * FROM questions WHERE quiz_id=?', [quizId]) as any;
+    const [questions] = (await this.db.query(
+      'SELECT * FROM questions WHERE quiz_id=?',
+      [quizId],
+    )) as any;
     let correct = 0;
     const results = questions.map((q: any, i: number) => {
       const isCorrect = answers[i] === q.correct_answer;
       if (isCorrect) correct++;
-      return { questionId: q.id, selected: answers[i], correct: q.correct_answer, isCorrect, explanation: q.explanation };
+      return {
+        questionId: q.id,
+        selected: answers[i],
+        correct: q.correct_answer,
+        isCorrect,
+        explanation: q.explanation,
+      };
     });
     const score = questions.length > 0 ? (correct / questions.length) * 100 : 0;
     const passed = score >= quiz.passing_score;
@@ -74,12 +132,21 @@ export class QuizzesService {
       [uuid(), userId, quizId, JSON.stringify(answers), score, passed ? 1 : 0],
     );
     if (passed) {
-      const [[{ courseId }]] = await this.db.query('SELECT course_id AS courseId FROM quizzes WHERE id=?', [quizId]) as any;
-      const [[{ total }]] = await this.db.query('SELECT COUNT(*) AS total FROM quizzes WHERE course_id=?', [courseId]) as any;
-      const [[{ passedCount }]] = await this.db.query(`
+      const [[{ courseId }]] = (await this.db.query(
+        'SELECT course_id AS courseId FROM quizzes WHERE id=?',
+        [quizId],
+      )) as any;
+      const [[{ total }]] = (await this.db.query(
+        'SELECT COUNT(*) AS total FROM quizzes WHERE course_id=?',
+        [courseId],
+      )) as any;
+      const [[{ passedCount }]] = (await this.db.query(
+        `
         SELECT COUNT(DISTINCT qa.quiz_id) AS passedCount FROM quiz_attempts qa JOIN quizzes q ON q.id=qa.quiz_id
         WHERE qa.user_id=? AND q.course_id=? AND qa.passed=1
-      `, [userId, courseId]) as any;
+      `,
+        [userId, courseId],
+      )) as any;
       if (Number(passedCount) >= Number(total)) {
         const certNum = `CERT-${Date.now()}-${userId.slice(0, 8).toUpperCase()}`;
         await this.db.query(
@@ -87,30 +154,54 @@ export class QuizzesService {
           [uuid(), userId, courseId, certNum, Math.round(score * 100) / 100],
         );
         // Send certificate email to the user
-        const [[user]] = await this.db.query('SELECT name, email, employee_id, department FROM users WHERE id=?', [userId]) as any;
-        const [[course]] = await this.db.query(
+        const [[user]] = (await this.db.query(
+          'SELECT name, email, employee_id, department FROM users WHERE id=?',
+          [userId],
+        )) as any;
+        const [[course]] = (await this.db.query(
           'SELECT c.title, u.name AS instructor_name FROM courses c JOIN users u ON u.id=c.instructor_id WHERE c.id=?',
-          [courseId]
-        ) as any;
-        const [[cert]] = await this.db.query(
-          'SELECT issued_at FROM certificates WHERE certificate_number=?', [certNum]
-        ) as any;
+          [courseId],
+        )) as any;
+        const [[cert]] = (await this.db.query(
+          'SELECT issued_at FROM certificates WHERE certificate_number=?',
+          [certNum],
+        )) as any;
         if (user && course) {
-          const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+          const frontendUrl =
+            process.env.FRONTEND_URL || 'http://localhost:3000';
           const verifyUrl = `${frontendUrl}/certificates/verify/${certNum}`;
           this.mail.sendCertificate(
-            user.email, user.name, course.title, certNum, verifyUrl,
-            user.employee_id, user.department, course.instructor_name,
+            user.email,
+            user.name,
+            course.title,
+            certNum,
+            verifyUrl,
+            user.employee_id,
+            user.department,
+            course.instructor_name,
             cert?.issued_at ? new Date(cert.issued_at) : new Date(),
             score,
           );
         }
       }
-      const [[enrollment]] = await this.db.query(
-        'SELECT id FROM enrollments WHERE user_id=? AND course_id=?', [userId, courseId],
-      ) as any;
-      if (enrollment) await this.progress.syncEnrollmentStatus(enrollment.id, userId, courseId);
+      const [[enrollment]] = (await this.db.query(
+        'SELECT id FROM enrollments WHERE user_id=? AND course_id=?',
+        [userId, courseId],
+      )) as any;
+      if (enrollment)
+        await this.progress.syncEnrollmentStatus(
+          enrollment.id,
+          userId,
+          courseId,
+        );
     }
-    return { score, passed, correct, total: questions.length, results, passingScore: quiz.passing_score };
+    return {
+      score,
+      passed,
+      correct,
+      total: questions.length,
+      results,
+      passingScore: quiz.passing_score,
+    };
   }
 }

@@ -7,11 +7,11 @@ export class CategoriesService {
   constructor(@Inject(DB_POOL) private db: Pool) {}
 
   async findAll() {
-    const [rows] = await this.db.query(`
+    const [rows] = (await this.db.query(`
       SELECT c.*, COUNT(co.id) AS course_count
       FROM categories c LEFT JOIN courses co ON co.category_id=c.id
       GROUP BY c.id ORDER BY c.name
-    `) as any;
+    `)) as any;
     return rows;
   }
 }

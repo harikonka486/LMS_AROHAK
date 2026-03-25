@@ -1,4 +1,9 @@
-import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import type { Pool } from 'mysql2/promise';
 import { v4 as uuid } from 'uuid';
 import { DB_POOL } from '../database/database.module';
@@ -8,18 +13,31 @@ export class EnrollmentsService {
   constructor(@Inject(DB_POOL) private db: Pool) {}
 
   async enroll(userId: string, courseId: string) {
-    const [[course]] = await this.db.query('SELECT * FROM courses WHERE id=?', [courseId]) as any;
+    const [[course]] = (await this.db.query(
+      'SELECT * FROM courses WHERE id=?',
+      [courseId],
+    )) as any;
     if (!course) throw new NotFoundException('Course not found');
-    const [[existing]] = await this.db.query('SELECT id FROM enrollments WHERE user_id=? AND course_id=?', [userId, courseId]) as any;
+    const [[existing]] = (await this.db.query(
+      'SELECT id FROM enrollments WHERE user_id=? AND course_id=?',
+      [userId, courseId],
+    )) as any;
     if (existing) throw new BadRequestException('Already enrolled');
     const id = uuid();
-    await this.db.query('INSERT INTO enrollments (id,user_id,course_id) VALUES (?,?,?)', [id, userId, courseId]);
-    const [[enrollment]] = await this.db.query('SELECT * FROM enrollments WHERE id=?', [id]) as any;
+    await this.db.query(
+      'INSERT INTO enrollments (id,user_id,course_id) VALUES (?,?,?)',
+      [id, userId, courseId],
+    );
+    const [[enrollment]] = (await this.db.query(
+      'SELECT * FROM enrollments WHERE id=?',
+      [id],
+    )) as any;
     return enrollment;
   }
 
   async findMy(userId: string) {
-    const [rows] = await this.db.query(`
+    const [rows] = (await this.db.query(
+      `
       SELECT e.*, c.title AS course_title, c.thumbnail, c.level, c.passing_score,
              u.name AS instructor_name,
              (SELECT COUNT(*) FROM lessons l JOIN sections s ON s.id=l.section_id WHERE s.course_id=c.id) AS total_lessons,
@@ -29,21 +47,39 @@ export class EnrollmentsService {
               WHERE qa.user_id=e.user_id AND q.course_id=c.id AND qa.passed=1) AS passed_quizzes
       FROM enrollments e JOIN courses c ON c.id=e.course_id JOIN users u ON u.id=c.instructor_id
       WHERE e.user_id=? ORDER BY e.enrolled_at DESC
-    `, [userId]) as any;
+    `,
+      [userId],
+    )) as any;
     return rows;
   }
 
   async unenroll(enrollmentId: string) {
-    const [[enrollment]] = await this.db.query('SELECT id FROM enrollments WHERE id=?', [enrollmentId]) as any;
+    const [[enrollment]] = (await this.db.query(
+      'SELECT id, user_id, course_id FROM enrollments WHERE id=?',
+      [enrollmentId],
+    )) as any;
     if (!enrollment) throw new NotFoundException('Enrollment not found');
+
+    // Delete associated certificates first
+    await this.db.query(
+      'DELETE FROM certificates WHERE user_id=? AND course_id=?',
+      [enrollment.user_id, enrollment.course_id],
+    );
+
+    // Then delete the enrollment
     await this.db.query('DELETE FROM enrollments WHERE id=?', [enrollmentId]);
-    return { message: 'Unenrolled successfully' };
+
+    return {
+      message:
+        'Unenrolled successfully. Associated certificates have also been removed.',
+    };
   }
 
   async check(userId: string, courseId: string) {
-    const [[enrollment]] = await this.db.query(
-      'SELECT * FROM enrollments WHERE user_id=? AND course_id=?', [userId, courseId],
-    ) as any;
+    const [[enrollment]] = (await this.db.query(
+      'SELECT * FROM enrollments WHERE user_id=? AND course_id=?',
+      [userId, courseId],
+    )) as any;
     return { enrolled: !!enrollment, enrollment: enrollment || null };
   }
 }

@@ -1,4 +1,17 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, Query, UseGuards, Request, UseInterceptors, UploadedFile } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Param,
+  Body,
+  Query,
+  UseGuards,
+  Request,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { CoursesService } from './courses.service';
@@ -6,7 +19,8 @@ import { JwtAuthGuard, RolesGuard, Roles } from '../auth/guards';
 
 const thumbnailStorage = diskStorage({
   destination: 'uploads/thumbnails',
-  filename: (_, file, cb) => cb(null, `${Date.now()}-${file.originalname.replace(/\s+/g, '_')}`),
+  filename: (_, file, cb) =>
+    cb(null, `${Date.now()}-${file.originalname.replace(/\s+/g, '_')}`),
 });
 
 @Controller('courses')
@@ -14,17 +28,25 @@ export class CoursesController {
   constructor(private courses: CoursesService) {}
 
   @Get()
-  findAll(@Query() query: any) { return this.courses.findAll(query); }
+  findAll(@Query() query: any) {
+    return this.courses.findAll(query);
+  }
 
   @Get('my')
-  @UseGuards(JwtAuthGuard, RolesGuard) @Roles('admin')
-  findMy(@Request() req: any) { return this.courses.findMy(req.user.id); }
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  findMy(@Request() req: any) {
+    return this.courses.findMy(req.user.id);
+  }
 
   @Get(':id')
-  findOne(@Param('id') id: string) { return this.courses.findOne(id); }
+  findOne(@Param('id') id: string) {
+    return this.courses.findOne(id);
+  }
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard) @Roles('admin')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
   @UseInterceptors(FileInterceptor('thumbnail', { storage: thumbnailStorage }))
   create(@Body() body: any, @UploadedFile() file: any, @Request() req: any) {
     return this.courses.create(body, file, req.user.id);
@@ -33,7 +55,12 @@ export class CoursesController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('thumbnail', { storage: thumbnailStorage }))
-  update(@Param('id') id: string, @Body() body: any, @UploadedFile() file: any, @Request() req: any) {
+  update(
+    @Param('id') id: string,
+    @Body() body: any,
+    @UploadedFile() file: any,
+    @Request() req: any,
+  ) {
     return this.courses.update(id, body, file, req.user);
   }
 

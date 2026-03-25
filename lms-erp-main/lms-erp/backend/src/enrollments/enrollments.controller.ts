@@ -1,4 +1,13 @@
-import { Controller, Post, Get, Delete, Param, Body, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Delete,
+  Param,
+  Body,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { EnrollmentsService } from './enrollments.service';
 import { JwtAuthGuard } from '../auth/guards';
 import { RolesGuard, Roles } from '../auth/guards';
@@ -14,7 +23,9 @@ export class EnrollmentsController {
   }
 
   @Get('my')
-  findMy(@Request() req: any) { return this.enrollments.findMy(req.user.id); }
+  findMy(@Request() req: any) {
+    return this.enrollments.findMy(req.user.id);
+  }
 
   @Get('check/:courseId')
   check(@Request() req: any, @Param('courseId') courseId: string) {

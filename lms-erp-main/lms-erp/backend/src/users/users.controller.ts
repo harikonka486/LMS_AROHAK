@@ -1,4 +1,13 @@
-import { Controller, Get, Patch, Delete, Param, Body, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Patch,
+  Delete,
+  Param,
+  Body,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard, RolesGuard, Roles } from '../auth/guards';
 
@@ -9,10 +18,14 @@ export class UsersController {
   constructor(private users: UsersService) {}
 
   @Get()
-  findAll() { return this.users.findAll(); }
+  findAll() {
+    return this.users.findAll();
+  }
 
   @Get('stats')
-  stats() { return this.users.getStats(); }
+  stats() {
+    return this.users.getStats();
+  }
 
   @Patch(':id/role')
   changeRole(@Param('id') id: string, @Body('role') role: string) {
@@ -20,7 +33,9 @@ export class UsersController {
   }
 
   @Get(':id/progress')
-  progress(@Param('id') id: string) { return this.users.getUserProgress(id); }
+  progress(@Param('id') id: string) {
+    return this.users.getUserProgress(id);
+  }
 
   @Delete(':id')
   delete(@Param('id') id: string, @Request() req: any) {

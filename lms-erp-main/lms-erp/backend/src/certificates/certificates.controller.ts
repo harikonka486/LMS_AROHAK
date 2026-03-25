@@ -8,12 +8,18 @@ export class CertificatesController {
 
   @Get('my')
   @UseGuards(JwtAuthGuard)
-  findMy(@Request() req: any) { return this.certs.findMy(req.user.id); }
+  findMy(@Request() req: any) {
+    return this.certs.findMy(req.user.id);
+  }
 
   @Get('verify/:number')
-  verify(@Param('number') number: string) { return this.certs.verify(number); }
+  verify(@Param('number') number: string) {
+    return this.certs.verify(number);
+  }
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
-  findOne(@Param('id') id: string) { return this.certs.findOne(id); }
+  findOne(@Param('id') id: string) {
+    return this.certs.findOne(id);
+  }
 }

@@ -22,8 +22,15 @@ export class MailService implements OnModuleInit {
   async onModuleInit() {
     const user = this.config.get('MAIL_USER');
     const pass = this.config.get('MAIL_PASS');
-    if (!user || user === 'your-email@gmail.com' || !pass || pass === 'your-app-password') {
-      this.logger.warn('⚠️  MAIL_USER / MAIL_PASS not configured in .env — emails will NOT be sent');
+    if (
+      !user ||
+      user === 'your-email@gmail.com' ||
+      !pass ||
+      pass === 'your-app-password'
+    ) {
+      this.logger.warn(
+        '⚠️  MAIL_USER / MAIL_PASS not configured in .env — emails will NOT be sent',
+      );
       return;
     }
     try {
@@ -31,14 +38,21 @@ export class MailService implements OnModuleInit {
       this.logger.log(`✅ Mail transporter ready — sending from ${user}`);
     } catch (err) {
       this.logger.error(`❌ Mail transporter failed: ${err.message}`);
-      this.logger.error('Check MAIL_USER, MAIL_PASS in .env. For Gmail use an App Password (not your login password).');
+      this.logger.error(
+        'Check MAIL_USER, MAIL_PASS in .env. For Gmail use an App Password (not your login password).',
+      );
     }
   }
 
   async sendWelcome(to: string, name: string): Promise<void> {
     const user = this.config.get('MAIL_USER');
     const pass = this.config.get('MAIL_PASS');
-    if (!user || user === 'your-email@gmail.com' || !pass || pass === 'your-app-password') {
+    if (
+      !user ||
+      user === 'your-email@gmail.com' ||
+      !pass ||
+      pass === 'your-app-password'
+    ) {
       this.logger.warn(`Skipping welcome email to ${to} — SMTP not configured`);
       return;
     }
@@ -104,24 +118,49 @@ export class MailService implements OnModuleInit {
       });
       this.logger.log(`Welcome email sent to ${to}`);
     } catch (err) {
-      this.logger.error(`Failed to send welcome email to ${to}: ${err.message}`);
+      this.logger.error(
+        `Failed to send welcome email to ${to}: ${err.message}`,
+      );
     }
   }
 
   async sendCertificate(
-    to: string, name: string, courseName: string, certNumber: string, verifyUrl: string,
-    employeeId?: string, department?: string, instructorName?: string, issuedAt?: Date, score?: number,
+    to: string,
+    name: string,
+    courseName: string,
+    certNumber: string,
+    verifyUrl: string,
+    employeeId?: string,
+    department?: string,
+    instructorName?: string,
+    issuedAt?: Date,
+    score?: number,
   ): Promise<void> {
     const user = this.config.get('MAIL_USER');
     const pass = this.config.get('MAIL_PASS');
-    if (!user || user === 'your-email@gmail.com' || !pass || pass === 'your-app-password') {
-      this.logger.warn(`Skipping certificate email to ${to} — SMTP not configured`);
+    if (
+      !user ||
+      user === 'your-email@gmail.com' ||
+      !pass ||
+      pass === 'your-app-password'
+    ) {
+      this.logger.warn(
+        `Skipping certificate email to ${to} — SMTP not configured`,
+      );
       return;
     }
     const from = this.config.get('MAIL_FROM', `LMS Platform <${user}>`);
     const dateStr = issuedAt
-      ? issuedAt.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-      : new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      ? issuedAt.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })
+      : new Date().toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
 
     try {
       await this.transporter.sendMail({
@@ -164,12 +203,16 @@ export class MailService implements OnModuleInit {
                     <span style="color:#16a34a;font-size:13px;font-weight:600;">✓ All assessments passed</span>
                   </div>
 
-                  ${score !== undefined ? `
+                  ${
+                    score !== undefined
+                      ? `
                   <div style="margin-bottom:28px;">
                     <span style="display:inline-block;background:#FFF8F0;border:1px solid #f0d9c8;border-radius:20px;padding:6px 20px;">
                       <span style="color:#8B1A1A;font-size:14px;font-weight:700;">Final Score: ${Math.round(score)}%</span>
                     </span>
-                  </div>` : '<div style="margin-bottom:28px;"></div>'}
+                  </div>`
+                      : '<div style="margin-bottom:28px;"></div>'
+                  }
 
                   <!-- Footer row -->
                   <div style="border-top:1px solid #e5e7eb;padding-top:20px;display:table;width:100%;">
@@ -199,16 +242,29 @@ export class MailService implements OnModuleInit {
           </html>
         `,
       });
-      this.logger.log(`Certificate email sent to ${to} for course: ${courseName}`);
+      this.logger.log(
+        `Certificate email sent to ${to} for course: ${courseName}`,
+      );
     } catch (err) {
-      this.logger.error(`Failed to send certificate email to ${to}: ${err.message}`);
+      this.logger.error(
+        `Failed to send certificate email to ${to}: ${err.message}`,
+      );
     }
   }
 
-  async sendPasswordReset(to: string, name: string, resetToken: string): Promise<void> {
+  async sendPasswordReset(
+    to: string,
+    name: string,
+    resetToken: string,
+  ): Promise<void> {
     const user = this.config.get('MAIL_USER');
     const pass = this.config.get('MAIL_PASS');
-    if (!user || user === 'your-email@gmail.com' || !pass || pass === 'your-app-password') {
+    if (
+      !user ||
+      user === 'your-email@gmail.com' ||
+      !pass ||
+      pass === 'your-app-password'
+    ) {
       this.logger.warn(`Skipping reset email to ${to} — SMTP not configured`);
       return;
     }

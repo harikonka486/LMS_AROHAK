@@ -1,4 +1,9 @@
-import { Injectable, BadRequestException, UnauthorizedException, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  UnauthorizedException,
+  Inject,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { v4 as uuid } from 'uuid';
@@ -25,9 +30,14 @@ export class AuthService {
   async register(body: any) {
     const { name, email, password, role, department, employee_id } = body;
     if (!this.isAllowedEmail(email))
-      throw new BadRequestException('Only @arohak.com or @cognivance.com email addresses are allowed');
+      throw new BadRequestException(
+        'Only @arohak.com or @cognivance.com email addresses are allowed',
+      );
 
-    const [exists] = await this.db.query('SELECT id FROM users WHERE email=?', [email]) as any;
+    const [exists] = (await this.db.query(
+      'SELECT id FROM users WHERE email=?',
+      [email],
+    )) as any;
     if (exists.length) throw new BadRequestException('Email already in use');
 
     const hashed = await bcrypt.hash(password, 10);
@@ -35,11 +45,20 @@ export class AuthService {
     const userRole = role === 'admin' ? 'admin' : 'employee';
     await this.db.query(
       'INSERT INTO users (id,name,email,password,role,department,employee_id) VALUES (?,?,?,?,?,?,?)',
-      [id, name, email, hashed, userRole, department || null, employee_id || null],
+      [
+        id,
+        name,
+        email,
+        hashed,
+        userRole,
+        department || null,
+        employee_id || null,
+      ],
     );
-    const [[user]] = await this.db.query(
-      'SELECT id,name,email,role,avatar,department,employee_id,created_at FROM users WHERE id=?', [id],
-    ) as any;
+    const [[user]] = (await this.db.query(
+      'SELECT id,name,email,role,avatar,department,employee_id,created_at FROM users WHERE id=?',
+      [id],
+    )) as any;
 
     // Send welcome email (non-blocking — errors are logged, not thrown)
     this.mail.sendWelcome(email, name);
@@ -50,9 +69,13 @@ export class AuthService {
   async login(body: any) {
     const { email, password } = body;
     if (!this.isAllowedEmail(email))
-      throw new BadRequestException('Only @arohak.com or @cognivance.com email addresses are allowed');
+      throw new BadRequestException(
+        'Only @arohak.com or @cognivance.com email addresses are allowed',
+      );
 
-    const [[user]] = await this.db.query('SELECT * FROM users WHERE email=?', [email]) as any;
+    const [[user]] = (await this.db.query('SELECT * FROM users WHERE email=?', [
+      email,
+    ])) as any;
     if (!user || !(await bcrypt.compare(password, user.password)))
       throw new UnauthorizedException('Invalid credentials');
 
@@ -61,11 +84,18 @@ export class AuthService {
   }
 
   async forgotPassword(email: string) {
-    const [[user]] = await this.db.query('SELECT id, name FROM users WHERE email=?', [email]) as any;
-    if (!user) return { message: 'If that email exists, a reset link has been sent.' };
+    const [[user]] = (await this.db.query(
+      'SELECT id, name FROM users WHERE email=?',
+      [email],
+    )) as any;
+    if (!user)
+      return { message: 'If that email exists, a reset link has been sent.' };
 
     // Invalidate existing tokens
-    await this.db.query('UPDATE password_reset_tokens SET used=1 WHERE user_id=?', [user.id]);
+    await this.db.query(
+      'UPDATE password_reset_tokens SET used=1 WHERE user_id=?',
+      [user.id],
+    );
 
     const token = uuid();
     await this.db.query(
@@ -78,18 +108,23 @@ export class AuthService {
   }
 
   async resetPassword(token: string, newPassword: string) {
-    const [[record]] = await this.db.query(
+    const [[record]] = (await this.db.query(
       'SELECT * FROM password_reset_tokens WHERE token=? AND used=0 AND expires_at > NOW()',
       [token],
-    ) as any;
+    )) as any;
     if (!record) {
       console.log(`[ResetPassword] Token lookup failed for token: ${token}`);
       throw new BadRequestException('Invalid or expired reset token');
     }
 
     const hashed = await bcrypt.hash(newPassword, 10);
-    await this.db.query('UPDATE users SET password=? WHERE id=?', [hashed, record.user_id]);
-    await this.db.query('UPDATE password_reset_tokens SET used=1 WHERE id=?', [record.id]);
+    await this.db.query('UPDATE users SET password=? WHERE id=?', [
+      hashed,
+      record.user_id,
+    ]);
+    await this.db.query('UPDATE password_reset_tokens SET used=1 WHERE id=?', [
+      record.id,
+    ]);
 
     return { message: 'Password reset successfully. You can now log in.' };
   }

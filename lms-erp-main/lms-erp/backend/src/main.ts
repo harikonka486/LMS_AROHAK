@@ -14,7 +14,10 @@ async function bootstrap() {
         process.env.FRONTEND_URL || 'http://localhost:3000',
       ].filter(Boolean);
       // Allow requests with no origin (mobile, Postman) or matching origins
-      if (!origin || allowed.some(u => origin.startsWith(u.replace(/\/$/, '')))) {
+      if (
+        !origin ||
+        allowed.some((u) => origin.startsWith(u.replace(/\/$/, '')))
+      ) {
         callback(null, true);
       } else {
         callback(null, true); // permissive for now — tighten after deploy

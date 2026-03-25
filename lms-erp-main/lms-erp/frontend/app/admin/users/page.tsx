@@ -377,7 +377,7 @@ function UserDetailPanel({ user, onClose }: { user: any; onClose: () => void }) 
       {confirmUnenroll && (
         <ConfirmModal
           title="Remove Enrollment"
-          message={`Remove "${user.name}" from "${confirmUnenroll.course_title}"? Their progress and quiz attempts will also be deleted.`}
+          message={`Remove "${user.name}" from "${confirmUnenroll.course_title}"? Their progress, quiz attempts, and any certificates will also be deleted.`}
           onConfirm={() => unenroll.mutate(confirmUnenroll.enrollment_id)}
           onCancel={() => setConfirmUnenroll(null)}
           loading={unenroll.isPending}
