@@ -10,6 +10,7 @@ export default function NewCoursePage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
+  const [showSections, setShowSections] = useState(false)
   const { register, handleSubmit } = useForm()
 
   const onSubmit = async (data: any) => {
@@ -43,37 +44,40 @@ export default function NewCoursePage() {
 
   return (
     <AppLayout>
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">Create New Course</h1>
-        <form onSubmit={handleSubmit(onSubmit)} className="card p-6 space-y-5">
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
-            <input {...register('title', { required: true })} className="input" placeholder="e.g. ERP Finance Module Training" />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
-            <textarea {...register('description', { required: true })} rows={4} className="input resize-none" placeholder="What will employees learn?" />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <h1 className="text-2xl font-bold">Create New Course</h1>
+        
+        {/* Basic Course Information */}
+        <div className="card p-6 space-y-5">
+          <h2 className="text-lg font-semibold mb-4">Course Information</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Level</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Course Title *</label>
+              <input {...register('title', { required: true })} className="input" placeholder="e.g. ERP Finance Module Training" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Level *</label>
               <select {...register('level')} className="input">
                 <option value="beginner">Beginner</option>
                 <option value="intermediate">Intermediate</option>
                 <option value="advanced">Advanced</option>
               </select>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Passing Score (%)</label>
-              <input {...register('passing_score')} type="number" min="1" max="100" defaultValue={70} className="input" />
-            </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Thumbnail</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Course Description *</label>
+            <textarea {...register('description', { required: true })} rows={4} className="input resize-none" placeholder="What will employees learn?" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Passing Score (%)</label>
+            <input {...register('passing_score')} type="number" min="1" max="100" defaultValue={70} className="input" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Course Thumbnail</label>
             <input 
               type="file" 
               accept="image/*" 
@@ -87,11 +91,22 @@ export default function NewCoursePage() {
             )}
           </div>
 
-          <div className="flex gap-3 pt-2">
+          <div className="flex gap-3 pt-4">
             <button type="submit" disabled={loading} className="btn-primary">{loading ? 'Creating...' : 'Create Course'}</button>
             <button type="button" onClick={() => router.back()} className="btn-secondary">Cancel</button>
           </div>
-        </form>
+        </div>
+
+        {/* Course Structure - Show after creation */}
+        {showSections && (
+          <div className="card p-6">
+            <h2 className="text-lg font-semibold mb-4">Course Structure</h2>
+            <div className="text-center py-8 text-gray-500">
+              <p className="mb-4">Course structure options will be available after creating the course.</p>
+              <p>You can add sections, lessons, quizzes, and documents.</p>
+            </div>
+          </div>
+        )}
       </div>
     </AppLayout>
   )

@@ -122,7 +122,8 @@ export default function CoursesPage() {
                       onError={(e) => {
                         console.error('Image failed to load:', course.thumbnail)
                         const target = e.target as HTMLImageElement
-                        target.src = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'}/placeholder-course.jpg`
+                        // Hide broken image instead of showing placeholder
+                        target.style.display = 'none'
                       }}
                       onLoad={() => {
                         console.log('Image loaded successfully:', course.thumbnail)
