@@ -100,8 +100,6 @@ export class CoursesService {
   }
 
   async create(body: any, file: any, userId: string) {
-    console.log('Courses service create called with:', { body, file, userId });
-    
     const {
       title,
       description,
@@ -113,42 +111,25 @@ export class CoursesService {
       video_url,
       sharepoint_video_url,
     } = body;
-    
-    console.log('Extracted values:', {
-      title,
-      description,
-      price,
-      level,
-      language,
-      categoryId,
-      passing_score,
-      video_url,
-      sharepoint_video_url
-    });
-    
     const thumbnail = file ? `/uploads/thumbnails/${file.filename}` : null;
     const id = uuid();
-    
-    const sql = 'INSERT INTO courses (id,title,description,price,level,language,thumbnail,instructor_id,category_id,passing_score,video_url,sharepoint_video_url) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)';
-    const values = [
-      id,
-      title,
-      description,
-      price,
-      level,
-      language,
-      thumbnail,
-      userId,
-      categoryId || null,
-      passing_score,
-      video_url || null,
-      sharepoint_video_url || null,
-    ];
-    
-    console.log('SQL:', sql);
-    console.log('Values:', values);
-    
-    await this.db.query(sql, values);
+    await this.db.query(
+      'INSERT INTO courses (id,title,description,price,level,language,thumbnail,instructor_id,category_id,passing_score,video_url,sharepoint_video_url) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)',
+      [
+        id,
+        title,
+        description,
+        price,
+        level,
+        language,
+        thumbnail,
+        userId,
+        categoryId || null,
+        passing_score,
+        video_url || null,
+        sharepoint_video_url || null,
+      ],
+    );
     const [[course]] = (await this.db.query(
       'SELECT * FROM courses WHERE id=?',
       [id],
