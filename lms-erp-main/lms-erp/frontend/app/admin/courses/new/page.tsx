@@ -64,24 +64,28 @@ export default function NewCoursePage() {
         <form onSubmit={handleSubmit(onSubmit)} className="card p-6 space-y-5">
           <h2 className="text-lg font-semibold mb-4">Course Information</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Course Title *</label>
-              <input {...register('title', { required: true })} className="input" placeholder="e.g. ERP Finance Module Training" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Level *</label>
-              <select {...register('level')} className="input">
-                <option value="beginner">Beginner</option>
-                <option value="intermediate">Intermediate</option>
-                <option value="advanced">Advanced</option>
-              </select>
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Course Title *</label>
+            <input {...register('title', { required: true })} className="input" placeholder="e.g. ERP Finance Module Training" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Level *</label>
+            <select {...register('level')} className="input">
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Course Description *</label>
             <textarea {...register('description', { required: true })} rows={4} className="input resize-none" placeholder="What will employees learn?" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Passing Score (%)</label>
+            <input {...register('passing_score')} type="number" min="1" max="100" defaultValue={70} className="input" />
           </div>
 
           <div>
@@ -121,48 +125,6 @@ export default function NewCoursePage() {
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Level *</label>
-            <select {...register('level')} className="input">
-              <option value="beginner">Beginner</option>
-              <option value="intermediate">Intermediate</option>
-              <option value="advanced">Advanced</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-            <select {...register('category_id')} className="input">
-              <option value="">Select Category</option>
-              <option value="tech">Technology</option>
-              <option value="business">Business</option>
-              <option value="finance">Finance</option>
-              <option value="management">Management</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
-            <input {...register('language')} className="input" defaultValue="English" />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Passing Score (%)</label>
-              <input {...register('passing_score')} type="number" min="1" max="100" defaultValue={70} className="input" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
-              <input {...register('price')} type="number" min="0" step="0.01" defaultValue={0} className="input" />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Course Video URL</label>
-            <input {...register('video_url')} type="url" className="input" placeholder="https://www.youtube.com/watch?v=..." />
-          </div>
-
-          
           <div className="flex gap-3 pt-4">
             <button type="submit" disabled={loading} className="btn-primary">{loading ? 'Creating...' : 'Create Course'}</button>
             <button type="button" onClick={() => router.back()} className="btn-secondary">Cancel</button>
