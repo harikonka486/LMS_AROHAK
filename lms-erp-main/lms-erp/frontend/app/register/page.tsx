@@ -95,7 +95,7 @@ export default function RegisterPage() {
           {/* Logo header */}
           <div className="text-center mb-8">
             <div className="flex justify-center mb-3">
-              <Image src="/arohak-logo.png" alt="Arohak" width={56} height={56} className="object-contain" />
+              <Image src="/arohak-logo.png" alt="Arohak" width={56} height={56} className="object-contain logo-light" />
             </div>
             <h1 className="text-2xl font-bold" style={{ color: A.red }}>Create Account</h1>
             <p className="text-gray-500 text-sm mt-1">Join the Arohak LMS training portal</p>

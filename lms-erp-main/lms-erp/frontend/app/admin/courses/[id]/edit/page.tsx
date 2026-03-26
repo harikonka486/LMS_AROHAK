@@ -1,9 +1,9 @@
 'use client'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams, useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
-import { Plus, Trash2, Eye, EyeOff, Upload, HelpCircle, CheckCircle } from 'lucide-react'
+import { Plus, Trash2, Eye, EyeOff, Upload, HelpCircle, CheckCircle, Edit2, Save, X } from 'lucide-react'
 import AppLayout from '@/components/layout/AppLayout'
 import ConfirmModal from '@/components/ConfirmModal'
 import api from '@/lib/api'
@@ -22,6 +22,18 @@ export default function EditCoursePage() {
   const [confirmDelete, setConfirmDelete] = useState<{ type: string; id: string; label: string } | null>(null)
   const [confirmDeleteCourse, setConfirmDeleteCourse] = useState(false)
   const [successMsg, setSuccessMsg] = useState('')
+  const [editingCourse, setEditingCourse] = useState(false)
+  const [courseForm, setCourseForm] = useState({
+    title: '',
+    description: '',
+    thumbnail: null as File | null,
+    video_url: '',
+    price: 0,
+    level: 'beginner',
+    language: 'English',
+    category_id: '',
+    passing_score: 70
+  })
 
   const showSuccess = (msg: string) => {
     setSuccessMsg(msg)
@@ -32,6 +44,44 @@ export default function EditCoursePage() {
     queryKey: ['course-edit', id],
     queryFn: () => api.get(`/courses/${id}`).then(r => r.data),
   })
+
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => api.get('/categories').then(r => r.data),
+  })
+
+  // Initialize form when course data loads
+  useEffect(() => {
+    if (course) {
+      setCourseForm({
+        title: course.title || '',
+        description: course.description || '',
+        thumbnail: null,
+        video_url: course.video_url || '',
+        price: course.price || 0,
+        level: course.level || 'beginner',
+        language: course.language || 'English',
+        category_id: course.category_id || '',
+        passing_score: course.passing_score || 70
+      })
+    }
+  }, [course])
+
+  const handleCourseUpdate = (e: React.FormEvent) => {
+    e.preventDefault()
+    const fd = new FormData()
+    Object.entries(courseForm).forEach(([k, v]) => {
+      if (k !== 'thumbnail' && v !== undefined && v !== '') {
+        fd.append(k, v as string)
+      }
+    })
+    if (courseForm.thumbnail) {
+      fd.append('thumbnail', courseForm.thumbnail)
+    }
+    
+    updateCourse.mutate(fd)
+    setEditingCourse(false)
+  }
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ['course-edit', id] })
 
@@ -172,15 +222,151 @@ export default function EditCoursePage() {
               {course?.is_published ? 'Published' : 'Draft'}
             </span>
           </div>
-          <button onClick={() => togglePublish.mutate()} className="btn-secondary flex items-center gap-2">
-            {course?.is_published ? <><EyeOff className="w-4 h-4" />Unpublish</> : <><Eye className="w-4 h-4" />Publish</>}
-          </button>
-          {canDelete && (
-            <button onClick={() => setConfirmDeleteCourse(true)} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors">
-              <Trash2 className="w-4 h-4" /> Delete Course
+          <div className="flex items-center gap-2">
+            <button onClick={() => setEditingCourse(!editingCourse)} className="btn-secondary flex items-center gap-2">
+              {editingCourse ? <><X className="w-4 h-4" /> Cancel</> : <><Edit2 className="w-4 h-4" /> Edit Course</>}
             </button>
-          )}
+            <button onClick={() => togglePublish.mutate()} className="btn-secondary flex items-center gap-2">
+              {course?.is_published ? <><EyeOff className="w-4 h-4" />Unpublish</> : <><Eye className="w-4 h-4" />Publish</>}
+            </button>
+            {canDelete && (
+              <button onClick={() => setConfirmDeleteCourse(true)} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors">
+                <Trash2 className="w-4 h-4" /> Delete Course
+              </button>
+            )}
+          </div>
         </div>
+
+        {/* Course Edit Form */}
+        {editingCourse && (
+          <div className="card p-6 border-2 border-blue-200">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Edit2 className="w-5 h-5" /> Edit Course Details
+            </h2>
+            <form onSubmit={handleCourseUpdate} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Course Title *</label>
+                  <input
+                    type="text"
+                    value={courseForm.title}
+                    onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })}
+                    className="input"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                  <select
+                    value={courseForm.category_id}
+                    onChange={(e) => setCourseForm({ ...courseForm, category_id: e.target.value })}
+                    className="input"
+                  >
+                    <option value="">Select Category</option>
+                    {categories?.map((cat: any) => (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
+                <textarea
+                  value={courseForm.description}
+                  onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })}
+                  rows={4}
+                  className="input resize-none"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Level</label>
+                  <select
+                    value={courseForm.level}
+                    onChange={(e) => setCourseForm({ ...courseForm, level: e.target.value })}
+                    className="input"
+                  >
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
+                  <input
+                    type="text"
+                    value={courseForm.language}
+                    onChange={(e) => setCourseForm({ ...courseForm, language: e.target.value })}
+                    className="input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Passing Score (%)</label>
+                  <input
+                    type="number"
+                    value={courseForm.passing_score}
+                    onChange={(e) => setCourseForm({ ...courseForm, passing_score: parseInt(e.target.value) })}
+                    min="1"
+                    max="100"
+                    className="input"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Course Video URL</label>
+                  <input
+                    type="url"
+                    value={courseForm.video_url}
+                    onChange={(e) => setCourseForm({ ...courseForm, video_url: e.target.value })}
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    className="input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+                  <input
+                    type="number"
+                    value={courseForm.price}
+                    onChange={(e) => setCourseForm({ ...courseForm, price: parseFloat(e.target.value) })}
+                    min="0"
+                    step="0.01"
+                    className="input"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Course Thumbnail</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setCourseForm({ ...courseForm, thumbnail: e.target.files?.[0] || null })}
+                  className="input py-1.5"
+                />
+                {courseForm.thumbnail && (
+                  <p className="text-xs text-gray-500 mt-1">New image selected: {courseForm.thumbnail.name}</p>
+                )}
+                {course?.thumbnail && !courseForm.thumbnail && (
+                  <p className="text-xs text-gray-500 mt-1">Current: {course.thumbnail}</p>
+                )}
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button type="submit" className="btn-primary flex items-center gap-2">
+                  <Save className="w-4 h-4" /> Save Changes
+                </button>
+                <button type="button" onClick={() => setEditingCourse(false)} className="btn-secondary">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
 
         {/* Sections & Lessons */}
         <div className="card p-5">
@@ -228,7 +414,7 @@ export default function EditCoursePage() {
                     </div>
                   ) : (
                     <button onClick={() => setNewLesson({ sectionId: section.id, title: '', video_url: '', sharepoint_video_url: '', google_drive_url: '' })}
-                      className="text-sm text-brand-600 hover:text-brand-700 flex items-center gap-1">
+                      className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
                       <Plus className="w-3.5 h-3.5" /> Add Lesson
                     </button>
                   )}
@@ -276,7 +462,7 @@ export default function EditCoursePage() {
           <div className="space-y-2 mb-4">
             {course?.quizzes?.map((quiz: any) => (
               <div key={quiz.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg text-sm">
-                <HelpCircle className="w-4 h-4 text-brand-600" />
+                <HelpCircle className="w-4 h-4 text-blue-600" />
                 <span className="flex-1">{quiz.title}</span>
                 <span className="badge-blue">Pass: {quiz.passing_score}%</span>
               </div>

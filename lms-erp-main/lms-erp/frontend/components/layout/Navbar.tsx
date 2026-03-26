@@ -62,7 +62,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/dashboard" className="flex items-center gap-2.5 flex-shrink-0 group">
             <Image src="/arohak-logo.png" alt="Arohak" width={36} height={36}
-              className="object-contain transition-transform group-hover:scale-105"
+              className="object-contain transition-transform group-hover:scale-105 logo-light"
               style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.15))' }} />
             <div className="hidden sm:block">
               <p className="font-bold text-sm leading-none" style={{ color: A.red }}>AROHAK</p>

@@ -83,7 +83,7 @@ export default function DashboardPage() {
             <StatCard icon={BookOpen}    label="Enrolled"     value={enrollments?.length ?? 0}   color="red" />
             <StatCard icon={Clock}       label="In Progress"  value={activeEnrollments.length}    color="amber" />
             <StatCard icon={CheckCircle} label="Completed"    value={completedEnrollments.length} color="emerald" />
-            <StatCard icon={Award}       label="Certificates" value={0}   color="gold" />
+            <StatCard icon={Award}       label="Certificates" value={certificates?.length ?? 0}   color="gold" />
           </>}
           {isAdmin && <>
             <StatCard icon={BookOpen}      label="Total Courses"  value={stats?.totalCourses ?? 0}         color="red" />
@@ -141,7 +141,7 @@ export default function DashboardPage() {
                   <div className="card p-10 text-center">
                     <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
                       style={{ background: '#FFF8F0' }}>
-                      <BookOpen className="w-7 h-7" style={{ color: '#8B1A1A' }} />
+                      <Award className="w-7 h-7 logo-light" style={{ color: '#8B1A1A' }} />
                     </div>
                     <p className="font-semibold text-gray-700 mb-1">No courses yet</p>
                     <p className="text-sm text-gray-400 mb-4">Start your learning journey today</p>
@@ -160,13 +160,36 @@ export default function DashboardPage() {
                 </Link>
               </div>
               <div className="space-y-3">
-                <div className="card p-8 text-center">
-                  <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                    <Award className="w-6 h-6 text-amber-500" />
+                {certificates?.length > 0 ? (
+                  certificates.slice(0, 3).map((cert: any) => (
+                    <div key={cert.id} className="card p-4 hover:shadow-md transition-shadow">
+                      <div className="flex items-start gap-3">
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                          style={{ background: 'linear-gradient(135deg, #8B1A1A, #C0392B)' }}>
+                          <Award className="w-6 h-6 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-sm text-gray-900 truncate">{cert.course_title}</h3>
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            Issued {new Date(cert.issued_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <Link href={`/certificates/${cert.id}`}
+                        className="btn-secondary w-full mt-3 py-2 text-xs">
+                        View Certificate
+                      </Link>
+                    </div>
+                  ))
+                ) : (
+                  <div className="card p-8 text-center">
+                    <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                      <Award className="w-6 h-6 text-amber-500 logo-light" />
+                    </div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">No certificates yet</p>
+                    <p className="text-xs text-gray-400">Complete a course to earn one</p>
                   </div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">No certificates yet</p>
-                  <p className="text-xs text-gray-400">Complete a course to earn one</p>
-                </div>
+                )}
               </div>
             </div>
           </div>

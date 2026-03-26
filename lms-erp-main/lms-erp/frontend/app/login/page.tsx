@@ -53,7 +53,7 @@ function ArohakLogo({ size = 40, showText = true }: { size?: number; showText?: 
         alt="Arohak"
         width={size}
         height={size}
-        className="object-contain"
+        className="object-contain logo-light"
         onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
       />
       {showText && (
@@ -336,7 +336,7 @@ export default function LoginPage() {
                 alt="Arohak"
                 width={90}
                 height={90}
-                className="object-contain rounded-xl"
+                className="object-contain logo-light rounded-xl"
                 style={{ background: 'rgba(255,255,255,0.12)', padding: '8px' }}
                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
               />

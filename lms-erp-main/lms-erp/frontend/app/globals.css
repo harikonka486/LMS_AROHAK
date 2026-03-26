@@ -118,6 +118,11 @@
   100% { background-position: 48px 48px; }
 }
 
+/* Light logo filter */
+.logo-light {
+  filter: brightness(1.3) opacity(0.8) contrast(0.9);
+}
+
 /* Page content sits above the background */
 .page-content {
   position: relative;
