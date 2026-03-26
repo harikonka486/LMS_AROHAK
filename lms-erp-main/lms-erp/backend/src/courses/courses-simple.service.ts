@@ -27,7 +27,7 @@ export class CoursesSimpleService {
       );
       
       // Return the created course
-      const [[course]] = await this.db.query(
+      const [course]: any = await this.db.query(
         'SELECT * FROM courses WHERE id = ?',
         [id]
       );
@@ -40,16 +40,16 @@ export class CoursesSimpleService {
   }
 
   async findOne(id: string) {
-    const [[course]] = await this.db.query(
+    const [course]: any = await this.db.query(
       'SELECT * FROM courses WHERE id = ?',
       [id]
-    ) as any;
+    );
     
     if (!course) {
       throw new NotFoundException('Course not found');
     }
     
-    return course;
+    return course[0];
   }
 
   async findAll(query: any) {
