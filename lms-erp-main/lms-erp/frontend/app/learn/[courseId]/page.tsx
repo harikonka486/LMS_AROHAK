@@ -253,7 +253,7 @@ export default function LearnPage() {
             <div className="max-w-4xl mx-auto p-6">
               <h1 className="text-xl font-bold mb-4">{activeLesson.title}</h1>
 
-              {(activeLesson.video_file || activeLesson.video_url) ? (
+              {(activeLesson.video_file || activeLesson.video_url || activeLesson.sharepoint_video_url) ? (
                 <div className="aspect-video bg-black rounded-xl overflow-hidden mb-6">
                   {activeLesson.video_file ? (
                     <video src={fileUrl(activeLesson.video_file)} controls className="w-full h-full" />
@@ -274,12 +274,9 @@ export default function LearnPage() {
                     }
                     // SharePoint or direct video file
                     return <video src={embed.src} controls className="w-full h-full" />
-                  })()
-                } else {
-                  // Direct video file URL
-                  return <video src={activeLesson.video_url} controls className="w-full h-full" />
-                }
-              })()
+                  })()}
+                </div>
+              ) : (
                 <div className="aspect-video bg-gray-800 rounded-xl flex items-center justify-center mb-6">
                   <div className="text-center text-gray-500">
                     <Play className="w-12 h-12 mx-auto mb-2" />
