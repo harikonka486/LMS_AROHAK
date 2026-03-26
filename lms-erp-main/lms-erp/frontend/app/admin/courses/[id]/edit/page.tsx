@@ -16,7 +16,7 @@ export default function EditCoursePage() {
   const { user } = useAuthStore()
   const canDelete = user?.role === 'admin'
   const [newSection, setNewSection] = useState('')
-  const [newLesson, setNewLesson] = useState<{ sectionId: string; title: string; video_url: string } | null>(null)
+  const [newLesson, setNewLesson] = useState<{ sectionId: string; title: string } | null>(null)
   const [showQuizForm, setShowQuizForm] = useState(false)
   const [quizData, setQuizData] = useState({ title: '', passing_score: 70, questions: [{ text: '', options: ['', '', '', ''], correctAnswer: 0 }] })
   const [confirmDelete, setConfirmDelete] = useState<{ type: string; id: string; label: string } | null>(null)
@@ -35,6 +35,11 @@ export default function EditCoursePage() {
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ['course-edit', id] })
 
+  const updateCourse = useMutation({
+    mutationFn: (data: any) => api.patch(`/courses/${id}`, data),
+    onSuccess: () => { invalidate(); toast.success('Course updated!') },
+  })
+
   const togglePublish = useMutation({
     mutationFn: () => api.patch(`/courses/${id}/publish`),
     onSuccess: () => { invalidate(); toast.success('Updated!') },
@@ -51,8 +56,8 @@ export default function EditCoursePage() {
   })
 
   const addLesson = useMutation({
-    mutationFn: ({ sectionId, title, video_url }: { sectionId: string; title: string; video_url: string }) =>
-      api.post(`/lessons/section/${sectionId}`, { title, video_url: video_url || undefined }),
+    mutationFn: ({ sectionId, title }: { sectionId: string; title: string }) =>
+      api.post(`/lessons/section/${sectionId}`, { title }),
     onSuccess: () => { invalidate(); setNewLesson(null) },
   })
 
@@ -115,9 +120,27 @@ export default function EditCoursePage() {
           )}
         </div>
 
-        {/* Sections & Lessons */}
+        {/* Course Content */}
         <div className="card p-5">
           <h2 className="font-semibold mb-4">Course Content</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Course Overview</label>
+              <textarea
+                value={course?.content || ''}
+                onChange={e => updateCourse.mutate({ content: e.target.value })}
+                rows={4}
+                className="input resize-none"
+                placeholder="Provide detailed course overview and learning objectives..."
+              />
+              <p className="text-xs text-gray-400 mt-1">Include course description, learning outcomes, and curriculum details</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Sections & Lessons */}
+        <div className="card p-5">
+          <h2 className="font-semibold mb-4">Course Structure</h2>
           <div className="space-y-4 mb-4">
             {course?.sections?.map((section: any) => (
               <div key={section.id} className="border border-gray-200 rounded-lg overflow-hidden">
@@ -140,15 +163,13 @@ export default function EditCoursePage() {
                     <div className="space-y-2">
                       <input value={newLesson.title} onChange={e => setNewLesson({ ...newLesson, title: e.target.value })}
                         placeholder="Lesson title" className="input text-sm py-1.5" />
-                      <input value={newLesson.video_url} onChange={e => setNewLesson({ ...newLesson, video_url: e.target.value })}
-                        placeholder="Video URL (YouTube, SharePoint, or direct link)" className="input text-sm py-1.5" />
                       <div className="flex gap-2">
                         <button onClick={() => addLesson.mutate(newLesson)} className="btn-primary text-sm py-1.5">Add</button>
                         <button onClick={() => setNewLesson(null)} className="btn-secondary text-sm py-1.5">Cancel</button>
                       </div>
                     </div>
                   ) : (
-                    <button onClick={() => setNewLesson({ sectionId: section.id, title: '', video_url: '' })}
+                    <button onClick={() => setNewLesson({ sectionId: section.id, title: '' })}
                       className="text-sm text-brand-600 hover:text-brand-700 flex items-center gap-1">
                       <Plus className="w-3.5 h-3.5" /> Add Lesson
                     </button>
