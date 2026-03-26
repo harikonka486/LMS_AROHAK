@@ -105,16 +105,12 @@ export default function CoursesPage() {
                   {course.thumbnail && course.thumbnail !== '' ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img 
-                      src={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}${course.thumbnail}`}
+                      src={`${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api').replace('/api', '')}${course.thumbnail}`}
                       alt={course.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       onError={(e) => {
-                        console.error('Image failed to load:', course.thumbnail, 'URL:', `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}${course.thumbnail}`)
                         const target = e.target as HTMLImageElement
                         target.style.display = 'none'
-                      }}
-                      onLoad={() => {
-                        console.log('Image loaded successfully:', course.thumbnail, 'URL:', `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}${course.thumbnail}`)
                       }}
                     />
                   ) : (

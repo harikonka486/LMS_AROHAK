@@ -28,7 +28,7 @@ function ResetPasswordForm() {
 
   const { register, handleSubmit, formState: { errors } } = useForm<F>({ resolver: zodResolver(schema) })
 
-  useEffect(() => { if (!token) router.replace('/login') }, [token, router])
+  useEffect(() => { if (!token) router.replace('/login') }, [token]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const onSubmit = async (data: F) => {
     setLoading(true)

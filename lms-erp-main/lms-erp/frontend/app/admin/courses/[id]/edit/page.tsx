@@ -121,22 +121,13 @@ export default function EditCoursePage() {
       console.log('Adding section:', title, 'to course:', id)
       return api.post(`/sections/course/${id}`, { title })
     },
-    onSuccess: (response) => { 
-      console.log('Section added successfully:', response)
+    onSuccess: () => { 
       invalidate(); 
       setNewSection('')
-      toast.success('Section added successfully!')
+      toast.success('Section added!')
     },
     onError: (error: any) => {
-      console.error('Failed to add section:', error)
-      console.error('Error response:', error.response?.data)
       toast.error(error.response?.data?.message || error.response?.data?.error || 'Failed to add section')
-      // Reset input on error
-      setNewSection('')
-    },
-    onMutate: () => {
-      // Clear input immediately when starting mutation
-      setNewSection('')
     }
   })
 
@@ -260,30 +251,15 @@ export default function EditCoursePage() {
               <Edit2 className="w-5 h-5" /> Edit Course Details
             </h2>
             <form onSubmit={handleCourseUpdate} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Course Title *</label>
-                  <input
-                    type="text"
-                    value={courseForm.title}
-                    onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })}
-                    className="input"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                  <select
-                    value={courseForm.category_id}
-                    onChange={(e) => setCourseForm({ ...courseForm, category_id: e.target.value })}
-                    className="input"
-                  >
-                    <option value="">Select Category</option>
-                    {categories?.map((cat: any) => (
-                      <option key={cat.id} value={cat.id}>{cat.name}</option>
-                    ))}
-                  </select>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Course Title *</label>
+                <input
+                  type="text"
+                  value={courseForm.title}
+                  onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })}
+                  className="input"
+                  required
+                />
               </div>
 
               <div>
@@ -297,7 +273,7 @@ export default function EditCoursePage() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Level</label>
                   <select
@@ -309,15 +285,6 @@ export default function EditCoursePage() {
                     <option value="intermediate">Intermediate</option>
                     <option value="advanced">Advanced</option>
                   </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
-                  <input
-                    type="text"
-                    value={courseForm.language}
-                    onChange={(e) => setCourseForm({ ...courseForm, language: e.target.value })}
-                    className="input"
-                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Passing Score (%)</label>
@@ -332,66 +299,27 @@ export default function EditCoursePage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Course Video URL</label>
-                  <input
-                    type="url"
-                    value={courseForm.video_url}
-                    onChange={(e) => setCourseForm({ ...courseForm, video_url: e.target.value })}
-                    placeholder="https://www.youtube.com/watch?v=..."
-                    className="input"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
-                  <input
-                    type="number"
-                    value={courseForm.price}
-                    onChange={(e) => setCourseForm({ ...courseForm, price: parseFloat(e.target.value) })}
-                    min="0"
-                    step="0.01"
-                    className="input"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Course Video URL</label>
+                <input
+                  type="url"
+                  value={courseForm.video_url}
+                  onChange={(e) => setCourseForm({ ...courseForm, video_url: e.target.value })}
+                  placeholder="https://www.youtube.com/watch?v=..."
+                  className="input"
+                />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Course Thumbnail</label>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setCourseForm({ ...courseForm, thumbnail: e.target.files?.[0] || null })}
-                    className="input py-1.5"
-                  />
-                  {courseForm.thumbnail && (
-                    <p className="text-xs text-gray-500 mt-1">New: {courseForm.thumbnail.name}</p>
-                  )}
-                  <button
-                    type="button"
-                    onClick={removeThumbnail}
-                    className="text-red-500 hover:text-red-700 text-sm px-3 py-1.5 border border border-red-300 rounded"
-                  >
-                    Remove
-                  </button>
-                </div>
-                {course?.thumbnail && !courseForm.thumbnail && (
-                  <div className="mt-2 p-2 bg-gray-50 rounded border border-gray-200">
-                    <p className="text-sm text-gray-600 mb-2">Current thumbnail:</p>
-                    <img 
-                      src={course.thumbnail.startsWith('/uploads/') ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'}${course.thumbnail}` : course.thumbnail} 
-                      alt={course.title}
-                      className="w-16 h-16 object-cover rounded border border-gray-300"
-                    />
-                    <button
-                      type="button"
-                      onClick={removeThumbnail}
-                      className="mt-2 text-red-500 hover:text-red-700 text-sm px-3 py-1.5 border border border-red-300 rounded"
-                    >
-                      Remove Current Thumbnail
-                    </button>
-                  </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setCourseForm({ ...courseForm, thumbnail: e.target.files?.[0] || null })}
+                  className="input py-1.5"
+                />
+                {courseForm.thumbnail && (
+                  <p className="text-xs text-gray-500 mt-1">Selected: {courseForm.thumbnail.name}</p>
                 )}
               </div>
 

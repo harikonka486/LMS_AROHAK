@@ -21,7 +21,7 @@ export default function LearnPage() {
   const [quizResult, setQuizResult] = useState<any>(null)
   const [currentQuestion, setCurrentQuestion] = useState(0)
 
-  useEffect(() => { if (!user) router.push('/login') }, [user, router])
+  useEffect(() => { if (!user) router.push('/login') }, [user]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const { data: course } = useQuery({
     queryKey: ['learn-course', courseId],

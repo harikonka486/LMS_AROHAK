@@ -23,14 +23,17 @@ async function seed() {
   console.log('Connected to DB. Seeding...\n');
 
   // ── Users ────────────────────────────────────────────────────────────────
-  const adminId    = uuid();
-  const adminHash  = await bcrypt.hash('Ar0hak#Admin2024', 10);
+  const adminId      = uuid();
+  const employeeId   = uuid();
+  const adminHash    = await bcrypt.hash('Ar0hak#Admin2024', 10);
+  const employeeHash = await bcrypt.hash('Ar0hak#Emp2024', 10);
 
   await db.query(`
-    INSERT IGNORE INTO users (id, name, email, password, role, department, employee_id)
+    INSERT IGNORE INTO users (id, name, email, password, role, department, employee_id, is_email_verified)
     VALUES
-      (?, 'Admin User',    'admin@arohak.com',    ?, 'admin',    'IT',         'EMP001')
-  `, [adminId, adminHash]);
+      (?, 'Admin User',    'admin@arohak.com',    ?, 'admin',    'IT',         'EMP001', 1),
+      (?, 'John Employee', 'employee@arohak.com', ?, 'employee', 'Operations', 'EMP002', 1)
+  `, [adminId, adminHash, employeeId, employeeHash]);
   console.log('✅ Users seeded');
 
   const [[admin]] = await db.query(`SELECT id FROM users WHERE email='admin@arohak.com'`);

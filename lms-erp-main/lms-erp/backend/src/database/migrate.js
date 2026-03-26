@@ -212,6 +212,27 @@ async function migrate() {
   `);
   console.log('✅ password_reset_tokens table ready');
 
+  // Email verification tokens table
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS email_verification_tokens (
+      id VARCHAR(36) PRIMARY KEY,
+      user_id VARCHAR(36) NOT NULL,
+      token VARCHAR(255) UNIQUE NOT NULL,
+      expires_at TIMESTAMP NOT NULL,
+      used TINYINT(1) DEFAULT 0,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+  `);
+  console.log('✅ email_verification_tokens table ready');
+
+  try {
+    await db.query(`ALTER TABLE users ADD COLUMN is_email_verified TINYINT(1) DEFAULT 0`);
+    console.log('✅ Added is_email_verified column to users');
+  } catch (e) {
+    if (!e.message.includes('Duplicate column')) console.warn('is_email_verified column:', e.message);
+  }
+
   await db.end();
 }
 

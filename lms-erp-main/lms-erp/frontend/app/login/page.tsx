@@ -97,10 +97,12 @@ function LoginModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (u
   const [forgotSent, setForgotSent]       = useState(false)
   const [forgotLoading, setForgotLoading] = useState(false)
   const [errorMsg, setErrorMsg]           = useState('')
+  const [verifyError, setVerifyError]     = useState(false)
   const { register, handleSubmit, formState: { errors } } = useForm<F>({ resolver: zodResolver(schema) })
 
   const onSubmit = async (data: F) => {
     setErrorMsg('')
+    setVerifyError(false)
     setLoading(true)
     try {
       const res = await api.post('/auth/login', data)
@@ -111,7 +113,13 @@ function LoginModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (u
         setErrorMsg('Cannot connect to server. Please ensure the backend is running.')
       } else {
         const msg = err.response?.data?.message || err.response?.data?.error || 'Invalid email or password'
-        setErrorMsg(Array.isArray(msg) ? msg[0] : msg)
+        const msgStr = Array.isArray(msg) ? msg[0] : msg
+        if (msgStr.toLowerCase().includes('verify')) {
+          setVerifyError(true)
+          setTimeout(() => setVerifyError(false), 30000)
+        } else {
+          setErrorMsg(msgStr)
+        }
       }
     } finally { setLoading(false) }
   }
@@ -149,7 +157,16 @@ function LoginModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (u
           </p>
         </div>
 
-        {/* Error banner — top center of form */}
+        {/* Email not verified banner */}
+        {verifyError && (
+          <div className="mx-8 mt-5 px-4 py-4 rounded-xl text-center"
+            style={{ background: '#fffbeb', border: '1px solid #fcd34d' }}>
+            <p className="text-sm font-semibold text-amber-800 mb-1">📧 Please verify your email</p>
+            <p className="text-xs text-amber-700">Check your inbox and click the verification link before signing in.</p>
+          </div>
+        )}
+
+        {/* Generic error banner */}
         {errorMsg && (
           <div className="mx-8 mt-5 flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium"
             style={{ background: '#fff0f0', border: '1px solid #fca5a5', color: '#991b1b' }}>
@@ -250,7 +267,9 @@ export default function LoginPage() {
   const [showLogin, setShowLogin]     = useState(false)
 
   useEffect(() => { setMounted(true) }, [])
-  useEffect(() => { if (mounted && user) router.replace('/dashboard') }, [mounted, user, router])
+  useEffect(() => { 
+    if (mounted && user) router.replace('/dashboard') 
+  }, [mounted, user]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const [showAllCourses, setShowAllCourses] = useState(false)
 
@@ -402,7 +421,7 @@ export default function LoginPage() {
                     <div className="h-44 relative overflow-hidden flex-shrink-0" style={{ background: HERO_BG }}>
                       {course.thumbnail ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={course.thumbnail} alt={course.title}
+                        <img src={course.thumbnail.startsWith('/uploads/') ? `${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api').replace('/api', '')}${course.thumbnail}` : course.thumbnail} alt={course.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center">

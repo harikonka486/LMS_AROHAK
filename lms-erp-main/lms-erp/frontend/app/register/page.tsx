@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import toast from 'react-hot-toast'
-import { CheckCircle, ArrowRight } from 'lucide-react'
+import { CheckCircle } from 'lucide-react'
 import api from '@/lib/api'
 
 const A = {
@@ -32,6 +32,22 @@ const schema = z.object({
 type F = z.infer<typeof schema>
 
 function SuccessModal({ name, onClose }: { name: string; onClose: () => void }) {
+  const router = useRouter()
+  const [countdown, setCountdown] = useState(5)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(interval)
+          router.push('/login')
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+    return () => clearInterval(interval)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: 'rgba(61,10,10,0.75)', backdropFilter: 'blur(6px)' }}>
@@ -45,14 +61,15 @@ function SuccessModal({ name, onClose }: { name: string; onClose: () => void }) 
           <p className="text-white/70 text-base">Welcome, {name}</p>
         </div>
         <div className="bg-white px-10 py-8 text-center">
-          <p className="text-gray-500 text-sm mb-6">
-            Your account has been successfully created. Please sign in with your credentials to get started.
+          <p className="text-gray-800 text-sm font-medium mb-2">
+            Your account has been successfully created.
           </p>
-          <button onClick={onClose}
-            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-white font-semibold text-base transition-all hover:opacity-90 active:scale-95"
-            style={{ background: BTN_BG }}>
-            Go to Login <ArrowRight className="w-5 h-5" />
-          </button>
+          <p className="text-gray-500 text-sm mb-4">
+            A verification email has been sent to your email address — please check your inbox and verify it before signing in.
+          </p>
+          <p className="text-gray-400 text-xs">
+            Redirecting to login in <span className="font-semibold" style={{ color: A.red }}>{countdown}s</span>...
+          </p>
         </div>
       </div>
       <style>{`@keyframes popIn{0%{opacity:0;transform:scale(0.85) translateY(20px)}100%{opacity:1;transform:scale(1) translateY(0)}}`}</style>

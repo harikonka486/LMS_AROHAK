@@ -39,11 +39,6 @@ export class CoursesSimpleController {
   @Roles('admin')
   @UseInterceptors(FileInterceptor('thumbnail', { storage: thumbnailStorage }))
   async create(@Body() body: any, @UploadedFile() file: any, @Request() req: any) {
-    try {
-      const result = await this.courses.create(body, file, req.user.id);
-      return { success: true, data: result };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
+    return this.courses.create(body, file, req.user.id);
   }
 }

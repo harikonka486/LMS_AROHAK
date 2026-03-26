@@ -17,7 +17,7 @@ export default function Home() {
     } else {
       router.replace('/login')
     }
-  }, [mounted, user, router])
+  }, [mounted, user]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return null
 }

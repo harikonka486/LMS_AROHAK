@@ -44,7 +44,7 @@ export class MailService implements OnModuleInit {
     }
   }
 
-  async sendWelcome(to: string, name: string): Promise<void> {
+  async sendWelcome(to: string, name: string, verifyToken?: string): Promise<void> {
     const user = this.config.get('MAIL_USER');
     const pass = this.config.get('MAIL_PASS');
     if (
@@ -57,7 +57,11 @@ export class MailService implements OnModuleInit {
       return;
     }
     const from = this.config.get('MAIL_FROM', `LMS Platform <${user}>`);
-    const loginUrl = `${this.config.get('FRONTEND_URL', 'http://localhost:3000')}/login`;
+    const frontendUrl = this.config.get('FRONTEND_URL', 'http://localhost:3000');
+    const verifyUrl = verifyToken
+      ? `${frontendUrl}/verify-email?token=${verifyToken}`
+      : null;
+    const dashboardUrl = `${frontendUrl}/dashboard`;
 
     const htmlContent = `
       <!DOCTYPE html>
@@ -91,12 +95,27 @@ export class MailService implements OnModuleInit {
                 <tr><td style="padding:6px 0;color:#374151;font-size:13px;">🎯 Take quizzes and assessments</td></tr>
               </table>
             </div>
+
+            ${verifyUrl ? `
+            <!-- Verify Email -->
+            <div style="background:#fff8f0;border:1px solid #f0d9c8;border-radius:12px;padding:20px;margin-bottom:8px;">
+              <p style="color:#8B1A1A;font-size:13px;font-weight:700;margin:0 0 6px;text-transform:uppercase;letter-spacing:0.05em;">Verify your email address</p>
+              <p style="color:#6b7280;font-size:13px;margin:0 0 16px;line-height:1.6;">Click the button below to confirm your email. This link expires in 24 hours.</p>
+              <div style="text-align:center;">
+                <a href="${verifyUrl}"
+                  style="display:inline-block;background:linear-gradient(135deg,#8B1A1A,#C0392B);color:#ffffff;padding:14px 36px;border-radius:10px;text-decoration:none;font-weight:700;font-size:15px;letter-spacing:0.02em;">
+                  ✅ Verify Email Address
+                </a>
+              </div>
+            </div>
+            ` : `
             <div style="text-align:center;margin:28px 0 8px;">
-              <a href="${loginUrl}"
+              <a href="${dashboardUrl}"
                 style="display:inline-block;background:linear-gradient(135deg,#8B1A1A,#C0392B);color:#ffffff;padding:14px 36px;border-radius:10px;text-decoration:none;font-weight:700;font-size:15px;letter-spacing:0.02em;">
                 Go to Dashboard →
               </a>
             </div>
+            `}
           </div>
           <!-- Footer -->
           <div style="background:#FDF3E7;padding:20px 32px;text-align:center;border-top:1px solid #f0d9c8;">
@@ -114,14 +133,12 @@ export class MailService implements OnModuleInit {
       await this.transporter.sendMail({
         from,
         to,
-        subject: '🎉 Welcome to Arohak LMS Portal!',
+        subject: '🎉 Welcome to Arohak LMS Portal — Please verify your email',
         html: htmlContent,
       });
       this.logger.log(`Welcome email sent to ${to}`);
     } catch (err) {
-      this.logger.error(
-        `Failed to send welcome email to ${to}: ${err.message}`,
-      );
+      this.logger.error(`Failed to send welcome email to ${to}: ${err.message}`);
     }
   }
 

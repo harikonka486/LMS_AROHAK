@@ -14,8 +14,12 @@ api.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401 && typeof window !== 'undefined') {
-      localStorage.removeItem('lms_token')
-      window.location.href = '/login'
+      const token = localStorage.getItem('lms_token')
+      // Only redirect if user had a token (session expired), not on public pages
+      if (token) {
+        localStorage.removeItem('lms_token')
+        window.location.href = '/login'
+      }
     }
     return Promise.reject(err)
   }

@@ -13,7 +13,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (mounted && !user) router.push('/login')
-  }, [mounted, user, router])
+  }, [mounted, user]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // While hydrating, show a spinner — never redirect prematurely
   if (!mounted) {
