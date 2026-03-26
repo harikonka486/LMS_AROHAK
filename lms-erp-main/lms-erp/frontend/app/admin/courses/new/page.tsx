@@ -48,7 +48,7 @@ export default function NewCoursePage() {
         <h1 className="text-2xl font-bold">Create New Course</h1>
         
         {/* Basic Course Information */}
-        <div className="card p-6 space-y-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="card p-6 space-y-5">
           <h2 className="text-lg font-semibold mb-4">Course Information</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -95,7 +95,7 @@ export default function NewCoursePage() {
             <button type="submit" disabled={loading} className="btn-primary">{loading ? 'Creating...' : 'Create Course'}</button>
             <button type="button" onClick={() => router.back()} className="btn-secondary">Cancel</button>
           </div>
-        </div>
+        </form>
 
         {/* Course Structure - Show after creation */}
         {showSections && (
