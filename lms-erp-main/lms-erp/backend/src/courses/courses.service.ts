@@ -109,11 +109,12 @@ export class CoursesService {
       categoryId,
       passing_score = 70,
       video_url,
+      sharepoint_video_url,
     } = body;
     const thumbnail = file ? `/uploads/thumbnails/${file.filename}` : null;
     const id = uuid();
     await this.db.query(
-      'INSERT INTO courses (id,title,description,price,level,language,thumbnail,instructor_id,category_id,passing_score,video_url) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+      'INSERT INTO courses (id,title,description,price,level,language,thumbnail,instructor_id,category_id,passing_score,video_url,sharepoint_video_url) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)',
       [
         id,
         title,
@@ -126,6 +127,7 @@ export class CoursesService {
         categoryId || null,
         passing_score,
         video_url || null,
+        sharepoint_video_url || null,
       ],
     );
     const [[course]] = (await this.db.query(
@@ -155,9 +157,10 @@ export class CoursesService {
       categoryId,
       passing_score,
       video_url,
+      sharepoint_video_url,
     } = body;
     await this.db.query(
-      'UPDATE courses SET title=?,description=?,price=?,level=?,language=?,thumbnail=?,category_id=?,passing_score=?,video_url=?,updated_at=NOW() WHERE id=?',
+      'UPDATE courses SET title=?,description=?,price=?,level=?,language=?,thumbnail=?,category_id=?,passing_score=?,video_url=?,sharepoint_video_url=?,updated_at=NOW() WHERE id=?',
       [
         title || course.title,
         description || course.description,
@@ -168,6 +171,7 @@ export class CoursesService {
         categoryId || course.category_id,
         passing_score || course.passing_score,
         video_url !== undefined ? video_url : course.video_url,
+        sharepoint_video_url !== undefined ? sharepoint_video_url : course.sharepoint_video_url,
         id,
       ],
     );

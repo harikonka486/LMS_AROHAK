@@ -21,16 +21,17 @@ export class LessonsService {
       'SELECT COUNT(*) AS count FROM lessons WHERE section_id=?',
       [sectionId],
     )) as any;
-    const { title, description, video_url, duration, is_free } = body;
+    const { title, description, video_url, sharepoint_video_url, duration, is_free } = body;
     const video_file = file ? `/uploads/videos/${file.filename}` : null;
     const id = uuid();
     await this.db.query(
-      'INSERT INTO lessons (id,title,description,video_url,video_file,duration,is_free,order_num,section_id) VALUES (?,?,?,?,?,?,?,?,?)',
+      'INSERT INTO lessons (id,title,description,video_url,sharepoint_video_url,video_file,duration,is_free,order_num,section_id) VALUES (?,?,?,?,?,?,?,?,?,?)',
       [
         id,
         title,
         description || null,
         video_url || null,
+        sharepoint_video_url || null,
         video_file,
         duration || null,
         is_free ? 1 : 0,
@@ -46,12 +47,13 @@ export class LessonsService {
   }
 
   async update(id: string, body: any, file: any) {
-    const { title, description, video_url, duration, is_free } = body;
+    const { title, description, video_url, sharepoint_video_url, duration, is_free } = body;
     const video_file = file ? `/uploads/videos/${file.filename}` : undefined;
     const fields = [
       'title=?',
       'description=?',
       'video_url=?',
+      'sharepoint_video_url=?',
       'duration=?',
       'is_free=?',
     ];
@@ -59,6 +61,7 @@ export class LessonsService {
       title,
       description,
       video_url,
+      sharepoint_video_url,
       duration,
       is_free ? 1 : 0,
     ];

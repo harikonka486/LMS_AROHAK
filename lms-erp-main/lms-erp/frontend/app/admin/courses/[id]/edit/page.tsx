@@ -36,8 +36,19 @@ export default function EditCoursePage() {
   const invalidate = () => qc.invalidateQueries({ queryKey: ['course-edit', id] })
 
   const updateCourse = useMutation({
-    mutationFn: (data: any) => api.patch(`/courses/${id}`, data),
-    onSuccess: () => { invalidate(); toast.success('Course updated!') },
+    mutationFn: (data: any) => {
+      console.log('Updating course with data:', data)
+      return api.patch(`/courses/${id}`, data)
+    },
+    onSuccess: () => { 
+      console.log('Course updated successfully')
+      invalidate(); 
+      toast.success('Course updated!') 
+    },
+    onError: (error: any) => {
+      console.error('Failed to update course:', error)
+      toast.error(error.response?.data?.error || 'Failed to update course')
+    }
   })
 
   const togglePublish = useMutation({
@@ -139,7 +150,10 @@ export default function EditCoursePage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">SharePoint Video URL</label>
               <input
                 value={course?.sharepoint_video_url || ''}
-                onChange={e => updateCourse.mutate({ sharepoint_video_url: e.target.value })}
+                onChange={e => {
+                  console.log('SharePoint URL changed:', e.target.value)
+                  updateCourse.mutate({ sharepoint_video_url: e.target.value })
+                }}
                 type="url"
                 className="input"
                 placeholder="https://company.sharepoint.com/..."

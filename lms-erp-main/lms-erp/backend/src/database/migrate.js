@@ -169,6 +169,20 @@ async function migrate() {
   }
 
   try {
+    await db.query(`ALTER TABLE courses ADD COLUMN sharepoint_video_url VARCHAR(1000) NULL`);
+    console.log('✅ Added sharepoint_video_url column to courses');
+  } catch (e) {
+    if (!e.message.includes('Duplicate column')) console.warn('sharepoint_video_url column:', e.message);
+  }
+
+  try {
+    await db.query(`ALTER TABLE lessons ADD COLUMN sharepoint_video_url VARCHAR(1000) NULL`);
+    console.log('✅ Added sharepoint_video_url column to lessons');
+  } catch (e) {
+    if (!e.message.includes('Duplicate column')) console.warn('sharepoint_video_url column in lessons:', e.message);
+  }
+
+  try {
     await db.query(`ALTER TABLE certificates ADD COLUMN score DECIMAL(5,2) NULL`);
     console.log('✅ Added score column to certificates');
   } catch (e) {
