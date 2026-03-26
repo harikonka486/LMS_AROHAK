@@ -100,9 +100,6 @@ export class CoursesService {
   }
 
   async create(body: any, file: any, userId: string) {
-    console.log('Service create called with body keys:', Object.keys(body));
-    console.log('Service create called with body values:', body);
-    
     const {
       title,
       description,
@@ -115,45 +112,15 @@ export class CoursesService {
       sharepoint_video_url,
     } = body;
     
-    console.log('Extracted values:', {
-      title,
-      description,
-      price,
-      level,
-      language,
-      categoryId,
-      passing_score,
-      video_url,
-      sharepoint_video_url
-    });
-    
     const thumbnail = file ? `/uploads/thumbnails/${file.filename}` : null;
     const id = uuid();
     
-    const sql = `
-      INSERT INTO courses (
-        id, title, description, price, level, language, 
-        thumbnail, instructor_id, category_id, passing_score, 
-        video_url, sharepoint_video_url
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-    const values = [
-      id, title, description, price, level, language,
-      thumbnail, userId, categoryId || null, passing_score,
-      video_url || null, sharepoint_video_url || null
-    ];
+    // Simple direct SQL approach
+    await this.db.query(
+      'INSERT INTO courses SET id=?, title=?, description=?, price=?, level=?, language=?, thumbnail=?, instructor_id=?, category_id=?, passing_score=?, video_url=?, sharepoint_video_url=?',
+      [id, title, description, price, level, language, thumbnail, userId, categoryId || null, passing_score, video_url || null, sharepoint_video_url || null]
+    );
     
-    console.log('SQL:', sql.trim());
-    console.log('Values count:', values.length);
-    console.log('Expected count: 12');
-    console.log('Actual values:', values);
-    
-    if (values.length !== 12) {
-      console.error('ERROR: Values count mismatch! Expected 12, got', values.length);
-      throw new Error(`Values count mismatch: Expected 12, got ${values.length}`);
-    }
-    
-    await this.db.query(sql, values);
     const [[course]] = (await this.db.query(
       'SELECT * FROM courses WHERE id=?',
       [id],
