@@ -14,7 +14,7 @@ export class SectionsService {
     )) as any;
     const id = uuid();
     await this.db.query(
-      'INSERT INTO sections (id,title,order_num,course_id) VALUES (?,?,?,?)',
+      'INSERT INTO sections (id,title,order_num,course_id) VALUES (?,?,?)',
       [id, title, Number(count) + 1, courseId],
     );
     const [[s]] = (await this.db.query('SELECT * FROM sections WHERE id=?', [
