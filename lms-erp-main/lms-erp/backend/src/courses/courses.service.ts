@@ -130,20 +130,17 @@ export class CoursesService {
     const thumbnail = file ? `/uploads/thumbnails/${file.filename}` : null;
     const id = uuid();
     
-    const sql = 'INSERT INTO courses (id,title,description,price,level,language,thumbnail,instructor_id,category_id,passing_score,video_url,sharepoint_video_url) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)';
+    const sql = `
+      INSERT INTO courses (
+        id, title, description, price, level, language, 
+        thumbnail, instructor_id, category_id, passing_score, 
+        video_url, sharepoint_video_url
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
     const values = [
-      id,
-      title,
-      description,
-      price,
-      level,
-      language,
-      thumbnail,
-      userId,
-      categoryId || null,
-      passing_score,
-      video_url || null,
-      sharepoint_video_url || null,
+      id, title, description, price, level, language,
+      thumbnail, userId, categoryId || null, passing_score,
+      video_url || null, sharepoint_video_url || null
     ];
     
     console.log('SQL:', sql);
