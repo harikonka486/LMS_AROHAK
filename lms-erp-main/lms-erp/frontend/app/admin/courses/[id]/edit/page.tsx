@@ -75,12 +75,22 @@ export default function EditCoursePage() {
         fd.append(k, v as string)
       }
     })
+    
+    // Handle thumbnail: add new file or remove existing
     if (courseForm.thumbnail) {
       fd.append('thumbnail', courseForm.thumbnail)
+    } else {
+      // Explicitly remove thumbnail if set to null
+      fd.append('thumbnail', '')
     }
     
     updateCourse.mutate(fd)
     setEditingCourse(false)
+  }
+
+  const removeThumbnail = () => {
+    setCourseForm({ ...courseForm, thumbnail: null })
+    updateCourse.mutate(new FormData().append('thumbnail', ''))
   }
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ['course-edit', id] })
@@ -348,17 +358,40 @@ export default function EditCoursePage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Course Thumbnail</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setCourseForm({ ...courseForm, thumbnail: e.target.files?.[0] || null })}
-                  className="input py-1.5"
-                />
-                {courseForm.thumbnail && (
-                  <p className="text-xs text-gray-500 mt-1">New image selected: {courseForm.thumbnail.name}</p>
-                )}
+                <div className="flex items-center gap-3">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setCourseForm({ ...courseForm, thumbnail: e.target.files?.[0] || null })}
+                    className="input py-1.5"
+                  />
+                  {courseForm.thumbnail && (
+                    <p className="text-xs text-gray-500 mt-1">New: {courseForm.thumbnail.name}</p>
+                  )}
+                  <button
+                    type="button"
+                    onClick={removeThumbnail}
+                    className="text-red-500 hover:text-red-700 text-sm px-3 py-1.5 border border border-red-300 rounded"
+                  >
+                    Remove
+                  </button>
+                </div>
                 {course?.thumbnail && !courseForm.thumbnail && (
-                  <p className="text-xs text-gray-500 mt-1">Current: {course.thumbnail}</p>
+                  <div className="mt-2 p-2 bg-gray-50 rounded border border-gray-200">
+                    <p className="text-sm text-gray-600 mb-2">Current thumbnail:</p>
+                    <img 
+                      src={course.thumbnail.startsWith('/uploads/') ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'}${course.thumbnail}` : course.thumbnail} 
+                      alt={course.title}
+                      className="w-16 h-16 object-cover rounded border border-gray-300"
+                    />
+                    <button
+                      type="button"
+                      onClick={removeThumbnail}
+                      className="mt-2 text-red-500 hover:text-red-700 text-sm px-3 py-1.5 border border border-red-300 rounded"
+                    >
+                      Remove Current Thumbnail
+                    </button>
+                  </div>
                 )}
               </div>
 
