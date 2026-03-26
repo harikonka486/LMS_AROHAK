@@ -121,6 +121,12 @@ export default function EditCoursePage() {
       console.error('Failed to add section:', error)
       console.error('Error response:', error.response?.data)
       toast.error(error.response?.data?.message || error.response?.data?.error || 'Failed to add section')
+      // Reset input on error
+      setNewSection('')
+    },
+    onMutate: () => {
+      // Clear input immediately when starting mutation
+      setNewSection('')
     }
   })
 
@@ -423,10 +429,28 @@ export default function EditCoursePage() {
             ))}
           </div>
           <div className="flex gap-2">
-            <input value={newSection} onChange={e => setNewSection(e.target.value)}
-              placeholder="New section title" className="input" />
-            <button onClick={() => newSection && addSection.mutate(newSection)} className="btn-primary whitespace-nowrap">
-              <Plus className="w-4 h-4" /> Add Section
+            <input 
+              value={newSection} 
+              onChange={e => setNewSection(e.target.value)}
+              placeholder="New section title" 
+              className="input" 
+              onKeyDown={e => {
+                if (e.key === 'Enter' && newSection.trim()) {
+                  addSection.mutate(newSection)
+                }
+              }}
+            />
+            <button 
+              onClick={() => {
+                if (newSection.trim()) {
+                  addSection.mutate(newSection)
+                }
+              }} 
+              disabled={!newSection.trim() || addSection.isPending} 
+              className="btn-primary whitespace-nowrap"
+            >
+              <Plus className="w-4 h-4" /> 
+              {addSection.isPending ? 'Adding...' : 'Add Section'}
             </button>
           </div>
         </div>
