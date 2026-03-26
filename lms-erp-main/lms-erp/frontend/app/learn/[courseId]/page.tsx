@@ -102,7 +102,6 @@ export default function LearnPage() {
   function getSharePointEmbedUrl(url: string): string | null {
     if (!url) return null
     
-    // Handle various SharePoint URL formats
     try {
       // Already an embed/stream URL — use as-is
       if (url.includes('/_layouts/15/embed.aspx') ||
@@ -132,12 +131,79 @@ export default function LearnPage() {
     }
   }
 
-  function getVideoEmbed(url: string): { type: 'youtube' | 'sharepoint' | 'iframe' | 'video'; src: string } | null {
+  // Convert Google Drive video URL to embed URL
+  function getGoogleDriveEmbedUrl(url: string): string | null {
+    if (!url) return null
+    
+    console.log('Parsing Google Drive URL:', url)
+    
+    // Handle various Google Drive URL formats
+    try {
+      // Convert share links (most common format)
+      // https://drive.google.com/file/d/[FILE_ID]/view
+      // https://drive.google.com/file/d/[FILE_ID]/usp=sharing
+      if (url.includes('drive.google.com/file/d/')) {
+        const afterFileD = url.split('/file/d/')[1]
+        if (afterFileD) {
+          const fileId = afterFileD.split('/')[0]?.split('?')[0]
+          console.log('Extracted file ID:', fileId)
+          if (fileId) {
+            return `https://drive.google.com/file/d/${fileId}/preview`
+          }
+        }
+      }
+      
+      // Handle direct download links
+      // https://drive.google.com/uc?id=[FILE_ID]
+      if (url.includes('drive.google.com/uc?id=')) {
+        const urlParams = new URL(url)
+        const fileId = urlParams.searchParams.get('id')
+        console.log('Extracted file ID from UC:', fileId)
+        if (fileId) {
+          return `https://drive.google.com/file/d/${fileId}/preview`
+        }
+      }
+      
+      // Handle open links
+      // https://drive.google.com/open?id=[FILE_ID]
+      if (url.includes('drive.google.com/open?id=')) {
+        const urlParams = new URL(url)
+        const fileId = urlParams.searchParams.get('id')
+        console.log('Extracted file ID from open:', fileId)
+        if (fileId) {
+          return `https://drive.google.com/file/d/${fileId}/preview`
+        }
+      }
+
+      // If it's already an embed URL, use as-is
+      if (url.includes('/preview')) {
+        console.log('URL is already embed format')
+        return url
+      }
+
+      console.log('No matching Google Drive URL format found')
+      return null
+    } catch (error) {
+      console.error('Google Drive URL parsing error:', error)
+      return url // fallback to original URL
+    }
+  }
+
+  function getVideoEmbed(url: string): { type: 'youtube' | 'sharepoint' | 'googledrive' | 'iframe' | 'video'; src: string } | null {
     if (!url) return null
     const yt = getYouTubeEmbedUrl(url)
     if (yt) return { type: 'youtube', src: yt }
     const sp = getSharePointEmbedUrl(url)
     if (sp) return { type: 'sharepoint', src: sp }
+    const gd = getGoogleDriveEmbedUrl(url)
+    if (gd) return { type: 'googledrive', src: gd }
+    
+    // If it's a Google Drive URL that couldn't be parsed, try using it directly
+    if (url.includes('drive.google.com')) {
+      console.log('Attempting to use Google Drive URL directly in iframe')
+      return { type: 'googledrive', src: url }
+    }
+    
     // Vimeo
     const vimeo = url.match(/vimeo\.com\/(\d+)/)
     if (vimeo) return { type: 'iframe', src: `https://player.vimeo.com/video/${vimeo[1]}` }
@@ -253,16 +319,29 @@ export default function LearnPage() {
             <div className="max-w-4xl mx-auto p-6">
               <h1 className="text-xl font-bold mb-4">{activeLesson.title}</h1>
 
-              {(activeLesson.video_file || activeLesson.video_url || activeLesson.sharepoint_video_url) ? (
+              {(activeLesson.video_file || activeLesson.video_url || activeLesson.sharepoint_video_url || activeLesson.google_drive_url) ? (
                 <div className="aspect-video bg-black rounded-xl overflow-hidden mb-6">
                   {activeLesson.video_file ? (
                     <video src={fileUrl(activeLesson.video_file)} controls className="w-full h-full" />
                   ) : (() => {
-                    const embed = getVideoEmbed(activeLesson.video_url || activeLesson.sharepoint_video_url)
-                    console.log('Video URL:', activeLesson.video_url || activeLesson.sharepoint_video_url)
+                    const videoUrl = activeLesson.video_url || activeLesson.sharepoint_video_url || activeLesson.google_drive_url
+                    const embed = getVideoEmbed(videoUrl)
+                    console.log('Video URL:', videoUrl)
                     console.log('Embed result:', embed)
                     
-                    if (embed?.type === 'youtube' || embed?.type === 'iframe') {
+                    if (!embed) {
+                      return (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-900">
+                          <div className="text-center text-gray-400">
+                            <p className="text-sm">Unsupported video format</p>
+                            <p className="text-xs mt-1">URL: {videoUrl}</p>
+                            <p className="text-xs mt-1">Please check the video URL</p>
+                          </div>
+                        </div>
+                      )
+                    }
+                    
+                    if (embed?.type === 'youtube' || embed?.type === 'iframe' || embed?.type === 'googledrive') {
                       return (
                         <iframe
                           src={embed.src}
@@ -272,7 +351,7 @@ export default function LearnPage() {
                         />
                       )
                     }
-                    // SharePoint or direct video file
+                    // SharePoint - use direct video element
                     return <video src={embed.src} controls className="w-full h-full" />
                   })()}
                 </div>

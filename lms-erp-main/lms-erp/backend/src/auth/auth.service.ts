@@ -23,16 +23,8 @@ export class AuthService {
     return this.jwt.sign({ id });
   }
 
-  private isAllowedEmail(email: string): boolean {
-    return !!email; // accept any valid email
-  }
-
   async register(body: any) {
     const { name, email, password, role, department, employee_id } = body;
-    if (!this.isAllowedEmail(email))
-      throw new BadRequestException(
-        'Only @arohak.com or @cognivance.com email addresses are allowed',
-      );
 
     const [exists] = (await this.db.query(
       'SELECT id FROM users WHERE email=?',
@@ -68,10 +60,6 @@ export class AuthService {
 
   async login(body: any) {
     const { email, password } = body;
-    if (!this.isAllowedEmail(email))
-      throw new BadRequestException(
-        'Only @arohak.com or @cognivance.com email addresses are allowed',
-      );
 
     const [[user]] = (await this.db.query('SELECT * FROM users WHERE email=?', [
       email,

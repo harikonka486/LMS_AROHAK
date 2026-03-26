@@ -24,16 +24,13 @@ async function seed() {
 
   // ── Users ────────────────────────────────────────────────────────────────
   const adminId    = uuid();
-  const employeeId = uuid();
   const adminHash  = await bcrypt.hash('Ar0hak#Admin2024', 10);
-  const empHash    = await bcrypt.hash('Ar0hak#Emp2024', 10);
 
   await db.query(`
     INSERT IGNORE INTO users (id, name, email, password, role, department, employee_id)
     VALUES
-      (?, 'Admin User',    'admin@arohak.com',    ?, 'admin',    'IT',         'EMP001'),
-      (?, 'Employee User', 'employee@arohak.com', ?, 'employee', 'Operations', 'EMP002')
-  `, [adminId, adminHash, employeeId, empHash]);
+      (?, 'Admin User',    'admin@arohak.com',    ?, 'admin',    'IT',         'EMP001')
+  `, [adminId, adminHash]);
   console.log('✅ Users seeded');
 
   const [[admin]] = await db.query(`SELECT id FROM users WHERE email='admin@arohak.com'`);

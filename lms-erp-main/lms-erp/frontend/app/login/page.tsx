@@ -31,9 +31,6 @@ const HERO_BG   = `linear-gradient(135deg, ${A.dark} 0%, ${A.red} 55%, ${A.crims
 const BTN_BG    = `linear-gradient(135deg, ${A.red}, ${A.crimson})`
 const GOLD_BG   = `linear-gradient(135deg, ${A.gold}, ${A.amber})`
 
-const ALLOWED_DOMAINS = ['@arohak.com', '@cognivance.com']
-const isAllowedEmail = (e: string) => !!e
-
 const schema = z.object({
   email: z.string().email(),
   password: z.string().min(1),

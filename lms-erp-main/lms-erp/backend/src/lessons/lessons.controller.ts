@@ -34,13 +34,12 @@ export class LessonsController {
   @Post('section/:sectionId')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  @UseInterceptors(FileInterceptor('video', { storage: videoStorage }))
   create(
     @Param('sectionId') sectionId: string,
     @Body() body: any,
-    @UploadedFile() file: any,
   ) {
-    return this.lessons.create(sectionId, body, file);
+    console.log('Creating lesson with data:', body);
+    return this.lessons.create(sectionId, body, null);
   }
 
   @Patch(':id')

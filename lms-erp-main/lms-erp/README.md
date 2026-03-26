@@ -99,11 +99,9 @@ App available at: `http://localhost:3000`
 
 ## Demo Accounts (after seeding)
 
-| Role       | Email                    | Password   |
-|------------|--------------------------|------------|
-| Admin      | admin@company.com        | admin123   |
-| Instructor | instructor@company.com   | instructor123 |
-| Student    | student@company.com      | student123 |
+| Role  | Email            | Password         |
+|--------|------------------|------------------|
+| Admin  | admin@arohak.com | Ar0hak#Admin2024 |
 
 ---
 

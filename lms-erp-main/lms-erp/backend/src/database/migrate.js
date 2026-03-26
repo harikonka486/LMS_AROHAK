@@ -72,6 +72,8 @@ async function migrate() {
       title VARCHAR(500) NOT NULL,
       description TEXT,
       video_url VARCHAR(500),
+      sharepoint_video_url VARCHAR(500),
+      google_drive_url VARCHAR(500),
       video_file VARCHAR(500),
       duration INT DEFAULT 0,
       order_num INT DEFAULT 0,
@@ -176,10 +178,17 @@ async function migrate() {
   }
 
   try {
-    await db.query(`ALTER TABLE lessons ADD COLUMN sharepoint_video_url VARCHAR(1000) NULL`);
+    await db.query(`ALTER TABLE lessons ADD COLUMN sharepoint_video_url VARCHAR(500) NULL`);
     console.log('✅ Added sharepoint_video_url column to lessons');
   } catch (e) {
-    if (!e.message.includes('Duplicate column')) console.warn('sharepoint_video_url column in lessons:', e.message);
+    if (!e.message.includes('Duplicate column')) console.warn('sharepoint_video_url column:', e.message);
+  }
+
+  try {
+    await db.query(`ALTER TABLE lessons ADD COLUMN google_drive_url VARCHAR(500) NULL`);
+    console.log('✅ Added google_drive_url column to lessons');
+  } catch (e) {
+    if (!e.message.includes('Duplicate column')) console.warn('google_drive_url column:', e.message);
   }
 
   try {

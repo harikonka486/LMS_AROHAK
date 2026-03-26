@@ -48,7 +48,7 @@ export class CoursesController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @UseInterceptors(FileInterceptor('thumbnail', { storage: thumbnailStorage }))
-  create(@Body() body: any, @UploadedFile() file: any, @Request() req: any) {
+  async create(@Body() body: any, @UploadedFile() file: any, @Request() req: any) {
     console.log('=== COURSE CREATE REQUEST ===');
     console.log('Body keys:', Object.keys(body));
     console.log('Body values:', body);
