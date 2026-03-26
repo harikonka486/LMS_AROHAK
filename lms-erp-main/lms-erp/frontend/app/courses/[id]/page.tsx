@@ -46,12 +46,6 @@ export default function CourseDetailPage() {
               <span className="badge-blue mb-2">{course.category_name}</span>
               <h1 className="text-2xl font-bold mt-2 mb-3">{course.title}</h1>
               <p className="text-gray-600 mb-4">{course.description}</p>
-              {course.content && (
-                <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                  <h3 className="font-semibold mb-2">Course Overview</h3>
-                  <p className="text-gray-700 whitespace-pre-wrap">{course.content}</p>
-                </div>
-              )}
               <div className="flex flex-wrap gap-4 mt-4 text-sm text-gray-500">
                 <span className="flex items-center gap-1"><Users className="w-4 h-4" />{course.enrollment_count} enrolled</span>
                 <span className="flex items-center gap-1"><BookOpen className="w-4 h-4" />{totalLessons} lessons</span>
