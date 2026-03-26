@@ -105,8 +105,13 @@ export default function CoursesPage() {
                   style={{ background: 'linear-gradient(135deg, #3d0a0a 0%, #8B1A1A 55%, #C0392B 100%)' }}>
                   {course.thumbnail ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={course.thumbnail} alt={course.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <img src={course.thumbnail.startsWith('/uploads/') ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'}${course.thumbnail}` : course.thumbnail} alt={course.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement
+                        target.src = '/api/placeholder-course.jpg'
+                      }}
+                    />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
                       <BookOpen className="w-16 h-16 text-white/20" />
