@@ -143,9 +143,15 @@ export class CoursesService {
       video_url || null, sharepoint_video_url || null
     ];
     
-    console.log('SQL:', sql);
+    console.log('SQL:', sql.trim());
     console.log('Values count:', values.length);
-    console.log('Values:', values);
+    console.log('Expected count: 12');
+    console.log('Actual values:', values);
+    
+    if (values.length !== 12) {
+      console.error('ERROR: Values count mismatch! Expected 12, got', values.length);
+      throw new Error(`Values count mismatch: Expected 12, got ${values.length}`);
+    }
     
     await this.db.query(sql, values);
     const [[course]] = (await this.db.query(
