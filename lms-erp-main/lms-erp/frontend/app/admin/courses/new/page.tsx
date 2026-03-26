@@ -9,7 +9,6 @@ import api from '@/lib/api'
 export default function NewCoursePage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
   const [showSections, setShowSections] = useState(false)
   const { register, handleSubmit } = useForm()
 
@@ -18,13 +17,8 @@ export default function NewCoursePage() {
     try {
       const fd = new FormData()
       Object.entries(data).forEach(([k, v]) => { 
-        if (k !== 'thumbnail' && v !== undefined && v !== '') fd.append(k, v as string) 
+        if (v !== undefined && v !== '') fd.append(k, v as string) 
       })
-      
-      // Add thumbnail file if selected
-      if (thumbnailFile) {
-        fd.append('thumbnail', thumbnailFile)
-      }
       
       // Use the simple courses endpoint
       const res = await api.post('/courses-simple', fd)
@@ -33,13 +27,6 @@ export default function NewCoursePage() {
     } catch (err: any) {
       toast.error(err.response?.data?.error || 'Failed')
     } finally { setLoading(false) }
-  }
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setThumbnailFile(file)
-    }
   }
 
   return (
@@ -76,21 +63,7 @@ export default function NewCoursePage() {
             <input {...register('passing_score')} type="number" min="1" max="100" defaultValue={70} className="input" />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Course Thumbnail</label>
-            <input 
-              type="file" 
-              accept="image/*" 
-              className="input py-1.5" 
-              onChange={handleFileChange}
-            />
-            {thumbnailFile && (
-              <p className="text-sm text-gray-600 mt-1">
-                Selected: {thumbnailFile.name}
-              </p>
-            )}
-          </div>
-
+          
           <div className="flex gap-3 pt-4">
             <button type="submit" disabled={loading} className="btn-primary">{loading ? 'Creating...' : 'Create Course'}</button>
             <button type="button" onClick={() => router.back()} className="btn-secondary">Cancel</button>
