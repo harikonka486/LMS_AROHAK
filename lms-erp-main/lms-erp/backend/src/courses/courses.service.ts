@@ -115,10 +115,10 @@ export class CoursesService {
     const thumbnail = file ? `/uploads/thumbnails/${file.filename}` : null;
     const id = uuid();
     
-    // Simple direct SQL approach
+    // Simple direct SQL approach - only 11 values needed for SET syntax (no ID)
     await this.db.query(
-      'INSERT INTO courses SET id=?, title=?, description=?, price=?, level=?, language=?, thumbnail=?, instructor_id=?, category_id=?, passing_score=?, video_url=?, sharepoint_video_url=?',
-      [id, title, description, price, level, language, thumbnail, userId, categoryId || null, passing_score, video_url || null, sharepoint_video_url || null]
+      'INSERT INTO courses SET title=?, description=?, price=?, level=?, language=?, thumbnail=?, instructor_id=?, category_id=?, passing_score=?, video_url=?, sharepoint_video_url=?',
+      [title, description, price, level, language, thumbnail, userId, categoryId || null, passing_score, video_url || null, sharepoint_video_url || null]
     );
     
     const [[course]] = (await this.db.query(
