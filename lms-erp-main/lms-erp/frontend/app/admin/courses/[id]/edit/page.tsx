@@ -143,38 +143,6 @@ export default function EditCoursePage() {
           )}
         </div>
 
-        {/* Course Videos */}
-        <div className="card p-5">
-          <h2 className="font-semibold mb-4">Course Videos</h2>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">YouTube Video URL</label>
-              <input
-                value={course?.video_url || ''}
-                onChange={e => updateCourse.mutate({ video_url: e.target.value })}
-                type="url"
-                className="input"
-                placeholder="https://www.youtube.com/watch?v=..."
-              />
-              <p className="text-xs text-gray-400 mt-1">Add YouTube video for course introduction</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">SharePoint Video URL</label>
-              <input
-                value={course?.sharepoint_video_url || ''}
-                onChange={e => {
-                  console.log('SharePoint URL changed:', e.target.value)
-                  updateCourse.mutate({ sharepoint_video_url: e.target.value })
-                }}
-                type="url"
-                className="input"
-                placeholder="https://company.sharepoint.com/..."
-              />
-              <p className="text-xs text-gray-400 mt-1">Add SharePoint video for internal training</p>
-            </div>
-          </div>
-        </div>
-
         {/* Sections & Lessons */}
         <div className="card p-5">
           <h2 className="font-semibold mb-4">Course Structure</h2>
