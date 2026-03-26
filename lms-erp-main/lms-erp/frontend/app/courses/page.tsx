@@ -106,24 +106,15 @@ export default function CoursesPage() {
                   {course.thumbnail ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img 
-                      src={(() => {
-                        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'
-                        // Handle both relative and absolute paths
-                        if (course.thumbnail.startsWith('/uploads/')) {
-                          return `${apiUrl}${course.thumbnail}`
-                        } else if (course.thumbnail.startsWith('http')) {
-                          return course.thumbnail
-                        } else {
-                          return `${apiUrl}/uploads/thumbnails/${course.thumbnail.split('/').pop()}`
-                        }
-                      })()} 
+                      src={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'}${course.thumbnail}`}
                       alt={course.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       onError={(e) => {
                         console.error('Image failed to load:', course.thumbnail)
                         const target = e.target as HTMLImageElement
-                        // Hide broken image instead of showing placeholder
+                        // Hide broken image and show fallback
                         target.style.display = 'none'
+                        target.parentElement?.classList.add('bg-gradient-to-br', 'from-gray-700', 'to-gray-900')
                       }}
                       onLoad={() => {
                         console.log('Image loaded successfully:', course.thumbnail)
