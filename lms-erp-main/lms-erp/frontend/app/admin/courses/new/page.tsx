@@ -9,14 +9,21 @@ import api from '@/lib/api'
 export default function NewCoursePage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
   const { register, handleSubmit } = useForm()
 
   const onSubmit = async (data: any) => {
     setLoading(true)
     try {
       const fd = new FormData()
-      Object.entries(data).forEach(([k, v]) => { if (v !== undefined && v !== '') fd.append(k, v as string) })
-      if (data.thumbnail?.[0]) fd.set('thumbnail', data.thumbnail[0])
+      Object.entries(data).forEach(([k, v]) => { 
+        if (k !== 'thumbnail' && v !== undefined && v !== '') fd.append(k, v as string) 
+      })
+      
+      // Add thumbnail file if selected
+      if (thumbnailFile) {
+        fd.append('thumbnail', thumbnailFile)
+      }
       
       // Use the simple courses endpoint
       const res = await api.post('/courses-simple', fd)
@@ -25,6 +32,13 @@ export default function NewCoursePage() {
     } catch (err: any) {
       toast.error(err.response?.data?.error || 'Failed')
     } finally { setLoading(false) }
+  }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setThumbnailFile(file)
+    }
   }
 
   return (
@@ -60,7 +74,17 @@ export default function NewCoursePage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Thumbnail</label>
-            <input {...register('thumbnail')} type="file" accept="image/*" className="input py-1.5" />
+            <input 
+              type="file" 
+              accept="image/*" 
+              className="input py-1.5" 
+              onChange={handleFileChange}
+            />
+            {thumbnailFile && (
+              <p className="text-sm text-gray-600 mt-1">
+                Selected: {thumbnailFile.name}
+              </p>
+            )}
           </div>
 
           <div className="flex gap-3 pt-2">
