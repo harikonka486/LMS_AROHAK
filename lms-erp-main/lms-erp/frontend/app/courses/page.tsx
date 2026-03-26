@@ -101,9 +101,8 @@ export default function CoursesPage() {
             {courses.map((course: any) => (
               <div key={course.id} className="course-card flex flex-col">
                 {/* Thumbnail */}
-                <div className="h-40 relative overflow-hidden flex-shrink-0"
-                  style={{ background: 'linear-gradient(135deg, #3d0a0a 0%, #8B1A1A 55%, #C0392B 100%)' }}>
-                  {course.thumbnail ? (
+                <div className="h-40 relative overflow-hidden flex-shrink-0 bg-gradient-to-br from-blue-600 to-purple-700">
+                  {course.thumbnail && course.thumbnail !== '' ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img 
                       src={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'}${course.thumbnail}`}
@@ -112,9 +111,7 @@ export default function CoursesPage() {
                       onError={(e) => {
                         console.error('Image failed to load:', course.thumbnail)
                         const target = e.target as HTMLImageElement
-                        // Hide broken image and show fallback
                         target.style.display = 'none'
-                        target.parentElement?.classList.add('bg-gradient-to-br', 'from-gray-700', 'to-gray-900')
                       }}
                       onLoad={() => {
                         console.log('Image loaded successfully:', course.thumbnail)
@@ -122,7 +119,12 @@ export default function CoursesPage() {
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <BookOpen className="w-16 h-16 text-white/20" />
+                      <div className="text-center text-white">
+                        <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-2">
+                          <BookOpen className="w-6 h-6" />
+                        </div>
+                        <p className="text-sm font-medium">No Image</p>
+                      </div>
                     </div>
                   )}
                   <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 70% 30%, rgba(212,160,23,0.25) 0%, transparent 60%)' }} />
