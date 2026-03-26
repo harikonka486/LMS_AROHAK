@@ -105,11 +105,27 @@ export default function CoursesPage() {
                   style={{ background: 'linear-gradient(135deg, #3d0a0a 0%, #8B1A1A 55%, #C0392B 100%)' }}>
                   {course.thumbnail ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={course.thumbnail.startsWith('/uploads/') ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'}${course.thumbnail}` : course.thumbnail} alt={course.title}
+                    <img 
+                      src={(() => {
+                        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'
+                        // Handle both relative and absolute paths
+                        if (course.thumbnail.startsWith('/uploads/')) {
+                          return `${apiUrl}${course.thumbnail}`
+                        } else if (course.thumbnail.startsWith('http')) {
+                          return course.thumbnail
+                        } else {
+                          return `${apiUrl}/uploads/thumbnails/${course.thumbnail.split('/').pop()}`
+                        }
+                      })()} 
+                      alt={course.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       onError={(e) => {
+                        console.error('Image failed to load:', course.thumbnail)
                         const target = e.target as HTMLImageElement
-                        target.src = '/api/placeholder-course.jpg'
+                        target.src = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'}/placeholder-course.jpg`
+                      }}
+                      onLoad={() => {
+                        console.log('Image loaded successfully:', course.thumbnail)
                       }}
                     />
                   ) : (
