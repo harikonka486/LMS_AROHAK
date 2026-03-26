@@ -101,26 +101,35 @@ export default function LearnPage() {
   // Convert SharePoint video URL to embed URL
   function getSharePointEmbedUrl(url: string): string | null {
     if (!url) return null
-    if (!url.includes('sharepoint.com') && !url.includes('sharepointonline.com')) return null
+    
+    // Handle various SharePoint URL formats
+    try {
+      // Already an embed/stream URL — use as-is
+      if (url.includes('/_layouts/15/embed.aspx') ||
+          url.includes('/_layouts/15/stream.aspx') ||
+          url.includes('/embed') ||
+          url.includes('microsoftstream.com/embed')) {
+        return url
+      }
 
-    // Already an embed/stream URL — use as-is
-    if (url.includes('/_layouts/15/embed.aspx') ||
-        url.includes('/_layouts/15/stream.aspx') ||
-        url.includes('/embed') ||
-        url.includes('microsoftstream.com/embed')) {
-      return url
+      // SharePoint direct video file
+      if (url.includes('sharepoint.com') || url.includes('sharepointonline.com')) {
+        // For standard SharePoint video URLs, try to convert to embed format
+        if (url.includes('/:v:/')) {
+          // Replace /:v:/ share link with stream embed
+          return url.replace('/:v:/', '/_layouts/15/stream.aspx?id=')
+            .replace('/s/', '/sites/')
+        }
+        
+        // For other SharePoint formats, return as-is
+        return url
+      }
+
+      return null
+    } catch (error) {
+      console.error('SharePoint URL parsing error:', error)
+      return url // fallback to original URL
     }
-
-    // SharePoint "share" link — convert to stream embed
-    // e.g. https://tenant.sharepoint.com/:v:/s/site/XXXXX
-    if (url.includes('/:v:/')) {
-      // Replace /:v:/ share link with stream embed
-      return url.replace('/:v:/', '/_layouts/15/stream.aspx?id=')
-        .replace('/s/', '/sites/')
-    }
-
-    // Fallback — try to use as embed directly
-    return url
   }
 
   function getVideoEmbed(url: string): { type: 'youtube' | 'sharepoint' | 'iframe' | 'video'; src: string } | null {
@@ -249,7 +258,10 @@ export default function LearnPage() {
                   {activeLesson.video_file ? (
                     <video src={fileUrl(activeLesson.video_file)} controls className="w-full h-full" />
                   ) : (() => {
-                    const embed = getVideoEmbed(activeLesson.video_url)
+                    const embed = getVideoEmbed(activeLesson.video_url || activeLesson.sharepoint_video_url)
+                    console.log('Video URL:', activeLesson.video_url || activeLesson.sharepoint_video_url)
+                    console.log('Embed result:', embed)
+                    
                     if (embed?.type === 'youtube' || embed?.type === 'iframe') {
                       return (
                         <iframe
@@ -260,21 +272,14 @@ export default function LearnPage() {
                         />
                       )
                     }
-                    if (embed?.type === 'sharepoint') {
-                      return (
-                        <iframe
-                          src={embed.src}
-                          className="w-full h-full"
-                          allowFullScreen
-                          allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-                        />
-                      )
-                    }
-                    // Direct video file URL
-                    return <video src={activeLesson.video_url} controls className="w-full h-full" />
-                  })()}
-                </div>
-              ) : (
+                    // SharePoint or direct video file
+                    return <video src={embed.src} controls className="w-full h-full" />
+                  })()
+                } else {
+                  // Direct video file URL
+                  return <video src={activeLesson.video_url} controls className="w-full h-full" />
+                }
+              })()
                 <div className="aspect-video bg-gray-800 rounded-xl flex items-center justify-center mb-6">
                   <div className="text-center text-gray-500">
                     <Play className="w-12 h-12 mx-auto mb-2" />
