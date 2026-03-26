@@ -17,7 +17,9 @@ export default function NewCoursePage() {
       const fd = new FormData()
       Object.entries(data).forEach(([k, v]) => { if (v !== undefined && v !== '') fd.append(k, v as string) })
       if (data.thumbnail?.[0]) fd.set('thumbnail', data.thumbnail[0])
-      const res = await api.post('/courses', fd)
+      
+      // Use the simple courses endpoint
+      const res = await api.post('/courses-simple', fd)
       toast.success('Course created!')
       router.push(`/admin/courses/${res.data.id}/edit`)
     } catch (err: any) {
