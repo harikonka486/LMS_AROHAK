@@ -56,18 +56,6 @@ export default function NewCoursePage() {
             </div>
           </div>
 
-          {/* Course Content */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Course Content</label>
-            <textarea
-              {...register('content')}
-              rows={6}
-              className="input resize-none"
-              placeholder="Provide detailed course content, learning objectives, and materials..."
-            />
-            <p className="text-xs text-gray-400 mt-1">Include course overview, learning outcomes, and detailed curriculum</p>
-          </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Thumbnail</label>
             <input {...register('thumbnail')} type="file" accept="image/*" className="input py-1.5" />

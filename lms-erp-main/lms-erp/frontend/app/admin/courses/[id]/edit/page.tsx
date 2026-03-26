@@ -16,7 +16,7 @@ export default function EditCoursePage() {
   const { user } = useAuthStore()
   const canDelete = user?.role === 'admin'
   const [newSection, setNewSection] = useState('')
-  const [newLesson, setNewLesson] = useState<{ sectionId: string; title: string } | null>(null)
+  const [newLesson, setNewLesson] = useState<{ sectionId: string; title: string; video_url: string; sharepoint_video_url: string } | null>(null)
   const [showQuizForm, setShowQuizForm] = useState(false)
   const [quizData, setQuizData] = useState({ title: '', passing_score: 70, questions: [{ text: '', options: ['', '', '', ''], correctAnswer: 0 }] })
   const [confirmDelete, setConfirmDelete] = useState<{ type: string; id: string; label: string } | null>(null)
@@ -56,8 +56,8 @@ export default function EditCoursePage() {
   })
 
   const addLesson = useMutation({
-    mutationFn: ({ sectionId, title }: { sectionId: string; title: string }) =>
-      api.post(`/lessons/section/${sectionId}`, { title }),
+    mutationFn: ({ sectionId, title, video_url, sharepoint_video_url }: { sectionId: string; title: string; video_url: string; sharepoint_video_url: string }) =>
+      api.post(`/lessons/section/${sectionId}`, { title, video_url: video_url || undefined, sharepoint_video_url: sharepoint_video_url || undefined }),
     onSuccess: () => { invalidate(); setNewLesson(null) },
   })
 
@@ -120,20 +120,31 @@ export default function EditCoursePage() {
           )}
         </div>
 
-        {/* Course Content */}
+        {/* Course Videos */}
         <div className="card p-5">
-          <h2 className="font-semibold mb-4">Course Content</h2>
+          <h2 className="font-semibold mb-4">Course Videos</h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Course Overview</label>
-              <textarea
-                value={course?.content || ''}
-                onChange={e => updateCourse.mutate({ content: e.target.value })}
-                rows={4}
-                className="input resize-none"
-                placeholder="Provide detailed course overview and learning objectives..."
+              <label className="block text-sm font-medium text-gray-700 mb-1">YouTube Video URL</label>
+              <input
+                value={course?.video_url || ''}
+                onChange={e => updateCourse.mutate({ video_url: e.target.value })}
+                type="url"
+                className="input"
+                placeholder="https://www.youtube.com/watch?v=..."
               />
-              <p className="text-xs text-gray-400 mt-1">Include course description, learning outcomes, and curriculum details</p>
+              <p className="text-xs text-gray-400 mt-1">Add YouTube video for course introduction</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">SharePoint Video URL</label>
+              <input
+                value={course?.sharepoint_video_url || ''}
+                onChange={e => updateCourse.mutate({ sharepoint_video_url: e.target.value })}
+                type="url"
+                className="input"
+                placeholder="https://company.sharepoint.com/..."
+              />
+              <p className="text-xs text-gray-400 mt-1">Add SharePoint video for internal training</p>
             </div>
           </div>
         </div>
@@ -163,13 +174,19 @@ export default function EditCoursePage() {
                     <div className="space-y-2">
                       <input value={newLesson.title} onChange={e => setNewLesson({ ...newLesson, title: e.target.value })}
                         placeholder="Lesson title" className="input text-sm py-1.5" />
+                      <div className="grid grid-cols-2 gap-2">
+                        <input value={newLesson.video_url} onChange={e => setNewLesson({ ...newLesson, video_url: e.target.value })}
+                          placeholder="YouTube URL" className="input text-sm py-1.5" />
+                        <input value={newLesson.sharepoint_video_url} onChange={e => setNewLesson({ ...newLesson, sharepoint_video_url: e.target.value })}
+                          placeholder="SharePoint URL" className="input text-sm py-1.5" />
+                      </div>
                       <div className="flex gap-2">
                         <button onClick={() => addLesson.mutate(newLesson)} className="btn-primary text-sm py-1.5">Add</button>
                         <button onClick={() => setNewLesson(null)} className="btn-secondary text-sm py-1.5">Cancel</button>
                       </div>
                     </div>
                   ) : (
-                    <button onClick={() => setNewLesson({ sectionId: section.id, title: '' })}
+                    <button onClick={() => setNewLesson({ sectionId: section.id, title: '', video_url: '', sharepoint_video_url: '' })}
                       className="text-sm text-brand-600 hover:text-brand-700 flex items-center gap-1">
                       <Plus className="w-3.5 h-3.5" /> Add Lesson
                     </button>
