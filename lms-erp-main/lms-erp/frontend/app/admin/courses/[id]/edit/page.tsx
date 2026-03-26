@@ -79,10 +79,22 @@ export default function EditCoursePage() {
 
   const uploadDoc = useMutation({
     mutationFn: (file: File) => {
-      const fd = new FormData(); fd.append('file', file); fd.append('title', file.name)
+      console.log('Uploading document:', file.name, file.size, file.type)
+      const fd = new FormData(); 
+      fd.append('file', file); 
+      fd.append('title', file.name)
+      console.log('FormData prepared, sending to:', `/documents/course/${id}`)
       return api.post(`/documents/course/${id}`, fd)
     },
-    onSuccess: () => { invalidate(); toast.success('Document uploaded!') },
+    onSuccess: () => { 
+      console.log('Document uploaded successfully')
+      invalidate(); 
+      toast.success('Document uploaded!') 
+    },
+    onError: (error: any) => {
+      console.error('Failed to upload document:', error)
+      toast.error(error.response?.data?.error || 'Failed to upload document')
+    }
   })
 
   const deleteDoc = useMutation({
