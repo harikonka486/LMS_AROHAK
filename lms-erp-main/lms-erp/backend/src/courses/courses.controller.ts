@@ -49,9 +49,15 @@ export class CoursesController {
   @Roles('admin')
   @UseInterceptors(FileInterceptor('thumbnail', { storage: thumbnailStorage }))
   create(@Body() body: any, @UploadedFile() file: any, @Request() req: any) {
-    console.log('Controller create called with:', { body, file });
+    console.log('=== COURSE CREATE REQUEST ===');
+    console.log('Body keys:', Object.keys(body));
+    console.log('Body values:', body);
+    console.log('File:', file);
+    console.log('User ID:', req.user.id);
+    console.log('===========================');
+    
     const result = await this.courses.create(body, file, req.user.id);
-    console.log('Controller create result:', result);
+    console.log('Create result:', result);
     return result;
   }
 
