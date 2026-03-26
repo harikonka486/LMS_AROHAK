@@ -10,6 +10,8 @@ export default function NewCoursePage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [showSections, setShowSections] = useState(false)
+  const [thumbnail, setThumbnail] = useState<File | null>(null)
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null)
   const { register, handleSubmit } = useForm()
 
   const onSubmit = async (data: any) => {
@@ -20,6 +22,11 @@ export default function NewCoursePage() {
         if (v !== undefined && v !== '') fd.append(k, v as string) 
       })
       
+      // Add thumbnail to FormData
+      if (thumbnail) {
+        fd.append('thumbnail', thumbnail)
+      }
+      
       // Use the simple courses endpoint
       const res = await api.post('/courses-simple', fd)
       toast.success('Course created!')
@@ -27,6 +34,25 @@ export default function NewCoursePage() {
     } catch (err: any) {
       toast.error(err.response?.data?.error || 'Failed')
     } finally { setLoading(false) }
+  }
+
+  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setThumbnail(file)
+      
+      // Create preview
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setThumbnailPreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const removeThumbnail = () => {
+    setThumbnail(null)
+    setThumbnailPreview(null)
   }
 
   return (
@@ -59,8 +85,81 @@ export default function NewCoursePage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Passing Score (%)</label>
-            <input {...register('passing_score')} type="number" min="1" max="100" defaultValue={70} className="input" />
+            <label className="block text-sm font-medium text-gray-700 mb-1">Course Thumbnail</label>
+            <div className="space-y-3">
+              <div className="flex items-center gap-4">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleThumbnailChange}
+                  className="input py-1.5"
+                />
+                <button
+                  type="button"
+                  onClick={removeThumbnail}
+                  className="text-red-500 hover:text-red-700 text-sm px-3 py-1.5 border border-red-300 rounded"
+                >
+                  Remove
+                </button>
+              </div>
+              
+              {/* Thumbnail Preview */}
+              {thumbnailPreview && (
+                <div className="mt-3">
+                  <p className="text-sm text-gray-600 mb-2">Thumbnail Preview:</p>
+                  <img 
+                    src={thumbnailPreview} 
+                    alt="Thumbnail preview" 
+                    className="w-32 h-32 object-cover rounded-lg border border-gray-300"
+                  />
+                </div>
+              )}
+              
+              <p className="text-xs text-gray-500">
+                Recommended: Square image, at least 400x400px. Max size: 5MB.
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Level *</label>
+            <select {...register('level')} className="input">
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+            <select {...register('category_id')} className="input">
+              <option value="">Select Category</option>
+              <option value="tech">Technology</option>
+              <option value="business">Business</option>
+              <option value="finance">Finance</option>
+              <option value="management">Management</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
+            <input {...register('language')} className="input" defaultValue="English" />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Passing Score (%)</label>
+              <input {...register('passing_score')} type="number" min="1" max="100" defaultValue={70} className="input" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+              <input {...register('price')} type="number" min="0" step="0.01" defaultValue={0} className="input" />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Course Video URL</label>
+            <input {...register('video_url')} type="url" className="input" placeholder="https://www.youtube.com/watch?v=..." />
           </div>
 
           

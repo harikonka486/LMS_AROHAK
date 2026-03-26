@@ -25,8 +25,7 @@ const ROLE_COLORS: Record<string, string> = {
 
 const navItems = [
   { href: '/dashboard',    label: 'Dashboard',   icon: LayoutDashboard, roles: ['admin','employee'] },
-  { href: '/courses',      label: 'Courses',      icon: BookOpen,        roles: ['admin','employee'] },
-  { href: '/my-learning',  label: 'My Learning',  icon: GraduationCap,   roles: ['employee'] },
+  { href: '/my-learning', label: 'My Learning', icon: GraduationCap,   roles: ['employee'] },
   { href: '/certificates', label: 'Certificates', icon: Award,           roles: ['admin','employee'] },
   { href: '/admin/users',  label: 'Users',        icon: Users,           roles: ['admin'] },
 ]
