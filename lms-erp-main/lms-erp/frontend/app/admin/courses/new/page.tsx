@@ -12,17 +12,45 @@ export default function NewCoursePage() {
   const { register, handleSubmit } = useForm()
 
   const onSubmit = async (data: any) => {
+    console.log('Course creation data:', data)
+    
+    // Validate required fields
+    if (!data.title || !data.description) {
+      toast.error('Title and description are required')
+      return
+    }
+    
     setLoading(true)
     try {
       const fd = new FormData()
-      Object.entries(data).forEach(([k, v]) => { if (v !== undefined && v !== '') fd.append(k, v as string) })
-      if (data.thumbnail?.[0]) fd.set('thumbnail', data.thumbnail[0])
+      
+      // Add required fields
+      fd.append('title', data.title)
+      fd.append('description', data.description)
+      
+      // Add optional fields
+      if (data.level) fd.append('level', data.level)
+      if (data.passing_score) fd.append('passing_score', data.passing_score)
+      if (data.categoryId) fd.append('categoryId', data.categoryId)
+      
+      // Add file if present
+      if (data.thumbnail?.[0]) {
+        console.log('Adding thumbnail file:', data.thumbnail[0])
+        fd.set('thumbnail', data.thumbnail[0])
+      }
+      
+      console.log('Sending request to /courses')
       const res = await api.post('/courses', fd)
+      console.log('Course created successfully:', res.data)
       toast.success('Course created!')
       router.push(`/admin/courses/${res.data.id}/edit`)
     } catch (err: any) {
-      toast.error(err.response?.data?.error || 'Failed')
-    } finally { setLoading(false) }
+      console.error('Course creation error:', err)
+      console.error('Error response:', err.response?.data)
+      toast.error(err.response?.data?.message || err.response?.data?.error || 'Failed to create course')
+    } finally { 
+      setLoading(false)
+    }
   }
 
   return (
