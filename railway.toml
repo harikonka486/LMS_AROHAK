@@ -1,6 +1,6 @@
 [build]
 builder = "nixpacks"
-buildCommand = "cd lms-erp-main/lms-erp/backend && npm install"
+buildCommand = "cd lms-erp-main/lms-erp/backend && npm install --ignore-scripts"
 
 [deploy]
 startCommand = "node lms-erp-main/lms-erp/backend/dist/main"
