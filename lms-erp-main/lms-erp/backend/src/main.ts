@@ -20,22 +20,7 @@ async function bootstrap() {
   });
   
   app.enableCors({
-    origin: (origin, callback) => {
-      const allowed = [
-        process.env.CLIENT_URL || 'http://localhost:3000',
-        process.env.FRONTEND_URL || 'http://localhost:3000',
-      ].filter(Boolean);
-      if (
-        !origin ||
-        allowed.some((u) => origin.startsWith(u.replace(/\/$/, ''))) ||
-        origin.endsWith('.vercel.app') ||
-        origin.endsWith('.railway.app')
-      ) {
-        callback(null, true);
-      } else {
-        callback(null, true); // permissive for now
-      }
-    },
+    origin: true,
     credentials: true,
   });
 
