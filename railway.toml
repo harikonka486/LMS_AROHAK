@@ -1,8 +1,0 @@
-[build]
-builder = "nixpacks"
-buildCommand = "cd lms-erp-main/lms-erp/backend && npm install && npm run build"
-
-[deploy]
-startCommand = "cd lms-erp-main/lms-erp/backend && npm run start:prod"
-restartPolicyType = "on_failure"
-restartPolicyMaxRetries = 3

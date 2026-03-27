@@ -7,6 +7,9 @@ node_modules/
 .next/
 out/
 
+# NestJS compiled output — always rebuild on deploy
+backend/dist/
+
 # Env files — never commit real secrets
 .env
 .env.local
