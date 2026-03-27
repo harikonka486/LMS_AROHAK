@@ -68,7 +68,7 @@ export default function VerifyEmailPage() {
       <div style={{ maxWidth: '480px', width: '100%', background: '#fff', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 24px rgba(139,26,26,0.10)', border: '1px solid #f0d9c8' }}>
         {/* Header */}
         <div style={{ background: 'linear-gradient(135deg,#3d0a0a 0%,#8B1A1A 55%,#C0392B 100%)', padding: '32px', textAlign: 'center' }}>
-          <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '13px', margin: '0 0 4px', letterSpacing: '2px', textTransform: 'uppercase' }}>Arohak LMS Portal</p>
+          <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '13px', margin: '0 0 4px', letterSpacing: '2px', textTransform: 'uppercase' }}>LMS Portal</p>
           <h1 style={{ color: '#fff', margin: 0, fontSize: '22px', fontWeight: 800 }}>Email Verification</h1>
           <div style={{ height: '3px', background: 'linear-gradient(90deg,#D4A017,#F0A500)', borderRadius: '2px', marginTop: '16px' }} />
         </div>
@@ -84,7 +84,7 @@ export default function VerifyEmailPage() {
 
         {/* Footer */}
         <div style={{ background: '#FDF3E7', padding: '16px 32px', textAlign: 'center', borderTop: '1px solid #f0d9c8' }}>
-          <p style={{ color: '#9ca3af', fontSize: '12px', margin: 0 }}>© {new Date().getFullYear()} Arohak Technologies. All rights reserved.</p>
+          <p style={{ color: '#9ca3af', fontSize: '12px', margin: 0 }}>© {new Date().getFullYear()} LMS Portal. All rights reserved.</p>
         </div>
       </div>
 

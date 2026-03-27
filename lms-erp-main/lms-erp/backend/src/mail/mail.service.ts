@@ -54,7 +54,7 @@ export class MailService implements OnModuleInit {
     const from = this.config.get('MAIL_FROM', `LMS Platform <${user}>`);
     await this.transporter.sendMail({
       from,
-      to: 'arohak.lms.auth@gmail.com',
+      to: 'harigopal.konka@arohak.com',
       replyTo: email,
       subject: `Contact Form: Message from ${name}`,
       html: `
@@ -101,7 +101,7 @@ export class MailService implements OnModuleInit {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Welcome to Arohak LMS</title>
+  <title>Welcome to LMS Portal</title>
   <!--[if mso]>
   <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
   <![endif]-->
@@ -115,9 +115,7 @@ export class MailService implements OnModuleInit {
       <!-- Header -->
       <tr>
         <td style="background-color:#8B1A1A;border-radius:12px 12px 0 0;padding:36px 32px;text-align:center;">
-          <p style="margin:0 0 4px 0;font-size:22px;font-weight:800;color:#ffffff;letter-spacing:1px;">AROHAK</p>
-          <p style="margin:0 0 12px 0;font-size:11px;color:rgba(255,255,255,0.6);letter-spacing:3px;text-transform:uppercase;">LMS PORTAL</p>
-          <h1 style="margin:0 0 6px 0;font-size:24px;font-weight:800;color:#ffffff;">Welcome to Arohak LMS!</h1>
+          <h1 style="margin:0 0 6px 0;font-size:24px;font-weight:800;color:#ffffff;">Welcome to LMS Portal!</h1>
           <p style="margin:0;font-size:13px;color:rgba(255,255,255,0.65);">Your learning journey starts now</p>
           <table width="80" cellpadding="0" cellspacing="0" border="0" style="margin:16px auto 0;">
             <tr><td style="background-color:#D4A017;height:3px;border-radius:2px;"></td></tr>
@@ -130,7 +128,7 @@ export class MailService implements OnModuleInit {
         <td style="padding:32px;">
           <p style="margin:0 0 8px 0;font-size:16px;font-weight:600;color:#3d0a0a;">Hi ${name},</p>
           <p style="margin:0 0 20px 0;font-size:14px;line-height:1.7;color:#6b7280;">
-            Your account has been successfully created on <strong style="color:#8B1A1A;">Arohak LMS Portal</strong>.
+            Your account has been successfully created on <strong style="color:#8B1A1A;">LMS Portal</strong>.
             You now have access to structured courses, progress tracking, and verified certificates.
           </p>
 
@@ -149,19 +147,19 @@ export class MailService implements OnModuleInit {
           <!-- Verify Email box -->
           <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#fff8f0;border-radius:10px;border:1px solid #f0d9c8;margin-bottom:8px;">
             <tr><td style="padding:20px;">
-              <p style="margin:0 0 6px 0;font-size:12px;font-weight:700;color:#8B1A1A;text-transform:uppercase;letter-spacing:1px;">Verify your email address</p>
+              <p style="margin:0 0 6px 0;font-size:12px;font-weight:700;color:#8B1A1A;text-transform:uppercase;letter-spacing:1px;">Confirm your email address</p>
               <p style="margin:0 0 20px 0;font-size:13px;color:#6b7280;line-height:1.6;">Click the button below to confirm your email. This link expires in 24 hours.</p>
               <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
                 <tr>
                   <td align="center" style="border-radius:8px;background-color:#8B1A1A;">
                     <!--[if mso]>
-                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${verifyUrl}" style="height:48px;v-text-anchor:middle;width:220px;" arcsize="10%" stroke="f" fillcolor="#8B1A1A">
+                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${verifyUrl}" style="height:48px;v-text-anchor:middle;width:240px;" arcsize="10%" stroke="f" fillcolor="#8B1A1A">
                       <w:anchorlock/>
-                      <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">Verify Email Address</center>
+                      <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">Confirm Email Address</center>
                     </v:roundrect>
                     <![endif]-->
                     <!--[if !mso]><!-->
-                    <a href="${verifyUrl}" style="display:inline-block;background-color:#8B1A1A;color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:700;text-decoration:none;padding:14px 36px;border-radius:8px;mso-hide:all;">Verify Email Address</a>
+                    <a href="${verifyUrl}" style="display:inline-block;background-color:#8B1A1A;color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:700;text-decoration:none;padding:14px 36px;border-radius:8px;mso-hide:all;">Confirm Email Address</a>
                     <!--<![endif]-->
                   </td>
                 </tr>
@@ -185,7 +183,7 @@ export class MailService implements OnModuleInit {
       <tr>
         <td style="background-color:#FDF3E7;padding:20px 32px;text-align:center;border-top:1px solid #f0d9c8;border-radius:0 0 12px 12px;">
           <p style="margin:0;font-size:12px;color:#9ca3af;">
-            &copy; ${new Date().getFullYear()} Arohak Technologies. All rights reserved.<br/>
+            &copy; ${new Date().getFullYear()} LMS Portal. All rights reserved.<br/>
             <span style="color:#c0a080;">This is an automated message &mdash; please do not reply.</span>
           </p>
         </td>
@@ -201,7 +199,7 @@ export class MailService implements OnModuleInit {
       await this.transporter.sendMail({
         from,
         to,
-        subject: '🎉 Welcome to Arohak LMS Portal — Please verify your email',
+        subject: '🎉 Welcome to LMS Portal — Please confirm your email',
         html: htmlContent,
       });
       this.logger.log(`Welcome email sent to ${to}`);
@@ -360,43 +358,82 @@ export class MailService implements OnModuleInit {
       await this.transporter.sendMail({
         from,
         to,
-        subject: '🔐 Reset Your Arohak LMS Password',
-        html: `
-          <!DOCTYPE html>
-          <html>
-          <body style="margin:0;padding:0;background:#FDF3E7;font-family:Arial,sans-serif;">
-            <div style="max-width:560px;margin:40px auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(139,26,26,0.10);border:1px solid #f0d9c8;">
-              <div style="background:linear-gradient(135deg,#3d0a0a 0%,#8B1A1A 55%,#C0392B 100%);padding:40px 32px;text-align:center;">
-                <h1 style="color:#ffffff;margin:0 0 6px;font-size:24px;font-weight:800;">Password Reset</h1>
-                <p style="color:rgba(255,255,255,0.65);margin:0;font-size:14px;">Arohak LMS Portal</p>
-                <div style="height:3px;background:linear-gradient(90deg,#D4A017,#F0A500);border-radius:2px;margin-top:20px;"></div>
-              </div>
-              <div style="padding:32px;">
-                <p style="color:#3d0a0a;font-size:16px;font-weight:600;margin:0 0 8px;">Hi ${name},</p>
-                <p style="color:#6b7280;font-size:14px;line-height:1.7;margin:0 0 20px;">
-                  We received a request to reset your password. Click the button below to set a new password.
-                  This link expires in <strong style="color:#8B1A1A;">1 hour</strong>.
-                </p>
-                <div style="text-align:center;margin:28px 0;">
-                  <a href="${resetUrl}"
-                    style="display:inline-block;background:linear-gradient(135deg,#8B1A1A,#C0392B);color:#ffffff;padding:14px 36px;border-radius:10px;text-decoration:none;font-weight:700;font-size:15px;">
-                    Reset Password →
-                  </a>
-                </div>
-                <p style="color:#6b7280;font-size:12px;text-align:center;margin:8px 0 0;">
-                  Or copy this link: <a href="${resetUrl}" style="color:#8B1A1A;">${resetUrl}</a>
-                </p>
-                <p style="color:#9ca3af;font-size:12px;text-align:center;margin:16px 0 0;">
-                  If you didn't request this, you can safely ignore this email.
-                </p>
-              </div>
-              <div style="background:#FDF3E7;padding:20px 32px;text-align:center;border-top:1px solid #f0d9c8;">
-                <p style="color:#9ca3af;font-size:12px;margin:0;">© ${new Date().getFullYear()} Arohak Technologies. All rights reserved.</p>
-              </div>
-            </div>
-          </body>
-          </html>
-        `,
+        subject: '🔐 Reset Your LMS Portal Password',
+        html: `<!DOCTYPE html>
+<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <!--[if mso]>
+  <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
+  <![endif]-->
+</head>
+<body style="margin:0;padding:0;background-color:#FDF3E7;font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FDF3E7;">
+  <tr><td align="center" style="padding:40px 16px;">
+    <table width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;background-color:#ffffff;border-radius:12px;border:1px solid #f0d9c8;">
+
+      <!-- Header -->
+      <tr>
+        <td style="background-color:#8B1A1A;border-radius:12px 12px 0 0;padding:36px 32px;text-align:center;">
+          <h1 style="margin:0 0 6px 0;font-size:22px;font-weight:800;color:#ffffff;">Password Reset</h1>
+          <p style="margin:0;font-size:13px;color:rgba(255,255,255,0.65);">LMS Portal</p>
+          <table width="80" cellpadding="0" cellspacing="0" border="0" style="margin:16px auto 0;">
+            <tr><td style="background-color:#D4A017;height:3px;border-radius:2px;"></td></tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- Body -->
+      <tr>
+        <td style="padding:32px;">
+          <p style="margin:0 0 8px 0;font-size:16px;font-weight:600;color:#3d0a0a;">Hi ${name},</p>
+          <p style="margin:0 0 24px 0;font-size:14px;line-height:1.7;color:#6b7280;">
+            We received a request to reset your password. Click the button below to set a new password.
+            This link expires in <strong style="color:#8B1A1A;">1 hour</strong>.
+          </p>
+
+          <!-- Button -->
+          <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto 24px;">
+            <tr>
+              <td align="center" style="border-radius:8px;background-color:#8B1A1A;">
+                <!--[if mso]>
+                <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${resetUrl}" style="height:48px;v-text-anchor:middle;width:200px;" arcsize="10%" stroke="f" fillcolor="#8B1A1A">
+                  <w:anchorlock/>
+                  <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">Reset Password</center>
+                </v:roundrect>
+                <![endif]-->
+                <!--[if !mso]><!-->
+                <a href="${resetUrl}" style="display:inline-block;background-color:#8B1A1A;color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:700;text-decoration:none;padding:14px 36px;border-radius:8px;mso-hide:all;">Reset Password →</a>
+                <!--<![endif]-->
+              </td>
+            </tr>
+          </table>
+
+          <p style="font-size:12px;color:#6b7280;text-align:center;margin:0 0 8px 0;">
+            Or copy this link: <a href="${resetUrl}" style="color:#8B1A1A;word-break:break-all;">${resetUrl}</a>
+          </p>
+          <p style="font-size:12px;color:#9ca3af;text-align:center;margin:16px 0 0 0;">
+            If you didn't request this, you can safely ignore this email.
+          </p>
+        </td>
+      </tr>
+
+      <!-- Footer -->
+      <tr>
+        <td style="background-color:#FDF3E7;padding:20px 32px;text-align:center;border-top:1px solid #f0d9c8;border-radius:0 0 12px 12px;">
+          <p style="margin:0;font-size:12px;color:#9ca3af;">
+            &copy; ${new Date().getFullYear()} LMS Portal. All rights reserved.
+          </p>
+        </td>
+      </tr>
+
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>`,
       });
       this.logger.log(`✅ Password reset email sent to ${to}`);
     } catch (err) {

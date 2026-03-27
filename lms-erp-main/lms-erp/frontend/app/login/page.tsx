@@ -181,6 +181,25 @@ function LoginModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (u
   const [forgotEmail, setForgotEmail]     = useState('')
   const [forgotSent, setForgotSent]       = useState(false)
   const [forgotLoading, setForgotLoading] = useState(false)
+  const [forgotCountdown, setForgotCountdown] = useState(10)
+
+  useEffect(() => {
+    if (!forgotSent) return
+    setForgotCountdown(10)
+    const interval = setInterval(() => {
+      setForgotCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(interval)
+          setForgotMode(false)
+          setForgotSent(false)
+          setForgotEmail('')
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [forgotSent]) // eslint-disable-line react-hooks/exhaustive-deps
   const [errorMsg, setErrorMsg]           = useState('')
   const [verifyError, setVerifyError]     = useState(false)
   const { register, handleSubmit, formState: { errors } } = useForm<F>({ resolver: zodResolver(schema) })
@@ -233,7 +252,6 @@ function LoginModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (u
 
         {/* Header */}
         <div className="px-8 pt-8 pb-6" style={{ background: HERO_BG }}>
-          <div className="mb-5"><ArohakLogoWhite size={36} /></div>
           <h2 className="text-2xl font-bold text-white mb-1">
             {forgotMode ? 'Reset Password' : 'Welcome back'}
           </h2>
@@ -269,7 +287,8 @@ function LoginModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (u
                   <Mail className="w-6 h-6 text-green-600" />
                 </div>
                 <p className="font-semibold text-gray-800 mb-1">Check your inbox</p>
-                <p className="text-sm text-gray-500 mb-5">If that email is registered, a reset link has been sent.</p>
+                <p className="text-sm text-gray-500 mb-3">If that email is registered, a reset link has been sent.</p>
+                <p className="text-xs text-gray-400 mb-4">Returning to sign in in <span className="font-semibold" style={{ color: A.red }}>{forgotCountdown}s</span>...</p>
                 <button onClick={() => { setForgotMode(false); setForgotSent(false); setForgotEmail('') }}
                   className="text-sm font-medium hover:underline" style={{ color: A.red }}>
                   Back to Sign In
