@@ -45,7 +45,6 @@ export default function AdminUsersPage() {
     onSuccess: (_, id) => {
       const name = confirmDelete?.name ?? 'User'
       qc.invalidateQueries({ queryKey: ['admin-users'] })
-      setSelectedUser(null)
       setConfirmDelete(null)
       setSuccessType('deleted')
       setSuccessMsg(`${name} has been deleted successfully.`)

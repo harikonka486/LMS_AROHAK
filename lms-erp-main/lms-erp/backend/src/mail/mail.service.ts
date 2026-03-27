@@ -10,8 +10,8 @@ export class MailService implements OnModuleInit {
   constructor(private config: ConfigService) {
     this.transporter = nodemailer.createTransport({
       host: this.config.get('MAIL_HOST', 'smtp.gmail.com'),
-      port: Number(this.config.get('MAIL_PORT', '587')),
-      secure: false,
+      port: Number(this.config.get('MAIL_PORT', '465')),
+      secure: Number(this.config.get('MAIL_PORT', '465')) === 465,
       auth: {
         user: this.config.get('MAIL_USER'),
         pass: this.config.get('MAIL_PASS'),
