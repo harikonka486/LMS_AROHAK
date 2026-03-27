@@ -12,6 +12,30 @@ import { DB_POOL } from '../database/database.module';
 export class EnrollmentsService {
   constructor(@Inject(DB_POOL) private db: Pool) {}
 
+  async findAll() {
+    const [rows] = (await this.db.query(
+      `SELECT e.id AS enrollment_id, e.enrolled_at, e.completed_at, e.status,
+              u.name AS user_name, u.email AS user_email, u.employee_id, u.department,
+              COALESCE(c.title, e.course_title_snapshot, 'Course Deleted') AS course_title,
+              COALESCE(c.level, 'N/A') AS level,
+              CASE WHEN c.id IS NOT NULL THEN
+                (SELECT COUNT(*) FROM lessons l JOIN sections s ON s.id=l.section_id WHERE s.course_id=c.id)
+              ELSE 0 END AS total_lessons,
+              (SELECT COUNT(*) FROM lesson_progress lp WHERE lp.enrollment_id=e.id AND lp.completed=1) AS completed_lessons
+       FROM enrollments e
+       JOIN users u ON u.id = e.user_id
+       LEFT JOIN courses c ON c.id = e.course_id
+       WHERE e.id = (
+         SELECT e2.id FROM enrollments e2
+         WHERE e2.user_id = e.user_id AND e2.course_id = e.course_id
+         ORDER BY FIELD(e2.status,'completed','active','dropped'), e2.enrolled_at DESC
+         LIMIT 1
+       )
+       ORDER BY e.enrolled_at DESC`,
+    )) as any;
+    return rows;
+  }
+
   async enroll(userId: string, courseId: string) {
     const [[course]] = (await this.db.query(
       'SELECT * FROM courses WHERE id=?',
@@ -25,8 +49,8 @@ export class EnrollmentsService {
     if (existing) throw new BadRequestException('Already enrolled');
     const id = uuid();
     await this.db.query(
-      'INSERT INTO enrollments (id,user_id,course_id) VALUES (?,?,?)',
-      [id, userId, courseId],
+      'INSERT INTO enrollments (id,user_id,course_id,course_title_snapshot) VALUES (?,?,?,?)',
+      [id, userId, courseId, course.title],
     );
     const [[enrollment]] = (await this.db.query(
       'SELECT * FROM enrollments WHERE id=?',
@@ -60,19 +84,10 @@ export class EnrollmentsService {
     )) as any;
     if (!enrollment) throw new NotFoundException('Enrollment not found');
 
-    // Delete associated certificates first
-    await this.db.query(
-      'DELETE FROM certificates WHERE user_id=? AND course_id=?',
-      [enrollment.user_id, enrollment.course_id],
-    );
-
-    // Then delete the enrollment
+    // Delete the enrollment only — certificates are preserved
     await this.db.query('DELETE FROM enrollments WHERE id=?', [enrollmentId]);
 
-    return {
-      message:
-        'Unenrolled successfully. Associated certificates have also been removed.',
-    };
+    return { message: 'Unenrolled successfully.' };
   }
 
   async check(userId: string, courseId: string) {

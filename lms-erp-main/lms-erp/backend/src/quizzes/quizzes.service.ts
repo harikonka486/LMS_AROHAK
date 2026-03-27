@@ -149,26 +149,14 @@ export class QuizzesService {
       )) as any;
       if (Number(passedCount) >= Number(total)) {
         const certNum = `CERT-${Date.now()}-${userId.slice(0, 8).toUpperCase()}`;
+        const [[courseForCert]] = (await this.db.query(
+          'SELECT title FROM courses WHERE id=?', [courseId],
+        )) as any;
         await this.db.query(
-          'INSERT IGNORE INTO certificates (id,user_id,course_id,certificate_number,score) VALUES (?,?,?,?,?)',
-          [uuid(), userId, courseId, certNum, Math.round(score * 100) / 100],
+          'INSERT IGNORE INTO certificates (id,user_id,course_id,certificate_number,score,course_title_snapshot) VALUES (?,?,?,?,?,?)',
+          [uuid(), userId, courseId, certNum, Math.round(score * 100) / 100, courseForCert?.title || null],
         );
-        // Send certificate email to the user
-        const [[user]] = (await this.db.query(
-          'SELECT name, email, employee_id, department FROM users WHERE id=?',
-          [userId],
-        )) as any;
-        const [[course]] = (await this.db.query(
-          'SELECT c.title, u.name AS instructor_name FROM courses c JOIN users u ON u.id=c.instructor_id WHERE c.id=?',
-          [courseId],
-        )) as any;
-        const [[cert]] = (await this.db.query(
-          'SELECT issued_at FROM certificates WHERE certificate_number=?',
-          [certNum],
-        )) as any;
-        if (user && course) {
-          // Certificate email disabled — users view certificates in the portal
-        }
+        // Certificate email disabled — users view certificates in the portal
       }
       const [[enrollment]] = (await this.db.query(
         'SELECT id FROM enrollments WHERE user_id=? AND course_id=?',

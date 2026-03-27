@@ -17,6 +17,13 @@ import { RolesGuard, Roles } from '../auth/guards';
 export class EnrollmentsController {
   constructor(private enrollments: EnrollmentsService) {}
 
+  @Get('all')
+  @UseGuards(RolesGuard)
+  @Roles('admin')
+  findAll() {
+    return this.enrollments.findAll();
+  }
+
   @Post()
   enroll(@Request() req: any, @Body('courseId') courseId: string) {
     return this.enrollments.enroll(req.user.id, courseId);

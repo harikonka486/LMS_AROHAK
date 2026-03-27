@@ -39,7 +39,8 @@ export class ProgressService {
     )) as any;
 
     const lessonsComplete =
-      Number(totalLessons) > 0 && Number(doneLessons) >= Number(totalLessons);
+      Number(totalLessons) === 0 ||
+      Number(doneLessons) >= Number(totalLessons);
     const quizzesComplete =
       Number(totalQuizzes) === 0 ||
       Number(passedQuizzes) >= Number(totalQuizzes);

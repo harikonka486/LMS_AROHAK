@@ -233,6 +233,59 @@ async function migrate() {
     if (!e.message.includes('Duplicate column')) console.warn('is_email_verified column:', e.message);
   }
 
+  // Preserve certificates when course is deleted
+  try {
+    const [fks] = await db.query(`
+      SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE
+      WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'certificates'
+      AND COLUMN_NAME = 'course_id' AND REFERENCED_TABLE_NAME = 'courses'
+    `);
+    if (fks.length > 0) {
+      const fkName = fks[0].CONSTRAINT_NAME;
+      await db.query(`ALTER TABLE certificates DROP FOREIGN KEY ${fkName}`);
+      await db.query(`ALTER TABLE certificates MODIFY course_id VARCHAR(36) NULL`);
+      await db.query(`ALTER TABLE certificates ADD CONSTRAINT fk_cert_course FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE SET NULL`);
+      console.log('✅ Changed certificates.course_id FK to ON DELETE SET NULL');
+    }
+  } catch (e) {
+    console.warn('Cert FK change skipped:', e.message);
+  }
+
+  // Add course_title_snapshot to certificates for display after course deletion
+  try {
+    await db.query(`ALTER TABLE certificates ADD COLUMN course_title_snapshot VARCHAR(500) NULL`);
+    console.log('✅ Added course_title_snapshot to certificates');
+  } catch (e) {
+    if (!e.message.includes('Duplicate column')) console.warn('cert snapshot:', e.message);
+  }
+
+  // Preserve enrollment history when course is deleted
+  try {
+    await db.query(`ALTER TABLE enrollments ADD COLUMN course_title_snapshot VARCHAR(500) NULL`);
+    console.log('✅ Added course_title_snapshot column to enrollments');
+  } catch (e) {
+    if (!e.message.includes('Duplicate column')) console.warn('course_title_snapshot:', e.message);
+  }
+
+  // Change enrollments.course_id FK to SET NULL on course delete
+  try {
+    // Get the FK constraint name
+    const [fks] = await db.query(`
+      SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE
+      WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'enrollments'
+      AND COLUMN_NAME = 'course_id' AND REFERENCED_TABLE_NAME = 'courses'
+    `);
+    if (fks.length > 0) {
+      const fkName = fks[0].CONSTRAINT_NAME;
+      await db.query(`ALTER TABLE enrollments DROP FOREIGN KEY ${fkName}`);
+      await db.query(`ALTER TABLE enrollments MODIFY course_id VARCHAR(36) NULL`);
+      await db.query(`ALTER TABLE enrollments ADD CONSTRAINT fk_enrollment_course FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE SET NULL`);
+      console.log('✅ Changed enrollments.course_id FK to ON DELETE SET NULL');
+    }
+  } catch (e) {
+    console.warn('FK change skipped (may already be SET NULL):', e.message);
+  }
+
   await db.end();
 }
 

@@ -27,7 +27,8 @@ const navItems = [
   { href: '/dashboard',    label: 'Dashboard',   icon: LayoutDashboard, roles: ['admin','employee'] },
   { href: '/courses',      label: 'Courses',     icon: BookOpen,        roles: ['admin','employee'] },
   { href: '/my-learning',  label: 'My Learning', icon: GraduationCap,   roles: ['employee'] },
-  { href: '/certificates', label: 'Certificates', icon: Award,          roles: ['admin','employee'] },
+  { href: '/certificates', label: 'Certificates', icon: Award,          roles: ['employee'] },
+  { href: '/admin/enrolled', label: 'Enrolled',  icon: Users,           roles: ['admin'] },
   { href: '/admin/users',  label: 'Users',        icon: Users,          roles: ['admin'] },
 ]
 

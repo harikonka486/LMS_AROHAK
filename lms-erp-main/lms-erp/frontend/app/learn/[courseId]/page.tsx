@@ -67,6 +67,10 @@ export default function LearnPage() {
       if (res.data.passed) {
         toast.success(`Quiz passed! Score: ${res.data.score.toFixed(0)}%`)
         qc.invalidateQueries({ queryKey: ['my-certs'] })
+        // Check after a short delay if all quizzes are now passed
+        setTimeout(() => {
+          qc.invalidateQueries({ queryKey: ['quizzes', courseId] })
+        }, 800)
       } else {
         toast.error(`Score: ${res.data.score.toFixed(0)}% — Need ${res.data.passingScore}% to pass`)
       }
@@ -420,29 +424,41 @@ export default function LearnPage() {
                 {quizResult ? (
                   /* Results screen */
                   <div className="flex-1 overflow-y-auto px-8 py-6">
-                    <div className={`rounded-2xl p-8 mb-6 text-center ${quizResult.passed ? 'bg-green-900/30 border border-green-700' : 'bg-red-900/30 border border-red-700'}`}>
-                      <p className="text-5xl font-bold mb-2">{quizResult.score.toFixed(0)}%</p>
-                      <p className={`text-xl font-semibold ${quizResult.passed ? 'text-green-400' : 'text-red-400'}`}>
-                        {quizResult.passed ? '🎉 Passed!' : '❌ Not Passed'}
-                      </p>
-                      <p className="text-sm text-gray-400 mt-2">{quizResult.correct}/{quizResult.total} correct answers</p>
-                      {quizResult.passed && <p className="text-green-300 text-sm mt-2">Certificate will be issued once all quizzes are passed!</p>}
-                    </div>
-                    <div className="space-y-3 mb-6">
-                      {quizResult.results?.map((r: any, i: number) => (
-                        <div key={i} className={`p-4 rounded-xl text-sm ${r.isCorrect ? 'bg-green-900/20 border border-green-800' : 'bg-red-900/20 border border-red-800'}`}>
-                          <p className="font-medium mb-1 text-white">Q{i + 1}: {activeQuiz.questions?.[i]?.text}</p>
-                          <p className={r.isCorrect ? 'text-green-400' : 'text-red-400'}>
-                            {r.isCorrect ? '✓ Correct' : `✗ Wrong — Correct: Option ${r.correct + 1}`}
-                          </p>
-                          {r.explanation && <p className="text-gray-400 text-xs mt-1">{r.explanation}</p>}
+                    {quizResult.passed ? (
+                      /* Passed — show only course completed banner */
+                      <div className="rounded-2xl overflow-hidden"
+                        style={{ background: 'linear-gradient(135deg, #064e3b, #065f46)', border: '1px solid rgba(16,185,129,0.4)' }}>
+                        <div className="px-6 py-5 flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-full bg-emerald-400/20 flex items-center justify-center flex-shrink-0">
+                            <CheckCircle className="w-7 h-7 text-emerald-400" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-emerald-300 font-bold text-lg">🎉 Course Completed!</p>
+                            <p className="text-emerald-400/70 text-sm mt-0.5">
+                              You've successfully completed <span className="font-semibold text-emerald-300">{course?.title}</span>. Your certificate has been issued.
+                            </p>
+                          </div>
+                          <button onClick={() => router.push('/certificates')}
+                            className="flex-shrink-0 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
+                            style={{ background: 'rgba(16,185,129,0.3)', border: '1px solid rgba(16,185,129,0.5)' }}>
+                            View Certificate
+                          </button>
                         </div>
-                      ))}
-                    </div>
-                    <button onClick={() => { setQuizResult(null); setAnswers([]); setCurrentQuestion(0) }}
-                      className="w-full py-3 bg-gray-700 rounded-xl text-sm hover:bg-gray-600 font-medium">
-                      Retake Quiz
-                    </button>
+                      </div>
+                    ) : (
+                      /* Failed — show score and retake */
+                      <div>
+                        <div className="rounded-2xl p-8 mb-6 text-center bg-red-900/30 border border-red-700">
+                          <p className="text-5xl font-bold mb-2">{quizResult.score.toFixed(0)}%</p>
+                          <p className="text-xl font-semibold text-red-400">❌ Not Passed</p>
+                          <p className="text-sm text-gray-400 mt-2">{quizResult.correct}/{quizResult.total} correct — need {quizResult.passingScore}% to pass</p>
+                        </div>
+                        <button onClick={() => { setQuizResult(null); setAnswers([]); setCurrentQuestion(0) }}
+                          className="w-full py-3 bg-gray-700 rounded-xl text-sm hover:bg-gray-600 font-medium">
+                          Retake Quiz
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   /* One question at a time */
