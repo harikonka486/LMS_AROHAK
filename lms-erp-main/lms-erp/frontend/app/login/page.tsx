@@ -202,7 +202,7 @@ function LoginModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (u
   }, [forgotSent]) // eslint-disable-line react-hooks/exhaustive-deps
   const [errorMsg, setErrorMsg]           = useState('')
   const [verifyError, setVerifyError]     = useState(false)
-  const { register, handleSubmit, formState: { errors } } = useForm<F>({ resolver: zodResolver(schema) })
+  const { register, handleSubmit, formState: { errors } } = useForm<F>({ resolver: zodResolver(schema), defaultValues: { email: '', password: '' } })
 
   const onSubmit = async (data: F) => {
     setErrorMsg('')
@@ -279,7 +279,7 @@ function LoginModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (u
         )}
 
         {/* Form */}
-        <div className="px-8 py-6" style={{ background: A.cream }}>
+        <div key={forgotMode ? 'forgot' : 'login'} className="px-8 py-6" style={{ background: A.cream }}>
           {forgotMode ? (
             forgotSent ? (
               <div className="text-center py-4">

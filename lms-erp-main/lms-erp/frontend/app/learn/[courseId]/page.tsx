@@ -125,9 +125,8 @@ export default function LearnPage() {
       }
 
       return null
-    } catch (error) {
-      console.error('SharePoint URL parsing error:', error)
-      return url // fallback to original URL
+    } catch {
+      return url
     }
   }
 
@@ -135,57 +134,28 @@ export default function LearnPage() {
   function getGoogleDriveEmbedUrl(url: string): string | null {
     if (!url) return null
     
-    console.log('Parsing Google Drive URL:', url)
-    
-    // Handle various Google Drive URL formats
     try {
-      // Convert share links (most common format)
-      // https://drive.google.com/file/d/[FILE_ID]/view
-      // https://drive.google.com/file/d/[FILE_ID]/usp=sharing
       if (url.includes('drive.google.com/file/d/')) {
         const afterFileD = url.split('/file/d/')[1]
         if (afterFileD) {
           const fileId = afterFileD.split('/')[0]?.split('?')[0]
-          console.log('Extracted file ID:', fileId)
-          if (fileId) {
-            return `https://drive.google.com/file/d/${fileId}/preview`
-          }
+          if (fileId) return `https://drive.google.com/file/d/${fileId}/preview`
         }
       }
-      
-      // Handle direct download links
-      // https://drive.google.com/uc?id=[FILE_ID]
       if (url.includes('drive.google.com/uc?id=')) {
         const urlParams = new URL(url)
         const fileId = urlParams.searchParams.get('id')
-        console.log('Extracted file ID from UC:', fileId)
-        if (fileId) {
-          return `https://drive.google.com/file/d/${fileId}/preview`
-        }
+        if (fileId) return `https://drive.google.com/file/d/${fileId}/preview`
       }
-      
-      // Handle open links
-      // https://drive.google.com/open?id=[FILE_ID]
       if (url.includes('drive.google.com/open?id=')) {
         const urlParams = new URL(url)
         const fileId = urlParams.searchParams.get('id')
-        console.log('Extracted file ID from open:', fileId)
-        if (fileId) {
-          return `https://drive.google.com/file/d/${fileId}/preview`
-        }
+        if (fileId) return `https://drive.google.com/file/d/${fileId}/preview`
       }
-
-      // If it's already an embed URL, use as-is
-      if (url.includes('/preview')) {
-        console.log('URL is already embed format')
-        return url
-      }
-
-      console.log('No matching Google Drive URL format found')
+      if (url.includes('/preview')) return url
       return null
-    } catch (error) {
-      console.error('Google Drive URL parsing error:', error)
-      return url // fallback to original URL
+    } catch {
+      return url
     }
   }
 
@@ -197,13 +167,7 @@ export default function LearnPage() {
     if (sp) return { type: 'sharepoint', src: sp }
     const gd = getGoogleDriveEmbedUrl(url)
     if (gd) return { type: 'googledrive', src: gd }
-    
-    // If it's a Google Drive URL that couldn't be parsed, try using it directly
-    if (url.includes('drive.google.com')) {
-      console.log('Attempting to use Google Drive URL directly in iframe')
-      return { type: 'googledrive', src: url }
-    }
-    
+
     // Vimeo
     const vimeo = url.match(/vimeo\.com\/(\d+)/)
     if (vimeo) return { type: 'iframe', src: `https://player.vimeo.com/video/${vimeo[1]}` }
@@ -326,9 +290,6 @@ export default function LearnPage() {
                   ) : (() => {
                     const videoUrl = activeLesson.video_url || activeLesson.sharepoint_video_url || activeLesson.google_drive_url
                     const embed = getVideoEmbed(videoUrl)
-                    console.log('Video URL:', videoUrl)
-                    console.log('Embed result:', embed)
-                    
                     if (!embed) {
                       return (
                         <div className="w-full h-full flex items-center justify-center bg-gray-900">

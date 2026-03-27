@@ -38,7 +38,6 @@ export class LessonsController {
     @Param('sectionId') sectionId: string,
     @Body() body: any,
   ) {
-    console.log('Creating lesson with data:', body);
     return this.lessons.create(sectionId, body, null);
   }
 

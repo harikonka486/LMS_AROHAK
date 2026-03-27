@@ -24,11 +24,6 @@ const thumbnailStorage = diskStorage({
 export class CoursesSimpleController {
   constructor(private courses: CoursesSimpleService) {}
 
-  @Get()
-  findAll() {
-    return this.courses.findAll({});
-  }
-
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.courses.findOne(id);

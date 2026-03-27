@@ -9,6 +9,7 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'LMS — Employee Training Portal',
   description: 'Employee Learning Management System',
+  icons: { icon: '/arohak-logo.png' },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

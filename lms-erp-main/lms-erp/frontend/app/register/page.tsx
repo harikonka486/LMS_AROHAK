@@ -31,23 +31,17 @@ const schema = z.object({
 })
 type F = z.infer<typeof schema>
 
-function SuccessModal({ name, onClose }: { name: string; onClose: () => void }) {
-  const router = useRouter()
+function SuccessModal({ name, onRedirect }: { name: string; onRedirect: () => void }) {
   const [countdown, setCountdown] = useState(5)
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
-          clearInterval(interval)
-          router.push('/login')
-          return 0
-        }
-        return prev - 1
-      })
-    }, 1000)
-    return () => clearInterval(interval)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    if (countdown <= 0) {
+      onRedirect()
+      return
+    }
+    const timer = setTimeout(() => setCountdown(c => c - 1), 1000)
+    return () => clearTimeout(timer)
+  }, [countdown, onRedirect])
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: 'rgba(61,10,10,0.75)', backdropFilter: 'blur(6px)' }}>
@@ -104,7 +98,7 @@ export default function RegisterPage() {
 
   return (
     <>
-      {createdName && <SuccessModal name={createdName} onClose={() => router.push('/login')} />}
+      {createdName && <SuccessModal name={createdName} onRedirect={() => router.push('/login')} />}
 
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="rounded-2xl shadow-xl w-full max-w-md p-8 border" style={{ background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderColor: '#f0d9c8' }}>

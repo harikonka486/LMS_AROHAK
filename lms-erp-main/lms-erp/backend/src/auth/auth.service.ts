@@ -138,7 +138,6 @@ export class AuthService {
       [token],
     )) as any;
     if (!record) {
-      console.log(`[ResetPassword] Token lookup failed for token: ${token}`);
       throw new BadRequestException('Invalid or expired reset token');
     }
 

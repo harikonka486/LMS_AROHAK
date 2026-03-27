@@ -49,16 +49,7 @@ export class CoursesController {
   @Roles('admin')
   @UseInterceptors(FileInterceptor('thumbnail', { storage: thumbnailStorage }))
   async create(@Body() body: any, @UploadedFile() file: any, @Request() req: any) {
-    console.log('=== COURSE CREATE REQUEST ===');
-    console.log('Body keys:', Object.keys(body));
-    console.log('Body values:', body);
-    console.log('File:', file);
-    console.log('User ID:', req.user.id);
-    console.log('===========================');
-    
-    const result = await this.courses.create(body, file, req.user.id);
-    console.log('Create result:', result);
-    return result;
+    return this.courses.create(body, file, req.user.id);
   }
 
   @Patch(':id')

@@ -1,6 +1,6 @@
 'use client'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { Plus, Trash2, Eye, EyeOff, Upload, HelpCircle, CheckCircle, Edit2, Save, X } from 'lucide-react'
@@ -11,6 +11,7 @@ import { useAuthStore } from '@/lib/store'
 
 export default function EditCoursePage() {
   const { id } = useParams<{ id: string }>()
+  const router = useRouter()
   const qc = useQueryClient()
   const { user } = useAuthStore()
   const canDelete = user?.role === 'admin'
@@ -84,17 +85,9 @@ export default function EditCoursePage() {
   const invalidate = () => qc.invalidateQueries({ queryKey: ['course-edit', id] })
 
   const updateCourse = useMutation({
-    mutationFn: (data: any) => {
-      console.log('Updating course with data:', data)
-      return api.patch(`/courses/${id}`, data)
-    },
-    onSuccess: () => { 
-      console.log('Course updated successfully')
-      invalidate(); 
-      toast.success('Course updated!') 
-    },
+    mutationFn: (data: any) => api.patch(`/courses/${id}`, data),
+    onSuccess: () => { invalidate(); toast.success('Course updated!') },
     onError: (error: any) => {
-      console.error('Failed to update course:', error)
       toast.error(error.response?.data?.error || 'Failed to update course')
     }
   })
@@ -105,15 +98,8 @@ export default function EditCoursePage() {
   })
 
   const addSection = useMutation({
-    mutationFn: (title: string) => {
-      console.log('Adding section:', title, 'to course:', id)
-      return api.post(`/sections/course/${id}`, { title })
-    },
-    onSuccess: () => { 
-      invalidate(); 
-      setNewSection('')
-      toast.success('Section added!')
-    },
+    mutationFn: (title: string) => api.post(`/sections/course/${id}`, { title }),
+    onSuccess: () => { invalidate(); setNewSection(''); toast.success('Section added!') },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || error.response?.data?.error || 'Failed to add section')
     }
@@ -126,33 +112,12 @@ export default function EditCoursePage() {
 
   const addLesson = useMutation({
     mutationFn: async ({ sectionId, title, video_url, sharepoint_video_url, google_drive_url }: { sectionId: string; title: string; video_url: string; sharepoint_video_url: string; google_drive_url: string }) => {
-      console.log('Adding lesson:', { sectionId, title, video_url, sharepoint_video_url, google_drive_url });
-      
-      const body = {
-        title,
-        video_url: video_url || null,
-        sharepoint_video_url: sharepoint_video_url || null,
-        google_drive_url: google_drive_url || null
-      };
-      
-      try {
-        const response = await api.post(`/lessons/section/${sectionId}`, body);
-        console.log('Lesson added successfully:', response);
-        return response;
-      } catch (error) {
-        console.error('Error adding lesson:', error);
-        throw error;
-      }
+      const body = { title, video_url: video_url || null, sharepoint_video_url: sharepoint_video_url || null, google_drive_url: google_drive_url || null }
+      return api.post(`/lessons/section/${sectionId}`, body)
     },
-    onSuccess: () => { 
-      console.log('Lesson added successfully');
-      invalidate(); 
-      setNewLesson(null) 
-    },
+    onSuccess: () => { invalidate(); setNewLesson(null) },
     onError: (error: any) => {
-      console.error('Failed to add lesson:', error);
-      console.error('Error response:', error.response?.data);
-      alert(error.response?.data?.message || error.response?.data?.error || 'Failed to add lesson');
+      alert(error.response?.data?.message || error.response?.data?.error || 'Failed to add lesson')
     }
   })
 
@@ -163,20 +128,13 @@ export default function EditCoursePage() {
 
   const uploadDoc = useMutation({
     mutationFn: (file: File) => {
-      console.log('Uploading document:', file.name, file.size, file.type)
-      const fd = new FormData(); 
-      fd.append('file', file); 
+      const fd = new FormData()
+      fd.append('file', file)
       fd.append('title', file.name)
-      console.log('FormData prepared, sending to:', `/documents/course/${id}`)
       return api.post(`/documents/course/${id}`, fd)
     },
-    onSuccess: () => { 
-      console.log('Document uploaded successfully')
-      invalidate(); 
-      toast.success('Document uploaded!') 
-    },
+    onSuccess: () => { invalidate(); toast.success('Document uploaded!') },
     onError: (error: any) => {
-      console.error('Failed to upload document:', error)
       toast.error(error.response?.data?.error || 'Failed to upload document')
     }
   })
@@ -201,7 +159,14 @@ export default function EditCoursePage() {
       qc.invalidateQueries({ queryKey: ['courses'] })
       qc.invalidateQueries({ queryKey: ['my-courses'] })
       qc.invalidateQueries({ queryKey: ['admin-stats'] })
-      router.push('/courses')
+      router.push('/dashboard')
+    },
+    onError: () => {
+      // Course may not exist in DB — still navigate away and clear cache
+      qc.invalidateQueries({ queryKey: ['courses'] })
+      qc.invalidateQueries({ queryKey: ['my-courses'] })
+      qc.invalidateQueries({ queryKey: ['admin-stats'] })
+      router.push('/dashboard')
     },
   })
 

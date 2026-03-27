@@ -52,9 +52,10 @@ export class MailService implements OnModuleInit {
       return;
     }
     const from = this.config.get('MAIL_FROM', `LMS Platform <${user}>`);
+    const contactTo = this.config.get('MAIL_USER');
     await this.transporter.sendMail({
       from,
-      to: 'harigopal.konka@arohak.com',
+      to: contactTo,
       replyTo: email,
       subject: `Contact Form: Message from ${name}`,
       html: `
