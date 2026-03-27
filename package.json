@@ -1,8 +1,0 @@
-{
-  "name": "lms-erp-root",
-  "version": "1.0.0",
-  "scripts": {
-    "build": "cd lms-erp-main/lms-erp/backend && npm install",
-    "start": "cd lms-erp-main/lms-erp/backend && node dist/main"
-  }
-}
