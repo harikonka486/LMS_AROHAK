@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import {
   Users, Search, Shield, GraduationCap, BookOpen, Trash2, Edit2,
-  X, Check, Award, Clock, CheckCircle
+  X, Check, CheckCircle
 } from 'lucide-react'
 import AppLayout from '@/components/layout/AppLayout'
 import ConfirmModal from '@/components/ConfirmModal'
@@ -24,7 +24,6 @@ export default function AdminUsersPage() {
   const [roleFilter, setRoleFilter] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editRole, setEditRole] = useState('')
-  const [selectedUser, setSelectedUser] = useState<any>(null)
   const [confirmDelete, setConfirmDelete] = useState<any>(null)
   const [successMsg, setSuccessMsg] = useState('')
   const [successType, setSuccessType] = useState<'deleted' | 'updated'>('deleted')
@@ -131,8 +130,7 @@ export default function AdminUsersPage() {
                         </div>
                         <div>
                           <button
-                            onClick={() => setSelectedUser(u)}
-                            className="font-medium hover:underline text-left"
+                            className="font-medium text-left"
                             style={{ color: '#8B1A1A' }}
                           >
                             {u.name}
@@ -184,11 +182,6 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
-      {/* Slide-over panel */}
-      {selectedUser && (
-        <UserDetailPanel user={selectedUser} onClose={() => setSelectedUser(null)} />
-      )}
-
       {/* Confirm delete modal */}
       {confirmDelete && (
         <ConfirmModal
@@ -218,171 +211,3 @@ export default function AdminUsersPage() {
   )
 }
 
-function UserDetailPanel({ user, onClose }: { user: any; onClose: () => void }) {
-  const qc = useQueryClient()
-  const [confirmUnenroll, setConfirmUnenroll] = useState<any>(null)
-
-  const { data: progress, isLoading } = useQuery({
-    queryKey: ['user-progress', user.id],
-    queryFn: () => api.get(`/users/${user.id}/progress`).then(r => r.data),
-  })
-
-  const unenroll = useMutation({
-    mutationFn: (enrollmentId: string) => api.delete(`/enrollments/${enrollmentId}`),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['user-progress', user.id] })
-      setConfirmUnenroll(null)
-    },
-  })
-
-  const enrolled   = progress?.length ?? 0
-  const completed  = progress?.filter((e: any) => e.status === 'completed').length ?? 0
-  const inProgress = progress?.filter((e: any) => e.status === 'active').length ?? 0
-  const certs      = progress?.filter((e: any) => e.certificate_number).length ?? 0
-
-  return (
-    <>
-      {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/30 z-40 backdrop-blur-sm" onClick={onClose} />
-
-      {/* Panel */}
-      <div className="fixed right-0 top-0 h-full w-full max-w-md bg-white z-50 shadow-2xl flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="p-6 border-b border-gray-100 flex items-start justify-between"
-          style={{ background: 'linear-gradient(135deg, #3d0a0a, #8B1A1A)' }}>
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-white text-lg font-bold">
-              {user.name?.[0]?.toUpperCase()}
-            </div>
-            <div>
-              <h2 className="text-white font-bold text-lg">{user.name}</h2>
-              <p className="text-white/60 text-sm">{user.email}</p>
-              <div className="flex items-center gap-2 mt-1">
-                {user.employee_id && <span className="text-white/70 text-xs">{user.employee_id}</span>}
-                {user.department && <span className="text-white/50 text-xs">· {user.department}</span>}
-                <span className="text-xs bg-white/20 text-white px-2 py-0.5 rounded-full">{ROLE_LABELS[user.role] ?? user.role}</span>
-              </div>
-            </div>
-          </div>
-          <button onClick={onClose} className="text-white/60 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Summary stats */}
-        <div className="grid grid-cols-4 gap-0 border-b border-gray-100">
-          {[
-            { icon: BookOpen,     label: 'Enrolled',    value: enrolled,   color: 'text-blue-600',   bg: 'bg-blue-50' },
-            { icon: Clock,        label: 'In Progress', value: inProgress, color: 'text-amber-600',  bg: 'bg-amber-50' },
-            { icon: CheckCircle,  label: 'Completed',   value: completed,  color: 'text-emerald-600',bg: 'bg-emerald-50' },
-            { icon: Award,        label: 'Certificates',value: certs,      color: 'text-purple-600', bg: 'bg-purple-50' },
-          ].map(({ icon: Icon, label, value, color, bg }) => (
-            <div key={label} className="flex flex-col items-center py-4 border-r last:border-r-0 border-gray-100">
-              <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center mb-1', bg)}>
-                <Icon className={cn('w-4 h-4', color)} />
-              </div>
-              <p className="text-xl font-bold text-gray-900">{value}</p>
-              <p className="text-xs text-gray-400 text-center leading-tight">{label}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Course list */}
-        <div className="flex-1 overflow-y-auto p-5">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">Course Details</p>
-
-          {isLoading && (
-            <div className="space-y-3">
-              {[1,2,3].map(i => <div key={i} className="h-20 bg-gray-100 rounded-xl animate-pulse" />)}
-            </div>
-          )}
-
-          {!isLoading && !progress?.length && (
-            <div className="text-center py-12 text-gray-400">
-              <BookOpen className="w-10 h-10 mx-auto mb-3 text-gray-200" />
-              <p className="text-sm">No courses enrolled yet</p>
-            </div>
-          )}
-
-          <div className="space-y-3">
-            {progress?.map((e: any) => {
-              const total = Number(e.total_lessons)
-              const done  = Number(e.completed_lessons)
-              const pct   = total > 0 ? Math.round((done / total) * 100) : 0
-              const passedQ = Number(e.passed_quizzes)
-              const totalQ  = Number(e.total_quizzes)
-
-              const statusMap: Record<string, { label: string; color: string; bar: string }> = {
-                completed: { label: 'Completed',   color: 'bg-emerald-100 text-emerald-700 border-emerald-200', bar: 'bg-emerald-500' },
-                active:    { label: 'In Progress', color: 'bg-blue-100 text-blue-700 border-blue-200',          bar: 'bg-blue-500' },
-                dropped:   { label: 'Dropped',     color: 'bg-red-100 text-red-700 border-red-200',             bar: 'bg-red-400' },
-              }
-              const s = statusMap[e.status] ?? statusMap.active
-
-              return (
-                <div key={e.enrollment_id} className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                  <div className="flex items-start justify-between gap-2 mb-3">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm text-gray-900 truncate">{e.course_title}</p>
-                      <p className="text-xs text-gray-400 mt-0.5 capitalize">{e.level}</p>
-                    </div>
-                    <span className={cn('text-xs font-medium px-2 py-0.5 rounded-full border flex-shrink-0', s.color)}>
-                      {s.label}
-                    </span>
-                  </div>
-
-                  {/* Progress bar */}
-                  <div className="mb-2">
-                    <div className="flex justify-between text-xs text-gray-500 mb-1">
-                      <span>Lessons</span>
-                      <span>{done}/{total} · {pct}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-1.5">
-                      <div className={cn('h-1.5 rounded-full transition-all', s.bar)} style={{ width: `${pct}%` }} />
-                    </div>
-                  </div>
-
-                  {/* Bottom row */}
-                  <div className="flex items-center justify-between text-xs mt-2">
-                    <span className="text-gray-500">
-                      Quizzes: <span className={cn('font-semibold', passedQ >= totalQ && totalQ > 0 ? 'text-emerald-600' : 'text-gray-700')}>
-                        {passedQ}/{totalQ} passed
-                      </span>
-                    </span>
-                    {e.certificate_number
-                      ? <span className="flex items-center gap-1 text-amber-600 font-medium"><Award className="w-3 h-3" /> Certified</span>
-                      : <span className="text-gray-300">No certificate</span>
-                    }
-                  </div>
-
-                  {/* Dates */}
-                  <div className="flex justify-between text-xs text-gray-400 mt-2 pt-2 border-t border-gray-200">
-                    <span>Enrolled: {new Date(e.enrolled_at).toLocaleDateString()}</span>
-                    {e.completed_at && <span>Completed: {new Date(e.completed_at).toLocaleDateString()}</span>}
-                  </div>
-
-                  {/* Remove enrollment */}
-                  <button
-                    onClick={() => setConfirmUnenroll(e)}
-                    className="mt-3 w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors border border-red-100">
-                    <Trash2 className="w-3.5 h-3.5" /> Remove Enrollment
-                  </button>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </div>
-
-      {confirmUnenroll && (
-        <ConfirmModal
-          title="Remove Enrollment"
-          message={`Remove "${user.name}" from "${confirmUnenroll.course_title}"? Their progress, quiz attempts, and any certificates will also be deleted.`}
-          onConfirm={() => unenroll.mutate(confirmUnenroll.enrollment_id)}
-          onCancel={() => setConfirmUnenroll(null)}
-          loading={unenroll.isPending}
-        />
-      )}
-    </>
-  )
-}

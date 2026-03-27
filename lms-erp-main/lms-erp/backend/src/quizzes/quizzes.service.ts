@@ -167,21 +167,7 @@ export class QuizzesService {
           [certNum],
         )) as any;
         if (user && course) {
-          const frontendUrl =
-            process.env.FRONTEND_URL || 'http://localhost:3000';
-          const verifyUrl = `${frontendUrl}/certificates/verify/${certNum}`;
-          this.mail.sendCertificate(
-            user.email,
-            user.name,
-            course.title,
-            certNum,
-            verifyUrl,
-            user.employee_id,
-            user.department,
-            course.instructor_name,
-            cert?.issued_at ? new Date(cert.issued_at) : new Date(),
-            score,
-          );
+          // Certificate email disabled — users view certificates in the portal
         }
       }
       const [[enrollment]] = (await this.db.query(

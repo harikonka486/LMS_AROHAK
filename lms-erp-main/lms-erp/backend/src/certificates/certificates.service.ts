@@ -6,6 +6,21 @@ import { DB_POOL } from '../database/database.module';
 export class CertificatesService {
   constructor(@Inject(DB_POOL) private db: Pool) {}
 
+  async findAll() {
+    const [rows] = (await this.db.query(
+      `SELECT cert.*, c.title AS course_title, c.thumbnail,
+              u.name AS user_name, u.email AS user_email,
+              u.employee_id, u.department, u.role,
+              inst.name AS instructor_name
+       FROM certificates cert
+       JOIN courses c ON c.id = cert.course_id
+       JOIN users u ON u.id = cert.user_id
+       JOIN users inst ON inst.id = c.instructor_id
+       ORDER BY cert.issued_at DESC`,
+    )) as any;
+    return rows;
+  }
+
   async findMy(userId: string) {
     const [rows] = (await this.db.query(
       `

@@ -1,6 +1,6 @@
 'use client'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { Plus, Trash2, Eye, EyeOff, Upload, HelpCircle, CheckCircle, Edit2, Save, X } from 'lucide-react'
@@ -11,7 +11,6 @@ import { useAuthStore } from '@/lib/store'
 
 export default function EditCoursePage() {
   const { id } = useParams<{ id: string }>()
-  const router = useRouter()
   const qc = useQueryClient()
   const { user } = useAuthStore()
   const canDelete = user?.role === 'admin'
@@ -28,10 +27,7 @@ export default function EditCoursePage() {
     description: '',
     thumbnail: null as File | null,
     video_url: '',
-    price: 0,
     level: 'beginner',
-    language: 'English',
-    category_id: '',
     passing_score: 70
   })
 
@@ -45,11 +41,6 @@ export default function EditCoursePage() {
     queryFn: () => api.get(`/courses/${id}`).then(r => r.data),
   })
 
-  const { data: categories } = useQuery({
-    queryKey: ['categories'],
-    queryFn: () => api.get('/categories').then(r => r.data),
-  })
-
   // Initialize form when course data loads
   useEffect(() => {
     if (course) {
@@ -58,10 +49,7 @@ export default function EditCoursePage() {
         description: course.description || '',
         thumbnail: null,
         video_url: course.video_url || '',
-        price: course.price || 0,
         level: course.level || 'beginner',
-        language: course.language || 'English',
-        category_id: course.category_id || '',
         passing_score: course.passing_score || 70
       })
     }
@@ -467,19 +455,43 @@ export default function EditCoursePage() {
               </div>
 
               {quizData.questions.map((q, qi) => (
-                <div key={qi} className="border border-gray-100 rounded-lg p-3 space-y-2">
+                <div key={qi} className="border border-gray-100 rounded-lg p-4 space-y-3 bg-gray-50">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-gray-700">Question {qi + 1}</p>
+                    {quizData.questions.length > 1 && (
+                      <button type="button" onClick={() => {
+                        const qs = quizData.questions.filter((_, i) => i !== qi)
+                        setQuizData({ ...quizData, questions: qs })
+                      }} className="text-xs text-red-400 hover:text-red-600">Remove</button>
+                    )}
+                  </div>
                   <input value={q.text} onChange={e => {
                     const qs = [...quizData.questions]; qs[qi].text = e.target.value; setQuizData({ ...quizData, questions: qs })
-                  }} placeholder={`Question ${qi + 1}`} className="input text-sm" />
-                  {q.options.map((opt, oi) => (
-                    <div key={oi} className="flex items-center gap-2">
-                      <input type="radio" name={`correct-${qi}`} checked={q.correctAnswer === oi}
-                        onChange={() => { const qs = [...quizData.questions]; qs[qi].correctAnswer = oi; setQuizData({ ...quizData, questions: qs }) }} />
-                      <input value={opt} onChange={e => {
-                        const qs = [...quizData.questions]; qs[qi].options[oi] = e.target.value; setQuizData({ ...quizData, questions: qs })
-                      }} placeholder={`Option ${oi + 1}`} className="input text-sm py-1.5" />
-                    </div>
-                  ))}
+                  }} placeholder={`Enter question ${qi + 1}`} className="input text-sm" />
+                  <p className="text-xs text-gray-500 font-medium">Options — click the circle to mark the correct answer:</p>
+                  {q.options.map((opt, oi) => {
+                    const isCorrect = q.correctAnswer === oi
+                    return (
+                      <div key={oi}
+                        className={`flex items-center gap-3 px-3 py-2 rounded-lg border-2 cursor-pointer transition-all ${isCorrect ? 'border-green-500 bg-green-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+                        onClick={() => { const qs = [...quizData.questions]; qs[qi].correctAnswer = oi; setQuizData({ ...quizData, questions: qs }) }}
+                      >
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${isCorrect ? 'border-green-500 bg-green-500' : 'border-gray-300'}`}>
+                          {isCorrect && <div className="w-2 h-2 rounded-full bg-white" />}
+                        </div>
+                        <input
+                          value={opt}
+                          onChange={e => {
+                            const qs = [...quizData.questions]; qs[qi].options[oi] = e.target.value; setQuizData({ ...quizData, questions: qs })
+                          }}
+                          onClick={e => e.stopPropagation()}
+                          placeholder={`Option ${oi + 1}`}
+                          className={`flex-1 bg-transparent border-none outline-none text-sm ${isCorrect ? 'text-green-800 font-medium' : 'text-gray-700'}`}
+                        />
+                        {isCorrect && <span className="text-xs font-semibold text-green-600 flex-shrink-0">✓ Correct</span>}
+                      </div>
+                    )
+                  })}
                 </div>
               ))}
 

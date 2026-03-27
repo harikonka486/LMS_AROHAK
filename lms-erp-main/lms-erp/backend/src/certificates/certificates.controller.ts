@@ -1,10 +1,17 @@
-import { Controller, Get, Param, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Delete, Param, UseGuards, Request } from '@nestjs/common';
 import { CertificatesService } from './certificates.service';
-import { JwtAuthGuard } from '../auth/guards';
+import { JwtAuthGuard, RolesGuard, Roles } from '../auth/guards';
 
 @Controller('certificates')
 export class CertificatesController {
   constructor(private certs: CertificatesService) {}
+
+  @Get('all')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  findAll() {
+    return this.certs.findAll();
+  }
 
   @Get('my')
   @UseGuards(JwtAuthGuard)
@@ -21,5 +28,12 @@ export class CertificatesController {
   @UseGuards(JwtAuthGuard)
   findOne(@Param('id') id: string) {
     return this.certs.findOne(id);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  delete(@Param('id') id: string) {
+    return this.certs.delete(id);
   }
 }

@@ -5,8 +5,6 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useQuery } from '@tanstack/react-query'
-import toast from 'react-hot-toast'
 import {
   Eye, EyeOff, Award, BarChart3, GraduationCap,
   Users, HelpCircle, ArrowRight, X,
@@ -83,6 +81,93 @@ function ArohakLogoWhite({ size = 40 }: { size?: number }) {
         <p className="font-bold text-sm leading-none text-white">AROHAK</p>
         <p className="text-[10px] leading-none mt-0.5 uppercase tracking-wide text-white/60">LMS Portal</p>
       </div>
+    </div>
+  )
+}
+
+// ── Contact Modal ─────────────────────────────────────────────────────────────
+function ContactModal({ onClose }: { onClose: () => void }) {
+  const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' })
+  const [loading, setLoading] = useState(false)
+  const [sent, setSent] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+    try {
+      await api.post('/contact', form)
+      setSent(true)
+    } catch {
+      setError('Failed to send message. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: 'rgba(61,10,10,0.65)', backdropFilter: 'blur(8px)' }}>
+      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden"
+        style={{ animation: 'popIn 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards' }}>
+        <button onClick={onClose}
+          className="absolute top-4 right-4 p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 z-10">
+          <X className="w-5 h-5" />
+        </button>
+
+        {/* Header */}
+        <div className="px-8 pt-8 pb-6" style={{ background: HERO_BG }}>
+          <ArohakLogoWhite size={36} />
+          <h2 className="text-2xl font-bold text-white mt-4 mb-1">Contact Us</h2>
+          <p className="text-white/60 text-sm">We'd love to hear from you</p>
+        </div>
+
+        <div className="px-8 py-6" style={{ background: A.cream }}>
+          {sent ? (
+            <div className="text-center py-6">
+              <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+                <Mail className="w-7 h-7 text-green-600" />
+              </div>
+              <p className="font-semibold text-gray-800 mb-1">Message Sent!</p>
+              <p className="text-sm text-gray-500 mb-5">We'll get back to you shortly at {form.email}</p>
+              <button onClick={onClose} className="text-sm font-medium hover:underline" style={{ color: A.red }}>Close</button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="px-4 py-3 rounded-xl text-sm text-red-700 bg-red-50 border border-red-200">{error}</div>
+              )}
+              <div>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: A.red }}>Full Name *</label>
+                <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
+                  className="input" placeholder="John Smith" required />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: A.red }}>Email *</label>
+                <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
+                  className="input" placeholder="you@example.com" required />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: A.red }}>Phone Number</label>
+                <input type="tel" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })}
+                  className="input" placeholder="+1 (609) 454 0364" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: A.red }}>Message *</label>
+                <textarea value={form.message} onChange={e => setForm({ ...form, message: e.target.value })}
+                  rows={3} className="input resize-none" placeholder="How can we help you?" required />
+              </div>
+              <button type="submit" disabled={loading}
+                className="w-full py-3 rounded-xl text-white font-semibold text-sm transition-all hover:opacity-90 disabled:opacity-60"
+                style={{ background: BTN_BG }}>
+                {loading ? 'Sending...' : 'Send Message'}
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+      <style>{`@keyframes popIn{0%{opacity:0;transform:scale(0.85) translateY(20px)}100%{opacity:1;transform:scale(1) translateY(0)}}`}</style>
     </div>
   )
 }
@@ -265,19 +350,95 @@ export default function LoginPage() {
   const { user } = useAuthStore()
   const [mounted, setMounted]         = useState(false)
   const [showLogin, setShowLogin]     = useState(false)
+  const [showContact, setShowContact] = useState(false)
 
   useEffect(() => { setMounted(true) }, [])
   useEffect(() => { 
     if (mounted && user) router.replace('/dashboard') 
   }, [mounted, user]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const [showAllCourses, setShowAllCourses] = useState(false)
+  const STATIC_COURSES = [
+    {
+      id: 'mft',
+      title: 'Managed File Transfer (MFT) Fundamentals',
+      description: 'Master MFT protocols (SFTP, FTPS, AS2), encryption, scheduling, monitoring and compliance. Covers IBM Sterling, GoAnywhere and MOVEit.',
+      level: 'beginner',
+      category_name: 'MFT & File Transfer',
+      instructor_name: 'Arohak LMS',
+      enrollment_count: 0,
+      quiz_count: 1,
+      thumbnail: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&q=80',
+    },
+    {
+      id: 'sap-ui5',
+      title: 'SAP UI5 & Fiori Development',
+      description: 'Build enterprise-grade SAP Fiori apps using SAPUI5 framework — MVC architecture, OData binding, Fiori Elements, SAP BTP deployment and Fiori Launchpad configuration.',
+      level: 'intermediate',
+      category_name: 'SAP UI5 & Fiori',
+      instructor_name: 'Arohak LMS',
+      enrollment_count: 0,
+      quiz_count: 1,
+      thumbnail: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80',
+    },
+    {
+      id: 'servicenow',
+      title: 'ServiceNow Platform Development',
+      description: 'Comprehensive training on ServiceNow — ITSM, GlideRecord scripting, Flow Designer, REST integrations, custom apps and Service Portal.',
+      level: 'intermediate',
+      category_name: 'ServiceNow',
+      instructor_name: 'Arohak LMS',
+      enrollment_count: 0,
+      quiz_count: 1,
+      thumbnail: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80',
+    },
+    {
+      id: 'webmethods',
+      title: 'webMethods Integration Platform',
+      description: 'End-to-end training on Software AG webMethods — Integration Server, Designer, API Gateway, Universal Messaging, B2B and microservices.',
+      level: 'intermediate',
+      category_name: 'webMethods Integration',
+      instructor_name: 'Arohak LMS',
+      enrollment_count: 0,
+      quiz_count: 1,
+      thumbnail: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&q=80',
+    },
+    {
+      id: 'fullstack',
+      title: 'Full Stack Web Development',
+      description: 'Build complete web applications using React, Node.js/Express, REST APIs, MySQL, JWT authentication and deployment on cloud platforms.',
+      level: 'intermediate',
+      category_name: 'Full Stack Development',
+      instructor_name: 'Arohak LMS',
+      enrollment_count: 0,
+      quiz_count: 1,
+      thumbnail: 'https://images.unsplash.com/photo-1593720213428-28a5b9e94613?w=600&q=80',
+    },
+    {
+      id: 'python',
+      title: 'Python Programming — From Beginner to Advanced',
+      description: 'Complete Python training covering syntax, OOP, file handling, APIs, automation, data analysis with pandas/numpy, and web development with Flask.',
+      level: 'beginner',
+      category_name: 'Python Programming',
+      instructor_name: 'Arohak LMS',
+      enrollment_count: 0,
+      quiz_count: 1,
+      thumbnail: 'https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=600&q=80',
+    },
+    {
+      id: 'ai-ml',
+      title: 'Artificial Intelligence & Machine Learning',
+      description: 'Comprehensive AI/ML training covering supervised and unsupervised learning, neural networks, deep learning, NLP, and real-world model deployment.',
+      level: 'advanced',
+      category_name: 'AI & Machine Learning',
+      instructor_name: 'Arohak LMS',
+      enrollment_count: 0,
+      quiz_count: 1,
+      thumbnail: 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=600&q=80',
+    },
+  ]
 
-  const { data } = useQuery({
-    queryKey: ['public-courses'],
-    queryFn: () => api.get('/courses', { params: { limit: 100 } }).then(r => r.data),
-  })
-  const allCourses = data?.courses ?? []
+  const allCourses = STATIC_COURSES
+  const [showAllCourses, setShowAllCourses] = useState(false)
   const courses = showAllCourses ? allCourses : allCourses.slice(0, 3)
 
   const handleSuccess = (u: any) => { setShowLogin(false); router.push('/dashboard') }
@@ -289,6 +450,7 @@ export default function LoginPage() {
   return (
     <>
       {showLogin   && <LoginModal onClose={() => setShowLogin(false)} onSuccess={handleSuccess} />}
+      {showContact && <ContactModal onClose={() => setShowContact(false)} />}
 
       <div className="min-h-screen flex flex-col">
 
@@ -315,6 +477,11 @@ export default function LoginPage() {
                 className="text-sm px-4 py-2 rounded-xl font-medium transition-all hover:bg-red-50"
                 style={{ color: A.red }}>
                 About
+              </button>
+              <button onClick={() => setShowContact(true)}
+                className="text-sm px-4 py-2 rounded-xl font-medium transition-all hover:bg-red-50"
+                style={{ color: A.red }}>
+                Contact
               </button>
             </nav>
 
@@ -377,7 +544,7 @@ export default function LoginPage() {
           {/* Stats */}
           <div className="relative z-10 mt-14 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
             {[
-              { icon: BookOpen,      label: 'Courses',      value: data?.total ?? '10+' },
+              { icon: BookOpen,      label: 'Courses',      value: '10+' },
               { icon: GraduationCap, label: 'Learners',     value: '300+' },
               { icon: Award,         label: 'Certificates', value: '100+' },
               { icon: BarChart3,     label: 'Completion',   value: '95%' },
@@ -400,20 +567,7 @@ export default function LoginPage() {
               <p className="text-gray-500 text-sm">Browse our training catalog — sign in to enroll</p>
             </div>
 
-            {allCourses.length === 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-sm">
-                    <div className="skeleton h-40 rounded-none" />
-                    <div className="p-4 space-y-2">
-                      <div className="skeleton h-4 w-3/4" />
-                      <div className="skeleton h-3 w-1/2" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {courses.map((course: any) => (
                   <div key={course.id} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col group border"
                     style={{ borderColor: '#f0d9c8' }}>
@@ -463,85 +617,15 @@ export default function LoginPage() {
                   </div>
                 ))}
               </div>
-            )}
 
-            {allCourses.length > 3 && (
-              <div className="text-center mt-10">
-                <button
-                  onClick={() => setShowAllCourses(prev => !prev)}
-                  className="inline-flex items-center gap-2 px-8 py-3 rounded-xl text-white font-semibold text-sm transition-all hover:opacity-90"
-                  style={{ background: BTN_BG }}>
-                  {showAllCourses ? 'Show Less' : 'View All Courses'}
-                  <ArrowRight className={`w-4 h-4 transition-transform ${showAllCourses ? 'rotate-90' : ''}`} />
-                </button>
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* ── About Section ── */}
-        <section id="about-section" className="py-16 px-6 border-t" style={{ background: 'rgba(255,255,255,0.7)', borderColor: '#f0d9c8' }}>
-          <div className="max-w-5xl mx-auto">
-
-            {/* Heading */}
-            <div className="text-center mb-10">
-              <span className="inline-block text-xs font-semibold px-4 py-1.5 rounded-full mb-3 uppercase tracking-widest"
-                style={{ background: `${A.red}15`, color: A.red }}>
-                About Us
-              </span>
-              <h2 className="text-2xl font-extrabold mb-2" style={{ color: A.dark }}>
-                A Dedicated Team to Grow Your Company
-              </h2>
-              <p className="text-gray-500 text-sm max-w-xl mx-auto">
-                Since 2016, Arohak has been delivering innovative IT solutions that empower enterprises to enhance workflow efficiency and surge productivity.
-              </p>
-            </div>
-
-            {/* Stats row */}
-            <div className="grid grid-cols-3 gap-4 mb-10">
-              {[
-                { value: '231', label: 'Valued Partnerships' },
-                { value: '340', label: 'Global Specialists' },
-                { value: '$20M+', label: 'Revenue Achieved' },
-              ].map(({ value, label }) => (
-                <div key={label} className="rounded-2xl p-6 text-center border"
-                  style={{ borderColor: '#f0d9c8', background: A.cream }}>
-                  <p className="text-4xl font-extrabold mb-1" style={{ color: A.red }}>{value}</p>
-                  <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{label}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Mission / Vision / Goal — compact row */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-              {[
-                { icon: GraduationCap, title: 'Our Mission', text: 'Unlock business potential through state-of-the-art IT solutions, focusing on client needs and lasting partnerships.' },
-                { icon: BarChart3,     title: 'Our Vision',  text: 'Become a global leader in transformative IT — helping every business tap into technology for innovation and growth.' },
-                { icon: Award,         title: 'The Goal',    text: 'Instill ethical excellence and compliance, empowering our team to make decisions grounded in honesty and integrity.' },
-              ].map(({ icon: Icon, title, text }) => (
-                <div key={title} className="flex flex-col items-center text-center gap-3 p-5 rounded-xl border"
-                  style={{ borderColor: '#f0d9c8', background: A.cream }}>
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: BTN_BG }}>
-                    <Icon className="w-5 h-5 text-white" />
-                  </div>
-                  <h4 className="font-semibold text-gray-900 text-sm">{title}</h4>
-                  <p className="text-xs text-gray-500 leading-relaxed">{text}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* CTA */}
-            <div className="rounded-2xl px-8 py-8 text-center relative overflow-hidden" style={{ background: HERO_BG }}>
-              <div className="absolute bottom-0 left-0 right-0 h-1" style={{ background: GOLD_BG }} />
-              <p className="text-white font-bold text-lg mb-1">Ready to grow with Arohak?</p>
-              <p className="text-white/60 text-sm mb-5">Join our learning community and take your career to the next level.</p>
-              <div className="flex items-center justify-center">
-                <button onClick={() => setShowLogin(true)}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90"
-                  style={{ background: GOLD_BG, color: A.dark }}>
-                  Get Started <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
+            <div className="text-center mt-10">
+              <button
+                onClick={() => setShowAllCourses(prev => !prev)}
+                className="inline-flex items-center gap-2 px-8 py-3 rounded-xl text-white font-semibold text-sm transition-all hover:opacity-90"
+                style={{ background: BTN_BG }}>
+                {showAllCourses ? 'Show Less' : 'View All Courses'}
+                <ArrowRight className={`w-4 h-4 transition-transform ${showAllCourses ? 'rotate-90' : ''}`} />
+              </button>
             </div>
 
           </div>
@@ -563,6 +647,88 @@ export default function LoginPage() {
                 <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* ── About Section ── */}
+        <section id="about-section" className="py-16 px-6 border-t" style={{ background: 'rgba(255,255,255,0.7)', borderColor: '#f0d9c8' }}>
+          <div className="max-w-5xl mx-auto">
+
+            {/* Badge */}
+            <div className="text-center mb-10">
+              <span className="inline-block text-xs font-semibold px-4 py-1.5 rounded-full mb-3 uppercase tracking-widest"
+                style={{ background: `${A.red}15`, color: A.red }}>
+                About Us
+              </span>
+            </div>
+
+            {/* Who We Are — image left, text right */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center mb-14">
+              <div className="rounded-2xl overflow-hidden shadow-md">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80"
+                  alt="Arohak Team"
+                  className="w-full h-72 object-cover"
+                />
+              </div>
+              <div>
+                <h2 className="text-2xl font-extrabold mb-2" style={{ color: A.dark }}>Who We Are</h2>
+                <h3 className="text-base font-semibold mb-4" style={{ color: A.red }}>A dedicated team to grow your company</h3>
+                <p className="text-gray-500 text-sm leading-relaxed mb-4">
+                  Arohak was born from a simple yet profound belief — that we could make a meaningful impact on the lives of others. Since our inception in 2016, we have been on a relentless journey to turn aspirations into achievements. Today, we proudly stand as a trusted ally, dedicated to delivering innovative solutions that drive success.
+                </p>
+                <p className="text-gray-500 text-sm leading-relaxed">
+                  A cornerstone of our values is our "Empowered Team". Our team members aren't just employees; they are cherished contributors and an integral part of our extended family. We cultivate an environment that nurtures positivity, fosters productivity, and encourages collaboration. Arohak is committed to diversity and gender equality, proudly championing female talent within our workforce. Our expertise spans Software Development, UX/UI, Cloud Solutions, IoT, Mobile App Development and Wearables for the enterprise.
+                </p>
+              </div>
+            </div>
+
+            {/* Mission / Vision / Goal — with images */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+              {[
+                {
+                  img: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&q=80',
+                  title: 'Our Mission',
+                  text: 'Our mission at Arohak is to unlock the potential of businesses through state-of-the-art IT solutions. We prioritize a partnership approach, focusing on our clients\' unique needs to deliver impactful outcomes and build lasting relationships.',
+                },
+                {
+                  img: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=600&q=80',
+                  title: 'Our Drive and Vision',
+                  text: 'Our vision is to emerge as a global beacon in transformative IT solutions. We imagine a world where every business can tap into the vast potential of technology to set new benchmarks in innovation and achieve unprecedented growth.',
+                },
+                {
+                  img: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=600&q=80',
+                  title: 'The Goal',
+                  text: 'Our goal is to instill a culture of ethical excellence and compliance. We empower our team to make decisions grounded in honesty and integrity, with robust controls ensuring strict adherence to both external and internal regulations.',
+                },
+              ].map(({ img, title, text }) => (
+                <div key={title} className="rounded-2xl overflow-hidden border shadow-sm"
+                  style={{ borderColor: '#f0d9c8', background: A.cream }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={img} alt={title} className="w-full h-40 object-cover" />
+                  <div className="p-5">
+                    <h4 className="font-bold text-sm mb-2" style={{ color: A.red }}>{title}</h4>
+                    <p className="text-xs text-gray-500 leading-relaxed">{text}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* CTA */}
+            <div className="rounded-2xl px-8 py-8 text-center relative overflow-hidden" style={{ background: HERO_BG }}>
+              <div className="absolute bottom-0 left-0 right-0 h-1" style={{ background: GOLD_BG }} />
+              <p className="text-white font-bold text-lg mb-1">Ready to grow with Arohak?</p>
+              <p className="text-white/60 text-sm mb-5">Join our learning community and take your career to the next level.</p>
+              <div className="flex items-center justify-center">
+                <button onClick={() => setShowLogin(true)}
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90"
+                  style={{ background: GOLD_BG, color: A.dark }}>
+                  Get Started <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
           </div>
         </section>
 
@@ -590,7 +756,7 @@ export default function LoginPage() {
                   <li><Link href="/register" className="hover:text-white transition-colors">Register</Link></li>
                   <li><button onClick={() => scrollTo('courses-section')} className="hover:text-white transition-colors">Browse Courses</button></li>
                   <li><button onClick={() => scrollTo('about-section')} className="hover:text-white transition-colors">About Us</button></li>
-                  <li><button onClick={() => setShowLogin(true)} className="hover:text-white transition-colors">My Certificates</button></li>
+                  <li><button onClick={() => setShowContact(true)} className="hover:text-white transition-colors">Contact Us</button></li>
                 </ul>
               </div>
 
@@ -598,9 +764,9 @@ export default function LoginPage() {
               <div>
                 <h4 className="font-semibold mb-4 text-sm" style={{ color: A.amber }}>Contact</h4>
                 <ul className="space-y-3 text-sm text-white/50">
-                  <li className="flex items-center gap-2"><Mail className="w-4 h-4 flex-shrink-0" style={{ color: A.gold }} />hr@arohak.com</li>
-                  <li className="flex items-center gap-2"><Phone className="w-4 h-4 flex-shrink-0" style={{ color: A.gold }} />+91 98765 43210</li>
-                  <li className="flex items-center gap-2"><MapPin className="w-4 h-4 flex-shrink-0" style={{ color: A.gold }} />Hyderabad, India</li>
+                  <li className="flex items-center gap-2"><Mail className="w-4 h-4 flex-shrink-0" style={{ color: A.gold }} />info@arohak.com</li>
+                  <li className="flex items-center gap-2"><Phone className="w-4 h-4 flex-shrink-0" style={{ color: A.gold }} />+1 (609) 454 0364</li>
+                  <li className="flex items-start gap-2"><MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: A.gold }} />5th Floor, V3 Tech Enclave, Phase 2, HITEC City, Hyderabad, Telangana 500081</li>
                   <li className="flex items-center gap-2"><Globe className="w-4 h-4 flex-shrink-0" style={{ color: A.gold }} />www.arohak.com</li>
                 </ul>
               </div>

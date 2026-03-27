@@ -15,6 +15,7 @@ import { CertificatesModule } from './certificates/certificates.module';
 import { HealthModule } from './health/health.module';
 import { MailModule } from './mail/mail.module';
 import { DocumentsModule } from './documents/documents.module';
+import { ContactController } from './contact/contact.controller';
 
 @Module({
   imports: [
@@ -35,5 +36,6 @@ import { DocumentsModule } from './documents/documents.module';
     MailModule,
     DocumentsModule,
   ],
+  controllers: [ContactController],
 })
 export class AppModule {}

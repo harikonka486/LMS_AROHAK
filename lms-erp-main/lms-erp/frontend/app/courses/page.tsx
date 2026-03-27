@@ -61,10 +61,6 @@ export default function CoursesPage() {
           </div>
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-gray-400 flex-shrink-0" />
-            <select value={category} onChange={e => setCategory(e.target.value)} className="input w-auto min-w-36">
-              <option value="">All Categories</option>
-              {categories?.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
             <select value={level} onChange={e => setLevel(e.target.value)} className="input w-auto min-w-32">
               <option value="">All Levels</option>
               <option value="beginner">Beginner</option>
