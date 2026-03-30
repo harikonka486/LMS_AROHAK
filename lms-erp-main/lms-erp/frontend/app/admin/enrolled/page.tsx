@@ -118,9 +118,6 @@ export default function AdminEnrolledPage() {
                       Completed: {new Date(e.completed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                     </p>
                   )}
-                  {Number(e.enrollment_count) > 1 && (
-                    <p className="text-xs text-blue-500 -mt-1">Re-enrolled {Number(e.enrollment_count)} times</p>
-                  )}
                 </div>
               )
             })}
