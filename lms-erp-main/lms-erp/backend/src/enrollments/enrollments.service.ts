@@ -28,17 +28,9 @@ export class EnrollmentsService {
        FROM enrollments e
        LEFT JOIN users u ON u.id = e.user_id
        LEFT JOIN courses c ON c.id = e.course_id
-       WHERE e.enrolled_at = (
-         SELECT MAX(e2.enrolled_at) FROM enrollments e2
-         WHERE COALESCE(e2.user_id, e2.user_name_snapshot) = COALESCE(e.user_id, e.user_name_snapshot)
-           AND COALESCE(e2.course_id, e2.course_title_snapshot) = COALESCE(e.course_id, e.course_title_snapshot)
-           AND COALESCE(e2.status,'active') = (
-             SELECT COALESCE(e3.status,'active') FROM enrollments e3
-             WHERE COALESCE(e3.user_id, e3.user_name_snapshot) = COALESCE(e.user_id, e.user_name_snapshot)
-               AND COALESCE(e3.course_id, e3.course_title_snapshot) = COALESCE(e.course_id, e.course_title_snapshot)
-             ORDER BY FIELD(COALESCE(e3.status,'active'),'completed','active','dropped')
-             LIMIT 1
-           )
+       WHERE e.id IN (
+         SELECT MIN(id) FROM enrollments
+         GROUP BY COALESCE(user_id, user_name_snapshot), COALESCE(course_id, course_title_snapshot)
        )
        ORDER BY e.enrolled_at DESC`,
     )) as any;

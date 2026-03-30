@@ -318,6 +318,21 @@ async function migrate() {
     console.warn('FK change skipped (may already be SET NULL):', e.message);
   }
 
+  // Prevent duplicate enrollments for same user+course snapshot combination
+  try {
+    await db.query(`
+      DELETE FROM enrollments WHERE id NOT IN (
+        SELECT id FROM (
+          SELECT MIN(id) as id FROM enrollments
+          GROUP BY COALESCE(user_id, user_name_snapshot), COALESCE(course_id, course_title_snapshot)
+        ) t
+      )
+    `);
+    console.log('✅ Cleaned duplicate enrollments');
+  } catch (e) {
+    console.warn('Dedup skipped:', e.message);
+  }
+
   await db.end();
 }
 
