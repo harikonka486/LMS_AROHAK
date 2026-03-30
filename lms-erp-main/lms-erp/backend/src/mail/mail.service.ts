@@ -5,38 +5,51 @@ import * as nodemailer from 'nodemailer';
 @Injectable()
 export class MailService implements OnModuleInit {
   private readonly logger = new Logger(MailService.name);
-  private transporter: nodemailer.Transporter;
+  private transporter: nodemailer.Transporter | null = null;
+  private resendApiKey: string | null = null;
 
   constructor(private config: ConfigService) {
-    this.transporter = nodemailer.createTransport({
-      host: this.config.get('MAIL_HOST', 'smtp.gmail.com'),
-      port: Number(this.config.get('MAIL_PORT', '465')),
-      secure: Number(this.config.get('MAIL_PORT', '465')) === 465,
-      auth: {
-        user: this.config.get('MAIL_USER'),
-        pass: this.config.get('MAIL_PASS'),
-      },
-    });
+    this.resendApiKey = this.config.get('RESEND_API_KEY') || null;
+    if (!this.resendApiKey) {
+      this.transporter = nodemailer.createTransport({
+        host: this.config.get('MAIL_HOST', 'smtp.gmail.com'),
+        port: Number(this.config.get('MAIL_PORT', '465')),
+        secure: Number(this.config.get('MAIL_PORT', '465')) === 465,
+        auth: {
+          user: this.config.get('MAIL_USER'),
+          pass: this.config.get('MAIL_PASS'),
+        },
+      });
+    }
   }
 
   private async sendMail(options: { to: string; subject: string; html: string; from?: string; replyTo?: string }) {
-    const from = options.from || this.config.get('MAIL_FROM') || 'LMS Portal <noreply@lms.com>';
-    await this.transporter.sendMail({
-      from,
-      to: options.to,
-      subject: options.subject,
-      html: options.html,
-      replyTo: options.replyTo,
-    });
+    const from = options.from || this.config.get('MAIL_FROM') || 'LMS Portal <onboarding@resend.dev>';
+
+    if (this.resendApiKey) {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${this.resendApiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from, to: options.to, subject: options.subject, html: options.html, reply_to: options.replyTo }),
+      });
+      if (!res.ok) throw new Error(`Resend error: ${await res.text()}`);
+    } else {
+      await this.transporter!.sendMail({ from, to: options.to, subject: options.subject, html: options.html, replyTo: options.replyTo });
+    }
   }
 
   private isMailConfigured(): boolean {
+    if (this.resendApiKey) return true;
     const user = this.config.get('MAIL_USER');
     const pass = this.config.get('MAIL_PASS');
     return !(!user || user === 'your-email@gmail.com' || !pass || pass === 'your-app-password');
   }
 
   async onModuleInit() {
+    if (this.resendApiKey) {
+      this.logger.log('✅ Using Resend for email delivery');
+      return;
+    }
     const user = this.config.get('MAIL_USER');
     const pass = this.config.get('MAIL_PASS');
     if (!user || user === 'your-email@gmail.com' || !pass || pass === 'your-app-password') {
@@ -44,11 +57,10 @@ export class MailService implements OnModuleInit {
       return;
     }
     try {
-      await this.transporter.verify();
+      await this.transporter!.verify();
       this.logger.log(`✅ Mail transporter ready — sending from ${user}`);
     } catch (err) {
       this.logger.error(`❌ Mail transporter failed: ${err.message}`);
-      this.logger.error('Check MAIL_USER, MAIL_PASS in .env. For Gmail use an App Password.');
     }
   }
 
