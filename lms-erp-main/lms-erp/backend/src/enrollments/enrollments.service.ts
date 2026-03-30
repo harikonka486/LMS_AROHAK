@@ -14,25 +14,27 @@ export class EnrollmentsService {
 
   async findAll() {
     const [rows] = (await this.db.query(
-      `SELECT e.id AS enrollment_id, e.enrolled_at, e.completed_at, e.status,
-              COALESCE(u.name, e.user_name_snapshot, 'Deleted User') AS user_name,
-              COALESCE(u.email, e.user_email_snapshot, '') AS user_email,
-              COALESCE(u.employee_id, '') AS employee_id,
-              COALESCE(u.department, '') AS department,
-              COALESCE(c.title, e.course_title_snapshot, 'Course Deleted') AS course_title,
-              COALESCE(c.level, 'N/A') AS level,
-              CASE WHEN c.id IS NOT NULL THEN
-                (SELECT COUNT(*) FROM lessons l JOIN sections s ON s.id=l.section_id WHERE s.course_id=c.id)
+      `SELECT
+              MIN(e.id) AS enrollment_id,
+              MIN(e.enrolled_at) AS enrolled_at,
+              MAX(e.completed_at) AS completed_at,
+              MAX(CASE WHEN e.status='completed' THEN 'completed' ELSE e.status END) AS status,
+              COALESCE(MAX(u.name), MAX(e.user_name_snapshot), 'Deleted User') AS user_name,
+              COALESCE(MAX(u.email), MAX(e.user_email_snapshot), '') AS user_email,
+              COALESCE(MAX(u.employee_id), '') AS employee_id,
+              COALESCE(MAX(u.department), '') AS department,
+              COALESCE(MAX(c.title), MAX(e.course_title_snapshot), 'Course Deleted') AS course_title,
+              COALESCE(MAX(c.level), 'N/A') AS level,
+              CASE WHEN MAX(c.id) IS NOT NULL THEN
+                (SELECT COUNT(*) FROM lessons l JOIN sections s ON s.id=l.section_id WHERE s.course_id=MAX(c.id))
               ELSE 0 END AS total_lessons,
-              (SELECT COUNT(*) FROM lesson_progress lp WHERE lp.enrollment_id=e.id AND lp.completed=1) AS completed_lessons
+              (SELECT COUNT(*) FROM lesson_progress lp WHERE lp.enrollment_id=MIN(e.id) AND lp.completed=1) AS completed_lessons,
+              COUNT(e.id) AS enrollment_count
        FROM enrollments e
        LEFT JOIN users u ON u.id = e.user_id
        LEFT JOIN courses c ON c.id = e.course_id
-       WHERE e.id IN (
-         SELECT MIN(id) FROM enrollments
-         GROUP BY COALESCE(user_id, user_name_snapshot), COALESCE(course_id, course_title_snapshot)
-       )
-       ORDER BY e.enrolled_at DESC`,
+       GROUP BY COALESCE(e.user_id, e.user_name_snapshot), COALESCE(e.course_id, e.course_title_snapshot)
+       ORDER BY MIN(e.enrolled_at) DESC`,
     )) as any;
     return rows;
   }
