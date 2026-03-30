@@ -1,10 +1,8 @@
 [build]
 builder = "nixpacks"
-buildCommand = "cd lms-erp-main/lms-erp/backend && npm install"
+buildCommand = "npm install && npm run build"
 
 [deploy]
-startCommand = "node lms-erp-main/lms-erp/backend/dist/main"
+startCommand = "npm run start:prod"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
-healthcheckPath = "/api/health"
-healthcheckTimeout = 30
