@@ -1,67 +1,46 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
-import { Resend } from 'resend';
 
 @Injectable()
 export class MailService implements OnModuleInit {
   private readonly logger = new Logger(MailService.name);
   private transporter: nodemailer.Transporter;
-  private resend: Resend | null = null;
 
   constructor(private config: ConfigService) {
-    const resendKey = this.config.get('RESEND_API_KEY');
-    if (resendKey) {
-      this.resend = new Resend(resendKey);
-      this.logger.log('✅ Using Resend for email delivery');
-    } else {
-      this.transporter = nodemailer.createTransport({
-        host: this.config.get('MAIL_HOST', 'smtp.gmail.com'),
-        port: Number(this.config.get('MAIL_PORT', '465')),
-        secure: Number(this.config.get('MAIL_PORT', '465')) === 465,
-        auth: {
-          user: this.config.get('MAIL_USER'),
-          pass: this.config.get('MAIL_PASS'),
-        },
-      });
-    }
+    this.transporter = nodemailer.createTransport({
+      host: this.config.get('MAIL_HOST', 'smtp.gmail.com'),
+      port: Number(this.config.get('MAIL_PORT', '465')),
+      secure: Number(this.config.get('MAIL_PORT', '465')) === 465,
+      auth: {
+        user: this.config.get('MAIL_USER'),
+        pass: this.config.get('MAIL_PASS'),
+      },
+    });
   }
 
   private async sendMail(options: { to: string; subject: string; html: string; from?: string; replyTo?: string }) {
-    const from = options.from || this.config.get('MAIL_FROM') || 'LMS Portal <onboarding@resend.dev>';
-
-    if (this.resend) {
-      await this.resend.emails.send({
-        from,
-        to: options.to,
-        subject: options.subject,
-        html: options.html,
-        replyTo: options.replyTo,
-      });
-    } else {
-      await this.transporter.sendMail({
-        from,
-        to: options.to,
-        subject: options.subject,
-        html: options.html,
-        replyTo: options.replyTo,
-      });
-    }
+    const from = options.from || this.config.get('MAIL_FROM') || 'LMS Portal <noreply@lms.com>';
+    await this.transporter.sendMail({
+      from,
+      to: options.to,
+      subject: options.subject,
+      html: options.html,
+      replyTo: options.replyTo,
+    });
   }
 
   private isMailConfigured(): boolean {
-    if (this.resend) return true;
     const user = this.config.get('MAIL_USER');
     const pass = this.config.get('MAIL_PASS');
     return !(!user || user === 'your-email@gmail.com' || !pass || pass === 'your-app-password');
   }
 
   async onModuleInit() {
-    if (this.resend) return;
     const user = this.config.get('MAIL_USER');
     const pass = this.config.get('MAIL_PASS');
     if (!user || user === 'your-email@gmail.com' || !pass || pass === 'your-app-password') {
-      this.logger.warn('⚠️  MAIL_USER / MAIL_PASS not configured in .env — emails will NOT be sent');
+      this.logger.warn('⚠️  MAIL_USER / MAIL_PASS not configured — emails will NOT be sent');
       return;
     }
     try {
@@ -69,7 +48,7 @@ export class MailService implements OnModuleInit {
       this.logger.log(`✅ Mail transporter ready — sending from ${user}`);
     } catch (err) {
       this.logger.error(`❌ Mail transporter failed: ${err.message}`);
-      this.logger.error('Check MAIL_USER, MAIL_PASS in .env. For Gmail use an App Password (not your login password).');
+      this.logger.error('Check MAIL_USER, MAIL_PASS in .env. For Gmail use an App Password.');
     }
   }
 
