@@ -57,7 +57,7 @@ export class MailService implements OnModuleInit {
   }
 
   async onModuleInit() {
-    if (this.resend) return; // Resend doesn't need verification
+    if (this.resend) return;
     const user = this.config.get('MAIL_USER');
     const pass = this.config.get('MAIL_PASS');
     if (!user || user === 'your-email@gmail.com' || !pass || pass === 'your-app-password') {
