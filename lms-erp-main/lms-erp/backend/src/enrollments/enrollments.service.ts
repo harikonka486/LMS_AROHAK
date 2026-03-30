@@ -15,7 +15,10 @@ export class EnrollmentsService {
   async findAll() {
     const [rows] = (await this.db.query(
       `SELECT e.id AS enrollment_id, e.enrolled_at, e.completed_at, e.status,
-              u.name AS user_name, u.email AS user_email, u.employee_id, u.department,
+              COALESCE(u.name, e.user_name_snapshot, 'Deleted User') AS user_name,
+              COALESCE(u.email, e.user_email_snapshot, '') AS user_email,
+              COALESCE(u.employee_id, '') AS employee_id,
+              COALESCE(u.department, '') AS department,
               COALESCE(c.title, e.course_title_snapshot, 'Course Deleted') AS course_title,
               COALESCE(c.level, 'N/A') AS level,
               CASE WHEN c.id IS NOT NULL THEN
@@ -23,13 +26,19 @@ export class EnrollmentsService {
               ELSE 0 END AS total_lessons,
               (SELECT COUNT(*) FROM lesson_progress lp WHERE lp.enrollment_id=e.id AND lp.completed=1) AS completed_lessons
        FROM enrollments e
-       JOIN users u ON u.id = e.user_id
+       LEFT JOIN users u ON u.id = e.user_id
        LEFT JOIN courses c ON c.id = e.course_id
-       WHERE e.id = (
-         SELECT e2.id FROM enrollments e2
-         WHERE e2.user_id = e.user_id AND e2.course_id = e.course_id
-         ORDER BY FIELD(e2.status,'completed','active','dropped'), e2.enrolled_at DESC
-         LIMIT 1
+       WHERE e.enrolled_at = (
+         SELECT MAX(e2.enrolled_at) FROM enrollments e2
+         WHERE COALESCE(e2.user_id, e2.user_name_snapshot) = COALESCE(e.user_id, e.user_name_snapshot)
+           AND COALESCE(e2.course_id, e2.course_title_snapshot) = COALESCE(e.course_id, e.course_title_snapshot)
+           AND COALESCE(e2.status,'active') = (
+             SELECT COALESCE(e3.status,'active') FROM enrollments e3
+             WHERE COALESCE(e3.user_id, e3.user_name_snapshot) = COALESCE(e.user_id, e.user_name_snapshot)
+               AND COALESCE(e3.course_id, e3.course_title_snapshot) = COALESCE(e.course_id, e.course_title_snapshot)
+             ORDER BY FIELD(COALESCE(e3.status,'active'),'completed','active','dropped')
+             LIMIT 1
+           )
        )
        ORDER BY e.enrolled_at DESC`,
     )) as any;
@@ -49,9 +58,17 @@ export class EnrollmentsService {
     if (existing) throw new BadRequestException('Already enrolled');
     const id = uuid();
     await this.db.query(
-      'INSERT INTO enrollments (id,user_id,course_id,course_title_snapshot) VALUES (?,?,?,?)',
-      [id, userId, courseId, course.title],
+      'INSERT INTO enrollments (id,user_id,course_id,course_title_snapshot,user_name_snapshot,user_email_snapshot) VALUES (?,?,?,?,?,?)',
+      [id, userId, courseId, course.title, null, null],
     );
+    // Snapshot user details
+    const [[user]] = (await this.db.query('SELECT name, email FROM users WHERE id=?', [userId])) as any;
+    if (user) {
+      await this.db.query(
+        'UPDATE enrollments SET user_name_snapshot=?, user_email_snapshot=? WHERE id=?',
+        [user.name, user.email, id],
+      );
+    }
     const [[enrollment]] = (await this.db.query(
       'SELECT * FROM enrollments WHERE id=?',
       [id],

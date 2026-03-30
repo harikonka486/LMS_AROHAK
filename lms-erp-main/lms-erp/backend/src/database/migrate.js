@@ -259,6 +259,38 @@ async function migrate() {
     if (!e.message.includes('Duplicate column')) console.warn('cert snapshot:', e.message);
   }
 
+  // Preserve enrollment history when user is deleted
+  try {
+    await db.query(`ALTER TABLE enrollments ADD COLUMN user_name_snapshot VARCHAR(255) NULL`);
+    console.log('✅ Added user_name_snapshot to enrollments');
+  } catch (e) {
+    if (!e.message.includes('Duplicate column')) console.warn('user_name_snapshot:', e.message);
+  }
+
+  try {
+    await db.query(`ALTER TABLE enrollments ADD COLUMN user_email_snapshot VARCHAR(255) NULL`);
+    console.log('✅ Added user_email_snapshot to enrollments');
+  } catch (e) {
+    if (!e.message.includes('Duplicate column')) console.warn('user_email_snapshot:', e.message);
+  }
+
+  try {
+    const [fks] = await db.query(`
+      SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE
+      WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'enrollments'
+      AND COLUMN_NAME = 'user_id' AND REFERENCED_TABLE_NAME = 'users'
+    `);
+    if (fks.length > 0) {
+      const fkName = fks[0].CONSTRAINT_NAME;
+      await db.query(`ALTER TABLE enrollments DROP FOREIGN KEY ${fkName}`);
+      await db.query(`ALTER TABLE enrollments MODIFY user_id VARCHAR(36) NULL`);
+      await db.query(`ALTER TABLE enrollments ADD CONSTRAINT fk_enrollment_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL`);
+      console.log('✅ Changed enrollments.user_id FK to ON DELETE SET NULL');
+    }
+  } catch (e) {
+    console.warn('User FK change skipped:', e.message);
+  }
+
   // Preserve enrollment history when course is deleted
   try {
     await db.query(`ALTER TABLE enrollments ADD COLUMN course_title_snapshot VARCHAR(500) NULL`);

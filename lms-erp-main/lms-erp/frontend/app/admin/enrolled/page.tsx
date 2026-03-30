@@ -58,8 +58,9 @@ export default function AdminEnrolledPage() {
             {filtered.map((e: any) => {
               const total = Number(e.total_lessons)
               const done = Number(e.completed_lessons)
-              const pct = total > 0 ? Math.round((done / total) * 100) : 0
               const isCompleted = e.status === 'completed'
+              const courseDeleted = total === 0 && isCompleted
+              const pct = total > 0 ? Math.round((done / total) * 100) : (isCompleted ? 100 : 0)
 
               return (
                 <div key={e.enrollment_id} className="card p-5 flex flex-col gap-3 border" style={{ borderColor: '#f0d9c8' }}>
@@ -86,7 +87,7 @@ export default function AdminEnrolledPage() {
                   <div>
                     <div className="flex justify-between text-xs text-gray-500 mb-1">
                       <span>Progress</span>
-                      <span>{done}/{total} lessons · {pct}%</span>
+                      <span>{courseDeleted ? `${pct}%` : `${done}/${total} lessons · ${pct}%`}</span>
                     </div>
                     <div className="w-full bg-gray-100 rounded-full h-1.5">
                       <div className="h-1.5 rounded-full transition-all"
