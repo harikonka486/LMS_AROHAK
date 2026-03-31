@@ -24,21 +24,33 @@ export class MailService implements OnModuleInit {
   }
 
   private async sendMail(options: { to: string; subject: string; html: string; from?: string; replyTo?: string }) {
-    const from = options.from || this.config.get('MAIL_FROM') || 'LMS Portal <onboarding@resend.dev>';
+    const from = options.from || this.config.get('MAIL_FROM') || 'LMS Portal <noreply@lms.com>';
+    const [fromName, fromEmail] = from.includes('<')
+      ? [from.split('<')[0].trim(), from.split('<')[1].replace('>', '').trim()]
+      : ['LMS Portal', from];
 
-    if (this.resendApiKey) {
-      const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${this.resendApiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from, to: options.to, subject: options.subject, html: options.html, reply_to: options.replyTo }),
-      });
-      if (!res.ok) throw new Error(`Resend error: ${await res.text()}`);
+    const brevoKey = this.config.get('BREVO_API_KEY');
+    if (brevoKey || this.resendApiKey) {
+      const apiKey = brevoKey || this.resendApiKey;
+      const isBrevo = !!brevoKey;
+      const url = isBrevo ? 'https://api.brevo.com/v3/smtp/email' : 'https://api.resend.com/emails';
+      const headers: any = { 'Content-Type': 'application/json' };
+      if (isBrevo) headers['api-key'] = apiKey;
+      else headers['Authorization'] = `Bearer ${apiKey}`;
+
+      const body = isBrevo
+        ? { sender: { name: fromName, email: fromEmail }, to: [{ email: options.to }], subject: options.subject, htmlContent: options.html, replyTo: options.replyTo ? { email: options.replyTo } : undefined }
+        : { from, to: options.to, subject: options.subject, html: options.html, reply_to: options.replyTo };
+
+      const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
+      if (!res.ok) throw new Error(`${isBrevo ? 'Brevo' : 'Resend'} error: ${await res.text()}`);
     } else {
       await this.transporter!.sendMail({ from, to: options.to, subject: options.subject, html: options.html, replyTo: options.replyTo });
     }
   }
 
   private isMailConfigured(): boolean {
+    if (this.config.get('BREVO_API_KEY')) return true;
     if (this.resendApiKey) return true;
     const user = this.config.get('MAIL_USER');
     const pass = this.config.get('MAIL_PASS');
@@ -46,6 +58,10 @@ export class MailService implements OnModuleInit {
   }
 
   async onModuleInit() {
+    if (this.config.get('BREVO_API_KEY')) {
+      this.logger.log('✅ Using Brevo for email delivery');
+      return;
+    }
     if (this.resendApiKey) {
       this.logger.log('✅ Using Resend for email delivery');
       return;
