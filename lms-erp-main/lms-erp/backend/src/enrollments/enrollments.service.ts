@@ -36,7 +36,22 @@ export class EnrollmentsService {
        GROUP BY COALESCE(e.user_id, e.user_name_snapshot), COALESCE(e.course_id, e.course_title_snapshot)
        ORDER BY MIN(e.enrolled_at) DESC`,
     )) as any;
-    return rows;
+
+    // Deduplicate by user_email + course_title to handle NULL user_id edge cases
+    const seen = new Map<string, any>();
+    for (const row of rows) {
+      const key = `${row.user_email}||${row.course_title}`;
+      if (!seen.has(key)) {
+        seen.set(key, row);
+      } else {
+        // Keep the one with completed status or latest enrollment
+        const existing = seen.get(key);
+        if (row.status === 'completed' && existing.status !== 'completed') {
+          seen.set(key, row);
+        }
+      }
+    }
+    return Array.from(seen.values());
   }
 
   async enroll(userId: string, courseId: string) {
