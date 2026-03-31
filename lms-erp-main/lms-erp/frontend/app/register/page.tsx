@@ -27,7 +27,6 @@ const schema = z.object({
   password: z.string().min(6),
   department: z.string().optional(),
   employee_id: z.string().optional(),
-  role: z.enum(['student', 'instructor']),
 })
 type F = z.infer<typeof schema>
 
@@ -78,13 +77,12 @@ export default function RegisterPage() {
 
   const { register, handleSubmit, formState: { errors } } = useForm<F>({
     resolver: zodResolver(schema),
-    defaultValues: { role: 'student' },
   })
 
   const onSubmit = async (data: F) => {
     setLoading(true)
     try {
-      await api.post('/auth/register', data)
+      await api.post('/auth/register', { ...data, role: 'employee' })
       setCreatedName(data.name)
     } catch (err: any) {
       if (!err.response) {
@@ -136,13 +134,6 @@ export default function RegisterPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-600 mb-1">Department</label>
                 <input {...register('department')} className="input" placeholder="Finance" />
-              </div>
-              <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-600 mb-1">Role</label>
-                <select {...register('role')} className="input">
-                  <option value="student">Employee (Learner)</option>
-                  <option value="instructor">Trainer (Instructor)</option>
-                </select>
               </div>
             </div>
 
