@@ -50,19 +50,21 @@ export class EnrollmentsService {
       [userId, courseId],
     )) as any;
     if (existing) throw new BadRequestException('Already enrolled');
+
+    // Also check by snapshot email
+    const [[userRow]] = (await this.db.query('SELECT name, email FROM users WHERE id=?', [userId])) as any;
+    if (userRow?.email) {
+      const [[existingByEmail]] = (await this.db.query(
+        'SELECT id FROM enrollments WHERE user_email_snapshot=? AND course_id=?',
+        [userRow.email, courseId],
+      )) as any;
+      if (existingByEmail) throw new BadRequestException('Already enrolled');
+    }
     const id = uuid();
     await this.db.query(
       'INSERT INTO enrollments (id,user_id,course_id,course_title_snapshot,user_name_snapshot,user_email_snapshot) VALUES (?,?,?,?,?,?)',
-      [id, userId, courseId, course.title, null, null],
+      [id, userId, courseId, course.title, userRow?.name ?? null, userRow?.email ?? null],
     );
-    // Snapshot user details
-    const [[user]] = (await this.db.query('SELECT name, email FROM users WHERE id=?', [userId])) as any;
-    if (user) {
-      await this.db.query(
-        'UPDATE enrollments SET user_name_snapshot=?, user_email_snapshot=? WHERE id=?',
-        [user.name, user.email, id],
-      );
-    }
     const [[enrollment]] = (await this.db.query(
       'SELECT * FROM enrollments WHERE id=?',
       [id],
@@ -106,6 +108,20 @@ export class EnrollmentsService {
       'SELECT * FROM enrollments WHERE user_id=? AND course_id=?',
       [userId, courseId],
     )) as any;
-    return { enrolled: !!enrollment, enrollment: enrollment || null };
+    if (enrollment) return { enrolled: true, enrollment };
+
+    // Also check by snapshot email in case user_id was nulled (edge case)
+    const [[user]] = (await this.db.query(
+      'SELECT email FROM users WHERE id=?', [userId]
+    )) as any;
+    if (user?.email) {
+      const [[byEmail]] = (await this.db.query(
+        'SELECT * FROM enrollments WHERE user_email_snapshot=? AND course_id=?',
+        [user.email, courseId],
+      )) as any;
+      if (byEmail) return { enrolled: true, enrollment: byEmail };
+    }
+
+    return { enrolled: false, enrollment: null };
   }
 }

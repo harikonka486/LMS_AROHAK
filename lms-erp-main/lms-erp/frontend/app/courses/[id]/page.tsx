@@ -31,11 +31,13 @@ export default function CourseDetailPage() {
     mutationFn: () => api.post('/enrollments', { courseId: id }),
     onSuccess: () => { toast.success('Enrolled!'); refetch(); router.push(`/learn/${id}`) },
     onError: (err: any) => {
-      const msg = err.response?.data?.message || err.response?.data?.error || ''
-      if (msg === 'Already enrolled' || msg.toLowerCase().includes('already enrolled')) {
+      const data = err.response?.data || {}
+      const msg = (data.message || data.error || '').toString().toLowerCase()
+      if (msg.includes('already enrolled') || msg.includes('already enroll')) {
         setShowAlreadyEnrolled(true)
+        refetch() // refresh enrollment status so button updates
       } else {
-        toast.error(msg || 'Failed to enroll')
+        toast.error(data.message || data.error || 'Failed to enroll')
       }
     },
   })
