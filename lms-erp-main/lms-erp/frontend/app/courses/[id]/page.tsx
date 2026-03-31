@@ -2,7 +2,7 @@
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { BookOpen, FileText, HelpCircle, Users, ChevronDown, Lock, Play, Download } from 'lucide-react'
+import { BookOpen, FileText, HelpCircle, Users, ChevronDown, Lock, Play, Download, CheckCircle, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 import AppLayout from '@/components/layout/AppLayout'
 import { useAuthStore } from '@/lib/store'
@@ -14,6 +14,7 @@ export default function CourseDetailPage() {
   const { user } = useAuthStore()
   const router = useRouter()
   const [openSection, setOpenSection] = useState<string | null>(null)
+  const [showAlreadyEnrolled, setShowAlreadyEnrolled] = useState(false)
 
   const { data: course, isLoading } = useQuery({
     queryKey: ['course', id],
@@ -29,7 +30,14 @@ export default function CourseDetailPage() {
   const enrollMutation = useMutation({
     mutationFn: () => api.post('/enrollments', { courseId: id }),
     onSuccess: () => { toast.success('Enrolled!'); refetch(); router.push(`/learn/${id}`) },
-    onError: (err: any) => toast.error(err.response?.data?.error || 'Failed'),
+    onError: (err: any) => {
+      const msg = err.response?.data?.message || err.response?.data?.error || ''
+      if (msg === 'Already enrolled' || msg.toLowerCase().includes('already enrolled')) {
+        setShowAlreadyEnrolled(true)
+      } else {
+        toast.error(msg || 'Failed to enroll')
+      }
+    },
   })
 
   if (isLoading) return <AppLayout><div className="animate-pulse h-64 bg-gray-200 rounded-xl" /></AppLayout>
@@ -38,6 +46,7 @@ export default function CourseDetailPage() {
   const totalLessons = course.sections?.reduce((a: number, s: any) => a + s.lessons.length, 0) ?? 0
 
   return (
+    <>
     <AppLayout>
       <div className="max-w-5xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -156,5 +165,40 @@ export default function CourseDetailPage() {
         </div>
       </div>
     </AppLayout>
+
+    {/* Already Enrolled Modal */}
+    {showAlreadyEnrolled && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        style={{ background: 'rgba(0,0,0,0.5)' }}
+        onClick={() => setShowAlreadyEnrolled(false)}>
+        <div className="relative bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center"
+          onClick={e => e.stopPropagation()}>
+          <button onClick={() => setShowAlreadyEnrolled(false)}
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+            <X className="w-5 h-5" />
+          </button>
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+            style={{ background: '#FFF8F0' }}>
+            <CheckCircle className="w-9 h-9" style={{ color: '#8B1A1A' }} />
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Already Enrolled</h2>
+          <p className="text-gray-500 text-sm mb-6">
+            You have already enrolled in <span className="font-semibold text-gray-800">{course?.title}</span>. Continue from where you left off.
+          </p>
+          <div className="flex gap-3">
+            <button onClick={() => setShowAlreadyEnrolled(false)}
+              className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+              Close
+            </button>
+            <button onClick={() => router.push(`/learn/${id}`)}
+              className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
+              style={{ background: 'linear-gradient(135deg,#8B1A1A,#C0392B)' }}>
+              Continue Learning
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   )
 }
