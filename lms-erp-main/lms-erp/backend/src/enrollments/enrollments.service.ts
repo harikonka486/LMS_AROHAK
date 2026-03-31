@@ -45,35 +45,24 @@ export class EnrollmentsService {
       [courseId],
     )) as any;
     if (!course) throw new NotFoundException('Course not found');
-
-    // Check for any existing enrollment (active or completed)
     const [[existing]] = (await this.db.query(
-      'SELECT id, status FROM enrollments WHERE user_id=? AND course_id=?',
+      'SELECT id FROM enrollments WHERE user_id=? AND course_id=?',
       [userId, courseId],
     )) as any;
-
-    if (existing) {
-      if (existing.status === 'completed') {
-        throw new BadRequestException('ALREADY_COMPLETED');
-      }
-      throw new BadRequestException('Already enrolled');
-    }
-
-    // Check certificates table for a previously completed record (unenrolled after completion)
-    const [[cert]] = (await this.db.query(
-      'SELECT id FROM certificates WHERE user_id=? AND course_id=?',
-      [userId, courseId],
-    )) as any;
-    if (cert) {
-      throw new BadRequestException('ALREADY_COMPLETED');
-    }
-
+    if (existing) throw new BadRequestException('Already enrolled');
     const id = uuid();
-    const [[user]] = (await this.db.query('SELECT name, email FROM users WHERE id=?', [userId])) as any;
     await this.db.query(
       'INSERT INTO enrollments (id,user_id,course_id,course_title_snapshot,user_name_snapshot,user_email_snapshot) VALUES (?,?,?,?,?,?)',
-      [id, userId, courseId, course.title, user?.name ?? null, user?.email ?? null],
+      [id, userId, courseId, course.title, null, null],
     );
+    // Snapshot user details
+    const [[user]] = (await this.db.query('SELECT name, email FROM users WHERE id=?', [userId])) as any;
+    if (user) {
+      await this.db.query(
+        'UPDATE enrollments SET user_name_snapshot=?, user_email_snapshot=? WHERE id=?',
+        [user.name, user.email, id],
+      );
+    }
     const [[enrollment]] = (await this.db.query(
       'SELECT * FROM enrollments WHERE id=?',
       [id],
@@ -117,17 +106,6 @@ export class EnrollmentsService {
       'SELECT * FROM enrollments WHERE user_id=? AND course_id=?',
       [userId, courseId],
     )) as any;
-    if (enrollment) {
-      return { enrolled: true, completed: enrollment.status === 'completed', enrollment };
-    }
-    // Check certificates for previously completed + unenrolled case
-    const [[cert]] = (await this.db.query(
-      'SELECT id FROM certificates WHERE user_id=? AND course_id=?',
-      [userId, courseId],
-    )) as any;
-    if (cert) {
-      return { enrolled: false, completed: true, previouslyCompleted: true, enrollment: null };
-    }
-    return { enrolled: false, completed: false, enrollment: null };
+    return { enrolled: !!enrollment, enrollment: enrollment || null };
   }
 }
