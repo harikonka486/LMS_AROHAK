@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
-import { Search, BookOpen, Users, HelpCircle, Filter, Layers } from 'lucide-react'
+import { Search, BookOpen, Filter, Layers } from 'lucide-react'
 import toast from 'react-hot-toast'
 import AppLayout from '@/components/layout/AppLayout'
 import { useAuthStore } from '@/lib/store'
@@ -140,17 +140,6 @@ export default function CoursesPage() {
                 <div className="p-4 flex flex-col flex-1">
                   <h3 className="font-semibold text-sm text-gray-900 leading-snug line-clamp-2 mb-1">{course.title}</h3>
                   <p className="text-xs text-gray-400 mb-3">By {course.instructor_name}</p>
-
-                  <div className="flex items-center gap-4 text-xs text-gray-400 mb-4">
-                    <span className="flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5" />
-                      {course.enrollment_count} enrolled
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <HelpCircle className="w-3.5 h-3.5" />
-                      {course.quiz_count} quizzes
-                    </span>
-                  </div>
 
                   <div className="flex gap-2 mt-auto">
                     <Link href={`/courses/${course.id}`} className="btn-secondary text-xs py-2 flex-1 justify-center">
