@@ -17,10 +17,20 @@ function VerifyEmailContent() {
       return
     }
     api.get(`/auth/verify-email`, { params: { token } })
-      .then(() => setStatus('success'))
+      .then((res) => {
+        setStatus('success')
+        setMessage(res.data?.message || 'Email verified successfully!')
+      })
       .catch((err) => {
-        setStatus('error')
-        setMessage(err.response?.data?.message || 'Invalid or expired verification link.')
+        const msg = err.response?.data?.message || err.response?.data?.error || 'Invalid or expired verification link.'
+        // Treat "already verified" as success
+        if (msg.toLowerCase().includes('already verified')) {
+          setStatus('success')
+          setMessage('Your email is already verified. You can sign in.')
+        } else {
+          setStatus('error')
+          setMessage(msg)
+        }
       })
   }, [token])
 
@@ -38,7 +48,7 @@ function VerifyEmailContent() {
           <div style={{ fontSize: '56px', marginBottom: '16px' }}>✅</div>
           <h2 style={{ color: '#15803d', fontSize: '20px', fontWeight: 700, margin: '0 0 8px' }}>Email Verified!</h2>
           <p style={{ color: '#6b7280', fontSize: '14px', lineHeight: 1.6, margin: '0 0 28px' }}>
-            Your email address has been successfully verified. You can now sign in to your account.
+            {message || 'Your email address has been successfully verified. You can now sign in to your account.'}
           </p>
           <Link href="/login"
             style={{ display: 'inline-block', background: 'linear-gradient(135deg,#8B1A1A,#C0392B)', color: '#fff', padding: '13px 32px', borderRadius: '10px', textDecoration: 'none', fontWeight: 700, fontSize: '15px' }}>

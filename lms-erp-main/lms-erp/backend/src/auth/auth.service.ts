@@ -63,27 +63,26 @@ export class AuthService {
       [token],
     )) as any;
 
-    // Token not found at all
     if (!record) throw new BadRequestException('Invalid verification link');
 
-    // Already verified — check if user is verified
+    // Already used — check if user is already verified
     if (record.used) {
       const [[user]] = (await this.db.query(
         'SELECT is_email_verified FROM users WHERE id=?',
         [record.user_id],
       )) as any;
       if (user?.is_email_verified) {
-        return { message: 'Email already verified!' };
+        return { message: 'Email already verified. You can sign in.' };
       }
       throw new BadRequestException('This verification link has already been used');
     }
 
-    // Expired
-    const [[valid]] = (await this.db.query(
-      'SELECT id FROM email_verification_tokens WHERE token=? AND used=0 AND expires_at > NOW()',
-      [token],
-    )) as any;
-    if (!valid) throw new BadRequestException('Verification link has expired');
+    // Check expiry
+    const now = new Date();
+    const expiresAt = new Date(record.expires_at);
+    if (now > expiresAt) {
+      throw new BadRequestException('Verification link has expired. Please register again or contact support.');
+    }
 
     await this.db.query('UPDATE users SET is_email_verified=1 WHERE id=?', [record.user_id]);
     await this.db.query('UPDATE email_verification_tokens SET used=1 WHERE id=?', [record.id]);
