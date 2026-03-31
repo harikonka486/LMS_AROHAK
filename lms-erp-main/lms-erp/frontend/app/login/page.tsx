@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
   Eye, EyeOff, Award, BarChart3, GraduationCap,
-  Users, HelpCircle, ArrowRight, X,
+  ArrowRight, X,
   Mail, Phone, MapPin, Globe, BookOpen,
 } from 'lucide-react'
 import api from '@/lib/api'
@@ -623,10 +623,6 @@ export default function LoginPage() {
                       <h3 className="font-semibold text-sm text-gray-900 leading-snug line-clamp-2 mb-1">{course.title}</h3>
                       <p className="text-xs text-gray-400 mb-3">By {course.instructor_name}</p>
                       <p className="text-xs text-gray-500 line-clamp-2 mb-4 leading-relaxed">{course.description}</p>
-                      <div className="flex items-center gap-4 text-xs text-gray-400 mb-4">
-                        <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5" />{course.enrollment_count} enrolled</span>
-                        <span className="flex items-center gap-1.5"><HelpCircle className="w-3.5 h-3.5" />{course.quiz_count} quizzes</span>
-                      </div>
                       <button onClick={() => setShowLogin(true)}
                         className="mt-auto w-full py-2 rounded-xl text-white text-xs font-semibold transition-all hover:opacity-90"
                         style={{ background: BTN_BG }}>
