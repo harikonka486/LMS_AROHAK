@@ -61,9 +61,11 @@ export default function AdminEnrolledPage() {
               const isCompleted = e.status === 'completed'
               const courseDeleted = total === 0 && isCompleted
               const pct = total > 0 ? Math.round((done / total) * 100) : (isCompleted ? 100 : 0)
+              // Unique key per user+course (not enrollment_id which may vary on duplicates)
+              const cardKey = `${e.user_email}-${e.course_title}`
 
               return (
-                <div key={e.enrollment_id} className="card p-5 flex flex-col gap-3 border" style={{ borderColor: '#f0d9c8' }}>
+                <div key={cardKey} className="card p-5 flex flex-col gap-3 border" style={{ borderColor: '#f0d9c8' }}>
                   {/* User */}
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"

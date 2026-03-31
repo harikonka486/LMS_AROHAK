@@ -29,7 +29,15 @@ export default function CourseDetailPage() {
   const enrollMutation = useMutation({
     mutationFn: () => api.post('/enrollments', { courseId: id }),
     onSuccess: () => { toast.success('Enrolled!'); refetch(); router.push(`/learn/${id}`) },
-    onError: (err: any) => toast.error(err.response?.data?.error || 'Failed'),
+    onError: (err: any) => {
+      const msg = err.response?.data?.message || err.response?.data?.error || ''
+      if (msg === 'ALREADY_COMPLETED' || msg.includes('ALREADY_COMPLETED')) {
+        toast.error('You have already completed this course previously.')
+        refetch()
+      } else {
+        toast.error(msg || 'Failed to enroll')
+      }
+    },
   })
 
   if (isLoading) return <AppLayout><div className="animate-pulse h-64 bg-gray-200 rounded-xl" /></AppLayout>
@@ -136,6 +144,22 @@ export default function CourseDetailPage() {
                 <button onClick={() => router.push(`/learn/${id}`)} className="btn-primary w-full justify-center py-3">
                   Continue Learning
                 </button>
+              ) : enrollment?.completed || enrollment?.previouslyCompleted ? (
+                <div className="w-full text-center">
+                  <div className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-emerald-700 font-semibold text-sm mb-2"
+                    style={{ background: '#d1fae5', border: '1px solid #6ee7b7' }}>
+                    <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Already Completed
+                  </div>
+                  <p className="text-xs text-gray-500">You have previously enrolled and completed this course successfully.</p>
+                  <button onClick={() => router.push('/certificates')}
+                    className="mt-3 w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
+                    style={{ background: 'linear-gradient(135deg,#8B1A1A,#C0392B)' }}>
+                    View Certificate
+                  </button>
+                </div>
               ) : (
                 <button onClick={() => enrollMutation.mutate()} disabled={enrollMutation.isPending}
                   className="btn-primary w-full justify-center py-3">
