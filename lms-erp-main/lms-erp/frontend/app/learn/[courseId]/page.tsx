@@ -234,7 +234,9 @@ export default function LearnPage() {
               <button key={quiz.id} onClick={() => { setActiveQuiz(quiz); setTab('quiz'); setAnswers([]); setQuizResult(null); setCurrentQuestion(0) }}
                 className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors ${activeQuiz?.id === quiz.id && tab === 'quiz' ? 'text-white' : 'text-gray-300 hover:bg-gray-700'}`}
                 style={activeQuiz?.id === quiz.id && tab === 'quiz' ? { background: '#8B1A1A' } : {}}>
-                <HelpCircle className="w-4 h-4 flex-shrink-0" />
+                {quiz.passed
+                  ? <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                  : <HelpCircle className="w-4 h-4 flex-shrink-0 text-gray-400" />}
                 <span className="truncate text-xs">{quiz.title}</span>
               </button>
             ))}
@@ -418,25 +420,31 @@ export default function LearnPage() {
                   /* Results screen */
                   <div className="flex-1 overflow-y-auto px-8 py-6">
                     {quizResult.passed ? (
-                      /* Passed — show only course completed banner */
-                      <div className="rounded-2xl overflow-hidden"
-                        style={{ background: 'linear-gradient(135deg, #064e3b, #065f46)', border: '1px solid rgba(16,185,129,0.4)' }}>
-                        <div className="px-6 py-5 flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-full bg-emerald-400/20 flex items-center justify-center flex-shrink-0">
-                            <CheckCircle className="w-7 h-7 text-emerald-400" />
+                      /* Passed */
+                      <div className="max-w-lg mx-auto space-y-4">
+                        <div className="rounded-2xl p-8 text-center"
+                          style={{ background: 'linear-gradient(135deg, #064e3b, #065f46)', border: '1px solid rgba(16,185,129,0.4)' }}>
+                          <div className="w-16 h-16 rounded-full bg-emerald-400/20 flex items-center justify-center mx-auto mb-4">
+                            <CheckCircle className="w-9 h-9 text-emerald-400" />
                           </div>
-                          <div className="flex-1">
-                            <p className="text-emerald-300 font-bold text-lg">🎉 Course Completed!</p>
-                            <p className="text-emerald-400/70 text-sm mt-0.5">
-                              You've successfully completed <span className="font-semibold text-emerald-300">{course?.title}</span>. Your certificate has been issued.
-                            </p>
-                          </div>
-                          <button onClick={() => router.push('/certificates')}
-                            className="flex-shrink-0 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
-                            style={{ background: 'rgba(16,185,129,0.3)', border: '1px solid rgba(16,185,129,0.5)' }}>
-                            View Certificate
-                          </button>
+                          <p className="text-emerald-300 font-bold text-2xl mb-1">🎉 Passed!</p>
+                          <p className="text-5xl font-bold text-white my-3">{quizResult.score.toFixed(0)}%</p>
+                          <p className="text-emerald-400/70 text-sm">
+                            {quizResult.correct}/{quizResult.total} correct · Passing score: {quizResult.passingScore}%
+                          </p>
+                          <p className="text-emerald-300/80 text-sm mt-2">
+                            You've completed <span className="font-semibold">{course?.title}</span>. Your certificate has been issued.
+                          </p>
                         </div>
+                        <button onClick={() => router.push('/certificates')}
+                          className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
+                          style={{ background: 'linear-gradient(135deg,#8B1A1A,#C0392B)' }}>
+                          View Certificate
+                        </button>
+                        <button onClick={() => { setQuizResult(null); setAnswers([]); setCurrentQuestion(0) }}
+                          className="w-full py-3 bg-gray-700 rounded-xl text-sm hover:bg-gray-600 font-medium text-gray-300">
+                          Retake Assessment
+                        </button>
                       </div>
                     ) : (
                       /* Failed — show score and retake */
@@ -452,6 +460,31 @@ export default function LearnPage() {
                         </button>
                       </div>
                     )}
+                  </div>
+                ) : activeQuiz?.passed ? (
+                  /* Already passed — show passed state with retake option */
+                  <div className="flex-1 overflow-y-auto px-8 py-6">
+                    <div className="max-w-lg mx-auto space-y-4">
+                      <div className="rounded-2xl p-8 text-center"
+                        style={{ background: 'linear-gradient(135deg, #064e3b, #065f46)', border: '1px solid rgba(16,185,129,0.4)' }}>
+                        <div className="w-16 h-16 rounded-full bg-emerald-400/20 flex items-center justify-center mx-auto mb-4">
+                          <CheckCircle className="w-9 h-9 text-emerald-400" />
+                        </div>
+                        <p className="text-emerald-300 font-bold text-2xl mb-1">✅ Already Passed</p>
+                        <p className="text-emerald-400/70 text-sm mt-2">
+                          You have already passed this assessment for <span className="font-semibold text-emerald-300">{course?.title}</span>.
+                        </p>
+                      </div>
+                      <button onClick={() => router.push('/certificates')}
+                        className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
+                        style={{ background: 'linear-gradient(135deg,#8B1A1A,#C0392B)' }}>
+                        View Certificate
+                      </button>
+                      <button onClick={() => { setAnswers([]); setCurrentQuestion(0); setQuizResult(null); setActiveQuiz({ ...activeQuiz, passed: false }) }}
+                        className="w-full py-3 bg-gray-700 rounded-xl text-sm hover:bg-gray-600 font-medium text-gray-300">
+                        Retake Assessment
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   /* One question at a time */
