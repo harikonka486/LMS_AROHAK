@@ -107,13 +107,13 @@ export default function CoursesPage() {
             {courses.map((course: any) => (
               <div key={course.id} className="course-card flex flex-col">
                 {/* Thumbnail */}
-                <div className="h-40 relative overflow-hidden flex-shrink-0 bg-gradient-to-br from-blue-600 to-purple-700">
+                <div className="h-52 relative overflow-hidden flex-shrink-0 bg-gradient-to-br from-blue-600 to-purple-700">
                   {course.thumbnail && course.thumbnail !== '' ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img 
                       src={`${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api').replace('/api', '')}${course.thumbnail}`}
                       alt={course.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-contain bg-white"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement
                         target.style.display = 'none'
@@ -154,31 +154,45 @@ export default function CoursesPage() {
                   {/* Admin: enrollment stats */}
                   {user?.role === 'admin' && (
                     <div className="mb-3 space-y-2">
-                      <div className="flex justify-between text-xs text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
-                          Enrolled: <span className="font-semibold text-gray-700 ml-1">{course.enrollment_count ?? 0}</span>
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
-                          Completed: <span className="font-semibold text-gray-700 ml-1">{course.completed_count ?? 0}</span>
-                        </span>
-                      </div>
-                      {/* Completion bar */}
-                      {Number(course.enrollment_count) > 0 && (
-                        <div>
-                          <div className="w-full bg-gray-100 rounded-full h-1.5">
-                            <div className="h-1.5 rounded-full transition-all"
-                              style={{
-                                width: `${Math.round((Number(course.completed_count) / Number(course.enrollment_count)) * 100)}%`,
-                                background: 'linear-gradient(90deg,#8B1A1A,#10b981)'
-                              }} />
-                          </div>
-                          <p className="text-right text-xs text-gray-400 mt-0.5">
-                            {Math.round((Number(course.completed_count) / Number(course.enrollment_count)) * 100)}% completion rate
-                          </p>
+                      {/* Enrolled bar */}
+                      <div>
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className="flex items-center gap-1.5 text-gray-500">
+                            <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
+                            Enrolled
+                          </span>
+                          <span className="font-semibold text-gray-700">{course.enrollment_count ?? 0} users</span>
                         </div>
-                      )}
+                        <div className="w-full bg-gray-100 rounded-full h-1.5">
+                          <div className="h-1.5 rounded-full bg-blue-500 transition-all"
+                            style={{ width: Number(course.enrollment_count) > 0 ? '100%' : '0%' }} />
+                        </div>
+                      </div>
+                      {/* Completed bar */}
+                      <div>
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className="flex items-center gap-1.5 text-gray-500">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+                            Completed
+                          </span>
+                          <span className="font-semibold text-gray-700">
+                            {course.completed_count ?? 0} users
+                            {Number(course.enrollment_count) > 0 && (
+                              <span className="text-gray-400 font-normal ml-1">
+                                ({Math.round((Number(course.completed_count) / Number(course.enrollment_count)) * 100)}%)
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-100 rounded-full h-1.5">
+                          <div className="h-1.5 rounded-full bg-emerald-500 transition-all"
+                            style={{
+                              width: Number(course.enrollment_count) > 0
+                                ? `${Math.round((Number(course.completed_count) / Number(course.enrollment_count)) * 100)}%`
+                                : '0%'
+                            }} />
+                        </div>
+                      </div>
                     </div>
                   )}
 
