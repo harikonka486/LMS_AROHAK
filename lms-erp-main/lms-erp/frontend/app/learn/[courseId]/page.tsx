@@ -246,17 +246,6 @@ export default function LearnPage() {
 
       {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Tabs */}
-        <div className="bg-gray-800 border-b border-gray-700/50 flex">
-          {(['lesson', 'documents'] as Tab[]).map(t => (
-            <button key={t} onClick={() => setTab(t)}
-              className={`px-5 py-3 text-sm font-medium capitalize transition-colors ${tab === t ? 'text-white border-b-2' : 'text-gray-400 hover:text-white'}`}
-              style={tab === t ? { borderBottomColor: '#C0392B' } : {}}>
-              {t === 'documents' ? 'Materials' : t}
-            </button>
-          ))}
-        </div>
-
         <div className={`flex-1 text-white ${tab === 'quiz' && activeQuiz && !quizResult ? 'overflow-hidden flex flex-col' : 'overflow-y-auto'}`} style={{ background: '#0f0e1a' }}>
 
           {/* ── Course Completed Banner — only show on lesson/documents tab ── */}
