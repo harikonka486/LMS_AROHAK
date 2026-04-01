@@ -25,7 +25,7 @@ export class EnrollmentsService {
               COALESCE(MAX(u.department), '') AS department,
               COALESCE(MAX(c.title), MAX(e.course_title_snapshot), 'Course Deleted') AS course_title,
               COALESCE(MAX(c.level), 'N/A') AS level,
-              MAX(c.thumbnail) AS thumbnail,
+              COALESCE(MAX(c.thumbnail), MAX(e.thumbnail_snapshot)) AS thumbnail,
               CASE WHEN MAX(c.id) IS NOT NULL THEN
                 (SELECT COUNT(*) FROM lessons l JOIN sections s ON s.id=l.section_id WHERE s.course_id=MAX(c.id))
               ELSE 0 END AS total_lessons,
@@ -66,19 +66,12 @@ export class EnrollmentsService {
       [userId, courseId],
     )) as any;
     if (existing) throw new BadRequestException('Already enrolled');
+    const [[userRow]] = (await this.db.query('SELECT name, email FROM users WHERE id=?', [userId])) as any;
     const id = uuid();
     await this.db.query(
-      'INSERT INTO enrollments (id,user_id,course_id,course_title_snapshot,user_name_snapshot,user_email_snapshot) VALUES (?,?,?,?,?,?)',
-      [id, userId, courseId, course.title, null, null],
+      'INSERT INTO enrollments (id,user_id,course_id,course_title_snapshot,user_name_snapshot,user_email_snapshot,thumbnail_snapshot) VALUES (?,?,?,?,?,?,?)',
+      [id, userId, courseId, course.title, userRow?.name ?? null, userRow?.email ?? null, course.thumbnail ?? null],
     );
-    // Snapshot user details
-    const [[user]] = (await this.db.query('SELECT name, email FROM users WHERE id=?', [userId])) as any;
-    if (user) {
-      await this.db.query(
-        'UPDATE enrollments SET user_name_snapshot=?, user_email_snapshot=? WHERE id=?',
-        [user.name, user.email, id],
-      );
-    }
     const [[enrollment]] = (await this.db.query(
       'SELECT * FROM enrollments WHERE id=?',
       [id],
@@ -89,7 +82,9 @@ export class EnrollmentsService {
   async findMy(userId: string) {
     const [rows] = (await this.db.query(
       `
-      SELECT e.*, c.title AS course_title, c.thumbnail, c.level, c.passing_score,
+      SELECT e.*, COALESCE(c.title, e.course_title_snapshot) AS course_title,
+             COALESCE(c.thumbnail, e.thumbnail_snapshot) AS thumbnail,
+             c.level, c.passing_score,
              u.name AS instructor_name,
              (SELECT COUNT(*) FROM lessons l JOIN sections s ON s.id=l.section_id WHERE s.course_id=c.id) AS total_lessons,
              (SELECT COUNT(*) FROM lesson_progress lp WHERE lp.enrollment_id=e.id AND lp.completed=1) AS completed_lessons,

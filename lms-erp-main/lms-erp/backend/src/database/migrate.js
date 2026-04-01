@@ -299,6 +299,14 @@ async function migrate() {
     if (!e.message.includes('Duplicate column')) console.warn('course_title_snapshot:', e.message);
   }
 
+  // Save course thumbnail snapshot for deleted course display
+  try {
+    await db.query(`ALTER TABLE enrollments ADD COLUMN thumbnail_snapshot VARCHAR(500) NULL`);
+    console.log('✅ Added thumbnail_snapshot column to enrollments');
+  } catch (e) {
+    if (!e.message.includes('Duplicate column')) console.warn('thumbnail_snapshot:', e.message);
+  }
+
   // Change enrollments.course_id FK to SET NULL on course delete
   try {
     // Get the FK constraint name
