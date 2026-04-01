@@ -33,6 +33,7 @@ export class CoursesService {
       `
       SELECT c.*, u.name AS instructor_name, cat.name AS category_name,
              (SELECT COUNT(*) FROM enrollments WHERE course_id=c.id) AS enrollment_count,
+             (SELECT COUNT(*) FROM enrollments WHERE course_id=c.id AND status='completed') AS completed_count,
              (SELECT COUNT(*) FROM sections WHERE course_id=c.id) AS section_count,
              (SELECT COUNT(*) FROM quizzes WHERE course_id=c.id) AS quiz_count
       FROM courses c JOIN users u ON u.id=c.instructor_id

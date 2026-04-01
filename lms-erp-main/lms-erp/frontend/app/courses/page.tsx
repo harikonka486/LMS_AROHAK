@@ -151,6 +151,37 @@ export default function CoursesPage() {
                   <h3 className="font-semibold text-sm text-gray-900 leading-snug line-clamp-2 mb-1">{course.title}</h3>
                   <p className="text-xs text-gray-400 mb-3">By {course.instructor_name}</p>
 
+                  {/* Admin: enrollment stats */}
+                  {user?.role === 'admin' && (
+                    <div className="mb-3 space-y-2">
+                      <div className="flex justify-between text-xs text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
+                          Enrolled: <span className="font-semibold text-gray-700 ml-1">{course.enrollment_count ?? 0}</span>
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+                          Completed: <span className="font-semibold text-gray-700 ml-1">{course.completed_count ?? 0}</span>
+                        </span>
+                      </div>
+                      {/* Completion bar */}
+                      {Number(course.enrollment_count) > 0 && (
+                        <div>
+                          <div className="w-full bg-gray-100 rounded-full h-1.5">
+                            <div className="h-1.5 rounded-full transition-all"
+                              style={{
+                                width: `${Math.round((Number(course.completed_count) / Number(course.enrollment_count)) * 100)}%`,
+                                background: 'linear-gradient(90deg,#8B1A1A,#10b981)'
+                              }} />
+                          </div>
+                          <p className="text-right text-xs text-gray-400 mt-0.5">
+                            {Math.round((Number(course.completed_count) / Number(course.enrollment_count)) * 100)}% completion rate
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <div className="flex gap-2 mt-auto">
                     <Link href={`/courses/${course.id}`} className="btn-secondary text-xs py-2 flex-1 justify-center">
                       Details
