@@ -242,6 +242,19 @@ export default function LearnPage() {
             ))}
           </div>
         )}
+
+        {/* Materials in sidebar */}
+        {course?.documents?.length > 0 && (
+          <div>
+            <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">Materials</div>
+            <button onClick={() => { setTab('documents'); setActiveQuiz(null) }}
+              className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors ${tab === 'documents' ? 'text-white' : 'text-gray-300 hover:bg-gray-700'}`}
+              style={tab === 'documents' ? { background: '#8B1A1A' } : {}}>
+              <FileText className="w-4 h-4 flex-shrink-0 text-gray-400" />
+              <span className="truncate text-xs">Course Materials</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Main */}
