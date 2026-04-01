@@ -25,6 +25,7 @@ export class EnrollmentsService {
               COALESCE(MAX(u.department), '') AS department,
               COALESCE(MAX(c.title), MAX(e.course_title_snapshot), 'Course Deleted') AS course_title,
               COALESCE(MAX(c.level), 'N/A') AS level,
+              MAX(c.thumbnail) AS thumbnail,
               CASE WHEN MAX(c.id) IS NOT NULL THEN
                 (SELECT COUNT(*) FROM lessons l JOIN sections s ON s.id=l.section_id WHERE s.course_id=MAX(c.id))
               ELSE 0 END AS total_lessons,
