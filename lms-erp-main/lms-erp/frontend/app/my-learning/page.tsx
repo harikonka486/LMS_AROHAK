@@ -152,10 +152,10 @@ function EnrollmentCard({ enrollment: e, isCompleted }: { enrollment: any; isCom
   return (
     <div className="card overflow-hidden hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
       {/* Course thumbnail */}
-      <div className="h-36 relative bg-gradient-to-br from-red-900 to-red-700 flex-shrink-0">
+      <div className="h-52 relative bg-gradient-to-br from-red-900 to-red-700 flex-shrink-0">
         {thumbSrc ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={thumbSrc} alt={e.course_title} className="w-full h-full object-cover"
+          <img src={thumbSrc} alt={e.course_title} className="w-full h-full object-contain bg-white"
             onError={(ev) => { (ev.target as HTMLImageElement).style.display = 'none' }} />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">

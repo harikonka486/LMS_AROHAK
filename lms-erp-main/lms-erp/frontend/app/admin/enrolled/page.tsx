@@ -70,11 +70,11 @@ export default function AdminEnrolledPage() {
               return (
                 <div key={cardKey} className="card overflow-hidden border" style={{ borderColor: '#f0d9c8' }}>
                   {/* Course thumbnail */}
-                  <div className="h-36 relative flex-shrink-0"
+                  <div className="h-52 relative flex-shrink-0"
                     style={{ background: 'linear-gradient(135deg,#3d0a0a,#8B1A1A)' }}>
                     {thumbSrc ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={thumbSrc} alt={e.course_title} className="w-full h-full object-cover"
+                      <img src={thumbSrc} alt={e.course_title} className="w-full h-full object-contain bg-white"
                         onError={(ev) => { (ev.target as HTMLImageElement).style.display = 'none' }} />
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center">

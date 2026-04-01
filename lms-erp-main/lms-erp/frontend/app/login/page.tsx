@@ -591,11 +591,11 @@ export default function LoginPage() {
                   <div key={course.id} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col group border"
                     style={{ borderColor: '#f0d9c8' }}>
                     {/* Thumbnail */}
-                    <div className="h-44 relative overflow-hidden flex-shrink-0" style={{ background: HERO_BG }}>
+                    <div className="h-52 relative overflow-hidden flex-shrink-0" style={{ background: HERO_BG }}>
                       {course.thumbnail ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={course.thumbnail.startsWith('/uploads/') ? `${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api').replace('/api', '')}${course.thumbnail}` : course.thumbnail} alt={course.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                          className="w-full h-full object-contain bg-white" />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center">
                           <BookOpen className="w-16 h-16 text-white/10" />

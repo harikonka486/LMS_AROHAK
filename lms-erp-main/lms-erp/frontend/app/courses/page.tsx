@@ -85,7 +85,7 @@ export default function CoursesPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="card overflow-hidden">
-                <div className="skeleton h-40 rounded-none" />
+                <div className="skeleton h-52 rounded-none" />
                 <div className="p-4 space-y-2">
                   <div className="skeleton h-4 w-3/4" />
                   <div className="skeleton h-3 w-1/2" />
