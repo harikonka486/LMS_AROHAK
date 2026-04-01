@@ -20,7 +20,16 @@ export class CertificatesService {
        LEFT JOIN users inst ON inst.id = c.instructor_id
        ORDER BY cert.issued_at DESC`,
     )) as any;
-    return rows;
+
+    // Deduplicate by user_id + course_id — one certificate per user per course
+    const seen = new Map<string, any>();
+    for (const cert of rows) {
+      const key = `${cert.user_id}||${cert.course_id || cert.course_title_snapshot}`;
+      if (!seen.has(key)) {
+        seen.set(key, cert);
+      }
+    }
+    return Array.from(seen.values());
   }
 
   async findMy(userId: string) {
@@ -37,7 +46,16 @@ export class CertificatesService {
        WHERE cert.user_id=? ORDER BY cert.issued_at DESC`,
       [userId],
     )) as any;
-    return rows;
+
+    // Deduplicate by course_id — keep only the latest certificate per course
+    const seen = new Map<string, any>();
+    for (const cert of rows) {
+      const key = cert.course_id || cert.course_title_snapshot;
+      if (!seen.has(key)) {
+        seen.set(key, cert);
+      }
+    }
+    return Array.from(seen.values());
   }
 
   async verify(number: string) {
