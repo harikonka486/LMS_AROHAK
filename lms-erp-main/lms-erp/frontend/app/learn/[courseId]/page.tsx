@@ -259,8 +259,8 @@ export default function LearnPage() {
 
         <div className={`flex-1 text-white ${tab === 'quiz' && activeQuiz && !quizResult ? 'overflow-hidden flex flex-col' : 'overflow-y-auto'}`} style={{ background: '#0f0e1a' }}>
 
-          {/* ── Course Completed Banner ── */}
-          {isCourseFullyCompleted && (
+          {/* ── Course Completed Banner — only show on lesson/documents tab ── */}
+          {isCourseFullyCompleted && tab !== 'quiz' && (
             <div className="mx-auto max-w-4xl mt-6 mx-6 rounded-2xl overflow-hidden"
               style={{ background: 'linear-gradient(135deg, #064e3b 0%, #065f46 100%)', border: '1px solid rgba(16,185,129,0.3)' }}>
               <div className="px-6 py-5 flex items-center gap-4">
