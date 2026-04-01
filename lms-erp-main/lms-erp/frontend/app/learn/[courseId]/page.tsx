@@ -248,31 +248,6 @@ export default function LearnPage() {
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className={`flex-1 text-white ${tab === 'quiz' && activeQuiz && !quizResult ? 'overflow-hidden flex flex-col' : 'overflow-y-auto'}`} style={{ background: '#0f0e1a' }}>
 
-          {/* ── Course Completed Banner — only show on lesson/documents tab ── */}
-          {isCourseFullyCompleted && tab !== 'quiz' && (
-            <div className="mx-auto max-w-4xl mt-6 mx-6 rounded-2xl overflow-hidden"
-              style={{ background: 'linear-gradient(135deg, #064e3b 0%, #065f46 100%)', border: '1px solid rgba(16,185,129,0.3)' }}>
-              <div className="px-6 py-5 flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-emerald-400/20 flex items-center justify-center flex-shrink-0">
-                  <CheckCircle className="w-7 h-7 text-emerald-400" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-emerald-300 font-bold text-lg leading-tight">🎉 Course Completed!</p>
-                  <p className="text-emerald-400/70 text-sm mt-0.5">
-                    You've successfully completed <span className="font-semibold text-emerald-300">{course?.title}</span>.
-                    {progress.completedAt && (
-                      <> Completed on {new Date(progress.completedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}.</>
-                    )}
-                  </p>
-                </div>
-                <button onClick={() => router.push('/certificates')}
-                  className="flex-shrink-0 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
-                  style={{ background: 'rgba(16,185,129,0.3)', border: '1px solid rgba(16,185,129,0.5)' }}>
-                  View Certificate
-                </button>
-              </div>
-            </div>
-          )}
           {/* Lesson tab */}
           {tab === 'lesson' && activeLesson && (
             <div className="max-w-4xl mx-auto p-6">
