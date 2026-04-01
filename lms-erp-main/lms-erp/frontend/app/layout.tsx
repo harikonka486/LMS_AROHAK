@@ -32,7 +32,35 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </div>
         <div className="page-content">
           <Providers>{children}</Providers>
-          <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 3000,
+              success: {
+                style: {
+                  background: 'linear-gradient(135deg,#8B1A1A,#C0392B)',
+                  color: '#fff',
+                  fontWeight: '600',
+                  borderRadius: '12px',
+                  padding: '12px 16px',
+                  boxShadow: '0 4px 20px rgba(139,26,26,0.4)',
+                },
+                iconTheme: { primary: '#fff', secondary: '#8B1A1A' },
+              },
+              error: {
+                style: {
+                  background: '#1a1a2e',
+                  color: '#fff',
+                  fontWeight: '600',
+                  borderRadius: '12px',
+                  padding: '12px 16px',
+                  border: '1px solid rgba(192,57,43,0.5)',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                },
+                iconTheme: { primary: '#C0392B', secondary: '#fff' },
+              },
+            }}
+          />
         </div>
       </body>
     </html>
