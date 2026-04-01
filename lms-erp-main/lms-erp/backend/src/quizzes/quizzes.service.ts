@@ -13,7 +13,7 @@ export class QuizzesService {
     private mail: MailService,
   ) {}
 
-  async findByCourse(courseId: string) {
+  async findByCourse(courseId: string, userId: string) {
     const [quizzes] = (await this.db.query(
       'SELECT * FROM quizzes WHERE course_id=? ORDER BY order_num',
       [courseId],
@@ -25,9 +25,14 @@ export class QuizzesService {
       )) as any;
       q.questions = questions.map((q: any) => ({
         ...q,
-        options:
-          typeof q.options === 'string' ? JSON.parse(q.options) : q.options,
+        options: typeof q.options === 'string' ? JSON.parse(q.options) : q.options,
       }));
+      // Check if this user has passed this quiz
+      const [[attempt]] = (await this.db.query(
+        'SELECT id FROM quiz_attempts WHERE user_id=? AND quiz_id=? AND passed=1 LIMIT 1',
+        [userId, q.id],
+      )) as any;
+      q.passed = !!attempt;
     }
     return quizzes;
   }

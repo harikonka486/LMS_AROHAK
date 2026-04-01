@@ -16,8 +16,8 @@ export class QuizzesController {
   constructor(private quizzes: QuizzesService) {}
 
   @Get('course/:courseId')
-  findByCourse(@Param('courseId') courseId: string) {
-    return this.quizzes.findByCourse(courseId);
+  findByCourse(@Param('courseId') courseId: string, @Request() req: any) {
+    return this.quizzes.findByCourse(courseId, req.user.id);
   }
 
   @Get(':id')
