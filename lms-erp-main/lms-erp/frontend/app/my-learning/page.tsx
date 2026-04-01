@@ -144,46 +144,65 @@ function EnrollmentCard({ enrollment: e, isCompleted }: { enrollment: any; isCom
   const total = Number(e.total_lessons)
   const done  = Number(e.completed_lessons)
   const pct   = total > 0 ? Math.round((done / total) * 100) : 0
+  const apiBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api').replace('/api', '')
+  const thumbSrc = e.thumbnail
+    ? (e.thumbnail.startsWith('http') ? e.thumbnail : `${apiBase}${e.thumbnail}`)
+    : null
 
   return (
-    <div className="card p-5 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="flex-1 min-w-0">
+    <div className="card overflow-hidden hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
+      {/* Course thumbnail */}
+      <div className="h-36 relative bg-gradient-to-br from-red-900 to-red-700 flex-shrink-0">
+        {thumbSrc ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={thumbSrc} alt={e.course_title} className="w-full h-full object-cover"
+            onError={(ev) => { (ev.target as HTMLImageElement).style.display = 'none' }} />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <BookOpen className="w-10 h-10 text-white/40" />
+          </div>
+        )}
+        <div className="absolute top-2 right-2">
+          <span className={cn('badge flex-shrink-0', isCompleted ? 'badge-green' : 'badge-blue')}>
+            {isCompleted ? 'Completed' : 'Enrolled'}
+          </span>
+        </div>
+      </div>
+
+      <div className="p-4">
+        <div className="mb-3">
           <h3 className="font-semibold text-sm text-gray-900 truncate">{e.course_title}</h3>
           <p className="text-xs text-gray-400 mt-0.5">{e.instructor_name}</p>
         </div>
-        <span className={cn('badge flex-shrink-0', isCompleted ? 'badge-green' : 'badge-blue')}>
-          {isCompleted ? 'Completed' : 'Enrolled'}
-        </span>
-      </div>
 
-      {/* Progress bar */}
-      <div className="mb-3">
-        <div className="flex justify-between text-xs mb-1.5">
-          <span className="text-gray-400">{done}/{total} lessons</span>
-          <span className="font-semibold text-gray-700">{pct}%</span>
+        {/* Progress bar */}
+        <div className="mb-3">
+          <div className="flex justify-between text-xs mb-1.5">
+            <span className="text-gray-400">{done}/{total} lessons</span>
+            <span className="font-semibold text-gray-700">{pct}%</span>
+          </div>
+          <div className="w-full bg-gray-100 rounded-full h-1.5">
+            <div className="h-1.5 rounded-full transition-all"
+              style={{ width: `${pct}%`, background: isCompleted ? '#10b981' : '#8B1A1A' }} />
+          </div>
         </div>
-        <div className="w-full bg-gray-100 rounded-full h-1.5">
-          <div className="h-1.5 rounded-full transition-all"
-            style={{ width: `${pct}%`, background: isCompleted ? '#10b981' : '#8B1A1A' }} />
+
+        <div className="flex items-center justify-between text-xs text-gray-400 mb-4">
+          <span>Enrolled: {new Date(e.enrolled_at).toLocaleDateString()}</span>
+          {isCompleted && e.completed_at && (
+            <span className="text-emerald-600 flex items-center gap-1 font-medium">
+              <Award className="w-3.5 h-3.5" />
+              {new Date(e.completed_at).toLocaleDateString()}
+            </span>
+          )}
         </div>
-      </div>
 
-      <div className="flex items-center justify-between text-xs text-gray-400 mb-4">
-        <span>Enrolled: {new Date(e.enrolled_at).toLocaleDateString()}</span>
-        {isCompleted && e.completed_at && (
-          <span className="text-emerald-600 flex items-center gap-1 font-medium">
-            <Award className="w-3.5 h-3.5" />
-            {new Date(e.completed_at).toLocaleDateString()}
-          </span>
-        )}
+        <Link href={`/learn/${e.course_id}`}
+          className="btn-primary w-full justify-center py-2.5 text-xs">
+          <Play className="w-3.5 h-3.5" />
+          {isCompleted ? 'Review Course' : 'Continue Learning'}
+        </Link>
       </div>
-
-      <Link href={`/learn/${e.course_id}`}
-        className="btn-primary w-full justify-center py-2.5 text-xs">
-        <Play className="w-3.5 h-3.5" />
-        {isCompleted ? 'Review Course' : 'Continue Learning'}
-      </Link>
     </div>
   )
 }
