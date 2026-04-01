@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
-import { Search, BookOpen, Filter, Layers } from 'lucide-react'
+import { Search, BookOpen, Filter, Layers, CheckCircle, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 import AppLayout from '@/components/layout/AppLayout'
 import { useAuthStore } from '@/lib/store'
@@ -21,6 +21,7 @@ export default function CoursesPage() {
   const [search, setSearch]     = useState('')
   const [category, setCategory] = useState('')
   const [level, setLevel]       = useState('')
+  const [alreadyEnrolledCourse, setAlreadyEnrolledCourse] = useState<string | null>(null)
 
   const { data, isLoading } = useQuery({
     queryKey: ['courses', search, category, level],
@@ -34,13 +35,22 @@ export default function CoursesPage() {
 
   const enrollMutation = useMutation({
     mutationFn: (courseId: string) => api.post('/enrollments', { courseId }),
-    onSuccess: () => { toast.success('Enrolled successfully!'); qc.invalidateQueries({ queryKey: ['my-enrollments'] }) },
-    onError: (err: any) => toast.error(err.response?.data?.error || 'Enrollment failed'),
+    onSuccess: (_, courseId) => { toast.success('Enrolled successfully!'); qc.invalidateQueries({ queryKey: ['my-enrollments'] }) },
+    onError: (err: any, courseId: string) => {
+      const msg = (err.response?.data?.message || err.response?.data?.error || '').toLowerCase()
+      if (msg.includes('already enrolled')) {
+        const course = (data?.courses ?? []).find((c: any) => c.id === courseId)
+        setAlreadyEnrolledCourse(course?.title || 'this course')
+      } else {
+        toast.error(err.response?.data?.message || 'Enrollment failed')
+      }
+    },
   })
 
   const courses = data?.courses ?? []
 
   return (
+    <>
     <AppLayout>
       <div className="max-w-6xl mx-auto">
 
@@ -161,5 +171,34 @@ export default function CoursesPage() {
         )}
       </div>
     </AppLayout>
+
+    {/* Already Enrolled Modal */}
+    {alreadyEnrolledCourse && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        style={{ background: 'rgba(0,0,0,0.5)' }}
+        onClick={() => setAlreadyEnrolledCourse(null)}>
+        <div className="relative bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center"
+          onClick={e => e.stopPropagation()}>
+          <button onClick={() => setAlreadyEnrolledCourse(null)}
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+            <X className="w-5 h-5" />
+          </button>
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+            style={{ background: '#FFF8F0' }}>
+            <CheckCircle className="w-9 h-9" style={{ color: '#8B1A1A' }} />
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Already Enrolled</h2>
+          <p className="text-gray-500 text-sm mb-6">
+            You have already enrolled in <span className="font-semibold text-gray-800">{alreadyEnrolledCourse}</span>.
+          </p>
+          <button onClick={() => setAlreadyEnrolledCourse(null)}
+            className="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
+            style={{ background: 'linear-gradient(135deg,#8B1A1A,#C0392B)' }}>
+            OK
+          </button>
+        </div>
+      </div>
+    )}
+    </>
   )
 }
